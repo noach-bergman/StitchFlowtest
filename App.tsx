@@ -7,7 +7,6 @@ import ClientsList from './components/ClientsList';
 import ClientFolders from './components/ClientFolders';
 import OrdersList from './components/OrdersList';
 import Inventory from './components/Inventory';
-import AiAssistant from './components/AiAssistant';
 import IncomeSummary from './components/IncomeSummary';
 import DataManagement from './components/DataManagement';
 import UserManagement from './components/UserManagement';
@@ -250,7 +249,6 @@ const App: React.FC = () => {
       case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} />;
       case 'income': return <IncomeSummary folders={folders} orders={orders} />;
       case 'inventory': return <Inventory inventory={inventory} setInventory={handleSaveInventory} />;
-      case 'ai-assistant': return <AiAssistant clients={clients} />;
       case 'data-mgmt': return <DataManagement onImportSuccess={loadAllData} />;
       case 'users': return <UserManagement />;
       default: return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={setActiveTab} userRole={currentUser.role} />;
@@ -398,13 +396,13 @@ const App: React.FC = () => {
             </button>
           ))}
           <button 
-            onClick={() => setActiveTab('ai-assistant')}
+            onClick={() => setIsScannerOpen(true)}
             className="flex flex-col items-center justify-center flex-1 -mt-14"
           >
-             <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-full flex items-center justify-center text-white shadow-2xl border-4 border-white mb-1 active:scale-90 transition-all">
-                <span className="text-3xl animate-pulse">✨</span>
+             <div className="w-16 h-16 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full flex items-center justify-center text-white shadow-2xl border-4 border-white mb-1 active:scale-90 transition-all">
+                <QrCode className="w-8 h-8 text-rose-400" />
              </div>
-             <span className="text-[11px] font-black text-rose-600 bg-white px-3 py-1 rounded-full shadow-sm border border-rose-50">AI עוזר</span>
+             <span className="text-[11px] font-black text-slate-700 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">סריקת QR</span>
           </button>
         </nav>
       </div>

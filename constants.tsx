@@ -5,7 +5,6 @@ import {
   Users, 
   Scissors, 
   Layers, 
-  MessageSquare, 
   FolderOpen,
   Calendar,
   Settings,
@@ -27,7 +26,6 @@ export const NAV_ITEMS = [
   { id: 'income', label: 'סיכום הכנסות', icon: <Wallet className="w-5 h-5" />, adminOnly: true },
   { id: 'data-mgmt', label: 'ניהול ענן ונתונים', icon: <Cloud className="w-5 h-5" />, superAdminOnly: true },
   { id: 'users', label: 'ניהול צוות', icon: <ShieldCheck className="w-5 h-5" />, superAdminOnly: true },
-  { id: 'ai-assistant', label: 'עוזר עיצוב AI', icon: <MessageSquare className="w-5 h-5" /> },
 ];
 
 export const STATUS_COLORS: Record<string, string> = {
