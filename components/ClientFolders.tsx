@@ -398,7 +398,10 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     const priceStr = formData.get('price') as string;
     const inputPrice = priceStr ? parseFloat(priceStr) : 0;
     const finalPrice = isNaN(inputPrice) ? 0 : Math.max(0, inputPrice);
-    const priceAddedNow = !!editingOrder && !(editingOrder.price > 0) && finalPrice > 0;
+    const priceChanged = !!editingOrder && finalPrice !== (editingOrder.price || 0);
+    const shouldUpdateIncomeDate = priceChanged
+      ? window.confirm('שינית את המחיר. האם לעדכן את תאריך ההכנסה להיום?')
+      : false;
 
     const newOrder: Order = {
       id: editingOrder?.id || randomId(),
@@ -415,7 +418,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       fabricNotes: "",
       createdAt: editingOrder?.createdAt || now,
       updatedAt: now,
-      readyAt: priceAddedNow ? now : editingOrder?.readyAt
+      readyAt: shouldUpdateIncomeDate ? now : editingOrder?.readyAt
     };
     setOrders(editingOrder ? orders.map(o => o.id === editingOrder.id ? newOrder : o) : [newOrder, ...orders]);
     setIsOrderModalOpen(false);
