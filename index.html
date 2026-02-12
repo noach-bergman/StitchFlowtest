@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#e11d48" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>StitchFlow - ניהול סטודיו תפירה</title>
+    <!-- Polyfill for process.env to prevent ReferenceError in browser environments -->
+    <script>
+      window.process = window.process || { env: {} };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600;700&family=Heebo:wght@300;500;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Assistant', sans-serif;
+        background-color: #f8f9fa;
+        -webkit-tap-highlight-color: transparent;
+        height: 100%;
+      }
+      .font-heebo { font-family: 'Heebo', sans-serif; }
+      
+      @media (min-width: 768px) {
+        html, body { overflow: hidden; }
+      }
+      
+      /* עיצוב להדפסה - מדבקה 50x30 מ"מ */
+      @media print {
+        @page {
+          size: 50mm 30mm;
+          margin: 0;
+        }
+        
+        html, body {
+          width: 50mm;
+          height: 30mm;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          background: white !important;
+        }
+
+        body * {
+          visibility: hidden !important;
+        }
+
+        #root { display: none !important; }
+
+        .print-only-container {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          width: 50mm !important;
+          height: 30mm !important;
+          visibility: visible !important;
+          display: flex !important;
+          flex-direction: row !important; /* Side by side layout */
+          align-items: center !important;
+          justify-content: space-between !important; /* Space between QR and text */
+          background: white !important;
+          padding: 2mm !important;
+          box-sizing: border-box !important;
+          direction: rtl !important;
+          z-index: 99999 !important;
+        }
+
+        .print-only-container * {
+          visibility: visible !important;
+          display: block !important;
+        }
+        .print-only-container p {
+          margin: 0 !important;
+          line-height: 1.1 !important;
+          text-align: right !important;
+        }
+        
+        /* Ensure images print clearly */
+        img {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+      
+      .print-only-container { display: none; }
+
+      /* אנימציית לייזר לסורק */
+      @keyframes laser-move {
+        0% { transform: translateY(0); opacity: 0.2; }
+        50% { transform: translateY(240px); opacity: 1; }
+        100% { transform: translateY(0); opacity: 0.2; }
+      }
+      .scanner-laser {
+        position: absolute;
+        left: 5%;
+        width: 90%;
+        height: 3px;
+        background: #e11d48;
+        box-shadow: 0 0 12px 3px rgba(225, 29, 72, 0.8);
+        z-index: 20;
+        animation: laser-move 2s infinite ease-in-out;
+        border-radius: 100%;
+        pointer-events: none;
+      }
+      
+      .scanner-overlay {
+        background: rgba(0, 0, 0, 0.5);
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+      }
+      .scanner-cutoff {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 250px;
+        height: 250px;
+        background: transparent;
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        z-index: 11;
+        overflow: hidden;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "@google/genai": "https://esm.sh/@google/genai",
+    "react-dom": "https://esm.sh/react-dom@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "html5-qrcode": "https://esm.sh/html5-qrcode@^2.3.8",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.91.1",
+    "qrcode": "https://esm.sh/qrcode@^1.5.4"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Keep one inline module script so stale html-proxy index requests do not 500.
+    </script>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

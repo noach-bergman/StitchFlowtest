@@ -1,0 +1,24 @@
+
+{
+  "short_name": "StitchFlow",
+  "name": "StitchFlow - ניהול סטודיו תפירה",
+  "description": "אפליקציה לניהול לקוחות, הזמנות ומלאי למעצבות אופנה",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3064/3064044.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3064/3064044.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#e11d48",
+  "background_color": "#ffffff",
+  "dir": "rtl",
+  "lang": "he"
+}
