@@ -45,6 +45,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const [folderToDelete, setFolderToDelete] = useState<Folder | null>(null);
   const [folderToArchive, setFolderToArchive] = useState<Folder | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [pendingPriceDateUpdate, setPendingPriceDateUpdate] = useState<{ order: Order; isEditing: boolean } | null>(null);
 
   const [activeQrOrder, setActiveQrOrder] = useState<Order | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
@@ -112,6 +113,19 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       return (1000 + (values[0] % 9000)).toString();
     }
     return (Math.floor(1000 + Math.random() * 9000)).toString();
+  };
+
+  const persistOrder = (order: Order, isEditing: boolean) => {
+    const nextOrders = isEditing
+      ? orders.map(o => o.id === order.id ? order : o)
+      : [order, ...orders];
+    setOrders(nextOrders);
+    setIsOrderModalOpen(false);
+    setEditingOrder(null);
+
+    if (!isEditing) {
+      handleOpenQrLabel(order);
+    }
   };
 
   const handleGenerateReceipt = async () => {
@@ -398,10 +412,8 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     const priceStr = formData.get('price') as string;
     const inputPrice = priceStr ? parseFloat(priceStr) : 0;
     const finalPrice = isNaN(inputPrice) ? 0 : Math.max(0, inputPrice);
-    const priceChanged = !!editingOrder && finalPrice !== (editingOrder.price || 0);
-    const shouldUpdateIncomeDate = priceChanged
-      ? window.confirm('שינית את המחיר. האם לעדכן את תאריך ההכנסה להיום?')
-      : false;
+    const isEditing = !!editingOrder;
+    const priceChanged = isEditing && finalPrice !== (editingOrder.price || 0);
 
     const newOrder: Order = {
       id: editingOrder?.id || randomId(),
@@ -418,14 +430,26 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       fabricNotes: "",
       createdAt: editingOrder?.createdAt || now,
       updatedAt: now,
-      readyAt: shouldUpdateIncomeDate ? now : editingOrder?.readyAt
+      readyAt: editingOrder?.readyAt
     };
-    setOrders(editingOrder ? orders.map(o => o.id === editingOrder.id ? newOrder : o) : [newOrder, ...orders]);
-    setIsOrderModalOpen(false);
 
-    if (!editingOrder) {
-      handleOpenQrLabel(newOrder);
+    if (priceChanged) {
+      setPendingPriceDateUpdate({ order: newOrder, isEditing });
+      return;
     }
+
+    persistOrder(newOrder, isEditing);
+  };
+
+  const resolvePendingPriceDateUpdate = (updateIncomeDateToToday: boolean) => {
+    if (!pendingPriceDateUpdate) return;
+
+    const finalizedOrder = updateIncomeDateToToday
+      ? { ...pendingPriceDateUpdate.order, readyAt: Date.now(), updatedAt: Date.now() }
+      : pendingPriceDateUpdate.order;
+
+    setPendingPriceDateUpdate(null);
+    persistOrder(finalizedOrder, pendingPriceDateUpdate.isEditing);
   };
 
   const handleQuickAddClient = (e: React.FormEvent<HTMLFormElement>) => {
@@ -870,6 +894,22 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               <div className="flex gap-4">
                  <button onClick={() => setOrderToDelete(null)} className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all">ביטול</button>
                  <button onClick={() => { onDeleteOrder(orderToDelete.id); setOrderToDelete(null); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">מחק פריט</button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {pendingPriceDateUpdate && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+           <div className="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center shadow-2xl">
+              <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mx-auto mb-6">
+                <AlertTriangle size={40} />
+              </div>
+              <h3 className="text-2xl font-black text-gray-800 mb-2">עדכון תאריך הכנסה</h3>
+              <p className="text-sm text-gray-500 mb-8">שינית את המחיר של <b>{pendingPriceDateUpdate.order.itemType}</b>. האם לעדכן את תאריך ההכנסה להיום?</p>
+              <div className="flex gap-4">
+                 <button onClick={() => resolvePendingPriceDateUpdate(false)} className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all">השאר תאריך קיים</button>
+                 <button onClick={() => resolvePendingPriceDateUpdate(true)} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">עדכן להיום</button>
               </div>
            </div>
         </div>
