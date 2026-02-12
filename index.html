@@ -30,67 +30,6 @@
         html, body { overflow: hidden; }
       }
       
-      /* עיצוב להדפסה - מדבקה 50x30 מ"מ */
-      @media print {
-        @page {
-          size: 50mm 30mm;
-          margin: 0;
-        }
-        
-        html, body {
-          width: 50mm;
-          height: 30mm;
-          margin: 0 !important;
-          padding: 0 !important;
-          overflow: hidden !important;
-          background: white !important;
-        }
-
-        body * {
-          visibility: hidden !important;
-        }
-
-        #root { display: none !important; }
-
-        .print-only-container {
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          bottom: 0 !important;
-          width: 50mm !important;
-          height: 30mm !important;
-          visibility: visible !important;
-          display: flex !important;
-          flex-direction: row !important; /* Side by side layout */
-          align-items: center !important;
-          justify-content: space-between !important; /* Space between QR and text */
-          background: white !important;
-          padding: 2mm !important;
-          box-sizing: border-box !important;
-          direction: rtl !important;
-          z-index: 99999 !important;
-        }
-
-        .print-only-container * {
-          visibility: visible !important;
-          display: block !important;
-        }
-        .print-only-container p {
-          margin: 0 !important;
-          line-height: 1.1 !important;
-          text-align: right !important;
-        }
-        
-        /* Ensure images print clearly */
-        img {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-      }
-      
-      .print-only-container { display: none; }
-
       /* אנימציית לייזר לסורק */
       @keyframes laser-move {
         0% { transform: translateY(0); opacity: 0.2; }

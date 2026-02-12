@@ -6,9 +6,7 @@ import { Search, FolderOpen, ArrowRight, Plus, Archive, CheckCircle2, Scissors, 
 import { generateProfessionalReceipt } from '../services/gemini';
 import { STATUS_COLORS } from '../constants';
 import QRCode from 'qrcode';
-import { createPortal } from 'react-dom';
 import html2canvas from 'html2canvas';
-import { executePrintFlow } from '../services/printOrchestrator';
 
 interface ClientFoldersProps {
   clients: Client[];
@@ -51,7 +49,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
   const [isPrintingLabel, setIsPrintingLabel] = useState(false);
-  const [isLabelImageReady, setIsLabelImageReady] = useState(false);
+  const [isSharingLabel, setIsSharingLabel] = useState(false);
   
   const [newFolderName, setNewFolderName] = useState('');
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -258,7 +256,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     setActiveQrOrder(order);
     setIsGeneratingQr(true);
     setIsPrintingLabel(false);
-    setIsLabelImageReady(false);
+    setIsSharingLabel(false);
     setQrDataUrl('');
     try {
       // Use DisplayId for QR to make it scanable and readable
@@ -278,106 +276,146 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     }
   };
 
-  const waitForLabelImageReady = async (): Promise<boolean> => {
-    const labelImage = document.querySelector<HTMLImageElement>('.print-only-qr-image');
-    if (!labelImage) return false;
-    if (labelImage.complete && labelImage.naturalWidth > 0) return true;
+  const getLabelImageBlob = async (): Promise<Blob> => {
+    const labelContent = document.getElementById('label-preview');
+    if (!labelContent) throw new Error('Label preview not found');
 
-    return await new Promise<boolean>((resolve) => {
-      let settled = false;
-      const cleanup = () => {
-        labelImage.removeEventListener('load', onLoad);
-        labelImage.removeEventListener('error', onError);
-      };
-      const onLoad = () => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        resolve(true);
-      };
-      const onError = () => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        resolve(false);
-      };
-
-      labelImage.addEventListener('load', onLoad, { once: true });
-      labelImage.addEventListener('error', onError, { once: true });
-      setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        cleanup();
-        resolve(labelImage.complete && labelImage.naturalWidth > 0);
-      }, 1200);
-    });
-  };
-
-  const getLabelImageDataUrl = async (): Promise<string> => {
-    const label = document.querySelector<HTMLElement>('.print-only-container');
-    if (!label) {
-      throw new Error('Label container not found');
-    }
-
-    const canvas = await html2canvas(label, {
+    const canvas = await html2canvas(labelContent, {
       backgroundColor: '#ffffff',
-      scale: 3,
+      scale: 2,
       useCORS: true,
       logging: false,
     });
 
-    return canvas.toDataURL('image/png');
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Failed to generate label image'));
+      }, 'image/png');
+    });
   };
 
   const handlePrintLabel = async () => {
     if (!activeQrOrder || !qrDataUrl || isPrintingLabel) return;
     setIsPrintingLabel(true);
-    const ready = await waitForLabelImageReady();
-    if (!ready) {
-      setIsPrintingLabel(false);
-      alert('תמונת ה-QR עדיין לא נטענה להדפסה. נסי שוב בעוד רגע.');
-      return;
-    }
-
     try {
-      const dataUrl = await getLabelImageDataUrl();
-      const result = await executePrintFlow(
-        {
-          dataUrl,
-          widthMm: 50,
-          heightMm: 30,
-          copies: 1,
-          jobName: `StitchFlow #${activeQrOrder.displayId}`,
-          labelId: activeQrOrder.id,
-          displayId: activeQrOrder.displayId,
-          clientName: activeQrOrder.clientName,
-          itemType: activeQrOrder.itemType,
-        },
-        {
-          browserPrint: () => setTimeout(() => window.print(), 120),
-        },
-      );
-
-      alert(result.message);
-      if (result.provider !== 'browser') {
-        setIsPrintingLabel(false);
+      const printWindow = window.open('', '_blank', 'width=560,height=420');
+      if (!printWindow) {
+        alert('לא ניתן לפתוח חלון הדפסה בדפדפן.');
+        return;
       }
+
+      const safeClient = activeQrOrder.clientName || '';
+      const safeItem = activeQrOrder.itemType || '';
+      const safeDisplayId = activeQrOrder.displayId || '';
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="he" dir="rtl">
+        <head>
+          <meta charset="UTF-8" />
+          <title>Label #${safeDisplayId}</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 24px;
+              font-family: Assistant, Arial, sans-serif;
+              background: #fff;
+            }
+            .label {
+              width: 50mm;
+              min-height: 30mm;
+              border: 1px solid #e5e7eb;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              box-sizing: border-box;
+              padding: 8px;
+            }
+            .meta { flex: 1; text-align: right; overflow: hidden; }
+            .id { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
+            .name { font-size: 12px; font-weight: 700; margin: 4px 0 0 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+            .item { font-size: 11px; margin: 2px 0 0 0; color: #475569; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+            img { width: 22mm; height: 22mm; object-fit: contain; }
+            @media print {
+              body { padding: 0; }
+              @page { size: auto; margin: 8mm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="label">
+            <img src="${qrDataUrl}" alt="QR" />
+            <div class="meta">
+              <p class="id">#${safeDisplayId}</p>
+              <p class="name">${safeClient}</p>
+              <p class="item">${safeItem}</p>
+            </div>
+          </div>
+          <script>
+            setTimeout(() => window.print(), 500);
+          </script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
     } catch (error) {
-      console.error('Label print flow failed:', error);
-      alert('שגיאה בלתי צפויה בהדפסה, עוברים להדפסת דפדפן.');
-      setTimeout(() => {
-        window.print();
-      }, 120);
+      console.error('Label print failed:', error);
+      alert('שגיאה בהדפסת התווית.');
+    } finally {
+      setIsPrintingLabel(false);
     }
   };
 
-  useEffect(() => {
-    const onAfterPrint = () => setIsPrintingLabel(false);
-    window.addEventListener('afterprint', onAfterPrint);
-    return () => {
-      window.removeEventListener('afterprint', onAfterPrint);
-    };
-  }, []);
+  const handleShareLabelImage = async () => {
+    if (!activeQrOrder || !qrDataUrl || isSharingLabel) return;
+    setIsSharingLabel(true);
+
+    try {
+      const blob = await getLabelImageBlob();
+      const normalizedName = (activeQrOrder.clientName || 'label')
+        .toString()
+        .toLowerCase()
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || 'label';
+      const fileDate = new Date().toISOString().slice(0, 10);
+      const file = new File([blob], `label-${normalizedName}-${activeQrOrder.displayId}-${fileDate}.png`, { type: 'image/png' });
+
+      let wasShared = false;
+      if (navigator.share) {
+        try {
+          if (!navigator.canShare || navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `Label #${activeQrOrder.displayId}`,
+              text: `${activeQrOrder.clientName} - ${activeQrOrder.itemType}`.trim(),
+            });
+            wasShared = true;
+            alert('התמונה שותפה בהצלחה.');
+          }
+        } catch (shareErr: any) {
+          if (shareErr?.name === 'AbortError') return;
+        }
+      }
+
+      if (!wasShared) {
+        if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
+          const item = new ClipboardItem({ 'image/png': blob });
+          await navigator.clipboard.write([item]);
+          alert('תמונת התווית הועתקה ללוח. אפשר להדביק ולשתף.');
+          return;
+        }
+        alert('שיתוף תמונה לא נתמך במכשיר זה, וגם לא ניתן להעתיק תמונה ללוח.');
+      }
+    } catch (error) {
+      console.error('Label image sharing failed:', error);
+      alert('שגיאה בהכנת תמונת התווית לשיתוף.');
+    } finally {
+      setIsSharingLabel(false);
+    }
+  };
 
   const handleAddFolder = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -503,56 +541,6 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
   return (
     <div className="space-y-6 text-right pb-32">
-      {/* 
-        Print Portal Structure 
-        Must match CSS .print-only-container styles in index.html for 50x30mm
-      */}
-      {activeQrOrder && createPortal(
-        <div
-          className="print-only-container"
-          style={{
-            position: 'fixed',
-            top: '-2000px',
-            left: '-2000px',
-            right: 'auto',
-            bottom: 'auto',
-            width: '50mm',
-            height: '30mm',
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: 'white',
-            padding: '2mm',
-            boxSizing: 'border-box',
-            direction: 'rtl',
-            pointerEvents: 'none',
-          }}
-        >
-           {/* Left side: QR Code */}
-           <div style={{ width: '22mm', height: '22mm', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-             {qrDataUrl && (
-               <img
-                 className="print-only-qr-image"
-                 src={qrDataUrl}
-                 alt="QR"
-                 onLoad={() => setIsLabelImageReady(true)}
-                 onError={() => setIsLabelImageReady(false)}
-                 style={{ width: '100%', height: '100%' }}
-               />
-             )}
-           </div>
-           
-           {/* Right side: Text Info */}
-           <div style={{ flex: 1, paddingRight: '2mm', display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'right', direction: 'rtl', overflow: 'hidden' }}>
-              <p style={{ fontSize: '14pt', fontWeight: '900', margin: '0', color: 'black', lineHeight: '1' }}>#{activeQrOrder.displayId}</p>
-              <p style={{ fontSize: '8pt', fontWeight: 'bold', margin: '1mm 0 0 0', color: 'black', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{activeQrOrder.clientName}</p>
-              <p style={{ fontSize: '7.5pt', margin: '0', color: 'black', opacity: 0.8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{activeQrOrder.itemType}</p>
-           </div>
-        </div>,
-        document.body
-      )}
-
       {!selectedFolderId ? (
         <div className="space-y-8 animate-in fade-in duration-500">
            <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-100 relative overflow-hidden">
@@ -811,7 +799,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
         </div>
       )}
 
-      {/* QR Label Modal - Only shown on screen, printing uses the portal above */}
+      {/* QR Label Modal */}
       {activeQrOrder && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md no-print animate-in fade-in duration-300">
           <div className="bg-white rounded-[3rem] w-full max-w-sm shadow-2xl animate-in zoom-in duration-300 overflow-hidden text-center">
@@ -820,34 +808,44 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                <button onClick={() => setActiveQrOrder(null)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
             </div>
             <div className="p-10 space-y-6">
-              <div className="flex justify-center bg-slate-50 p-6 rounded-3xl border-2 border-dashed border-slate-200">
-                {qrDataUrl ? (
-                  <img
-                    src={qrDataUrl}
-                    alt="QR Code"
-                    className="w-48 h-48"
-                    onLoad={() => setIsLabelImageReady(true)}
-                    onError={() => setIsLabelImageReady(false)}
-                  />
-                ) : (
-                  <div className="w-48 h-48 flex items-center justify-center">
-                    <RefreshCw className="animate-spin text-rose-500" />
-                  </div>
-                )}
+              <div id="label-preview" className="bg-white p-6 rounded-3xl border-2 border-dashed border-slate-200 space-y-4">
+                <div className="flex justify-center bg-slate-50 p-4 rounded-2xl">
+                  {qrDataUrl ? (
+                    <img
+                      src={qrDataUrl}
+                      alt="QR Code"
+                      className="w-48 h-48"
+                    />
+                  ) : (
+                    <div className="w-48 h-48 flex items-center justify-center">
+                      <RefreshCw className="animate-spin text-rose-500" />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1 text-right">
+                  <p className="font-bold text-gray-800 text-lg">{activeQrOrder.clientName}</p>
+                  <p className="font-black text-rose-600">ID: #{activeQrOrder.displayId}</p>
+                  <p className="text-xs font-bold text-gray-500 truncate">{activeQrOrder.itemType}</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <p className="font-bold text-gray-800 text-lg">{activeQrOrder.clientName}</p>
-                <p className="font-black text-rose-600">ID: #{activeQrOrder.displayId}</p>
-                <p className="text-xs font-bold text-gray-500 truncate">{activeQrOrder.itemType}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  onClick={handlePrintLabel}
+                  disabled={isGeneratingQr || !qrDataUrl || isPrintingLabel}
+                  className="w-full bg-rose-600 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:bg-rose-700 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isPrintingLabel ? <RefreshCw className="animate-spin" size={20} /> : <Printer size={20} />}
+                  {isPrintingLabel ? 'מדפיס...' : 'הדפס'}
+                </button>
+                <button
+                  onClick={handleShareLabelImage}
+                  disabled={isGeneratingQr || !qrDataUrl || isSharingLabel}
+                  className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isSharingLabel ? <RefreshCw className="animate-spin" size={20} /> : <Share2 size={20} />}
+                  {isSharingLabel ? 'משתף...' : 'שתף'}
+                </button>
               </div>
-              <button 
-                onClick={handlePrintLabel}
-                disabled={isGeneratingQr || !qrDataUrl || !isLabelImageReady || isPrintingLabel}
-                className="w-full bg-rose-600 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:bg-rose-700 active:scale-95 transition-all disabled:opacity-50"
-              >
-                {isGeneratingQr || isPrintingLabel ? <RefreshCw className="animate-spin" size={20} /> : <Printer size={20} />} 
-                {isGeneratingQr ? 'מכין תווית...' : isPrintingLabel ? 'שולח להדפסה...' : 'הדפסת תווית'}
-              </button>
             </div>
           </div>
         </div>
