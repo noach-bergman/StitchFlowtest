@@ -339,13 +339,6 @@ const App: React.FC = () => {
             </button>
 
             <button 
-              onClick={() => setIsScannerOpen(true)}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900 text-white active:scale-95 transition-all shadow-md mr-2"
-            >
-              <QrCode className="w-4 h-4 text-rose-500" />
-              <span className="text-[10px] font-black hidden sm:inline uppercase">סריקת QR</span>
-            </button>
-            <button 
               onClick={loadAllData}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border active:scale-95 transition-all ${isCloud ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50 border-gray-100'}`}
             >

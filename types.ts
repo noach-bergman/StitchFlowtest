@@ -1,7 +1,7 @@
 
 export type OrderStatus = 'חדש' | 'מדידות' | 'בתפירה' | 'מדידה_שנייה' | 'מוכן';
 export type UserRole = 'super_admin' | 'admin' | 'staff' | 'viewer';
-export type PrintProvider = 'auto' | 'qz' | 'agent' | 'browser';
+export type PrintProvider = 'auto' | 'ble' | 'qz' | 'agent' | 'browser';
 
 export interface User {
   id: string;

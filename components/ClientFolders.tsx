@@ -349,6 +349,9 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
           copies: 1,
           jobName: `StitchFlow #${activeQrOrder.displayId}`,
           labelId: activeQrOrder.id,
+          displayId: activeQrOrder.displayId,
+          clientName: activeQrOrder.clientName,
+          itemType: activeQrOrder.itemType,
         },
         {
           browserPrint: () => setTimeout(() => window.print(), 120),
