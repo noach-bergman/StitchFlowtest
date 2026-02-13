@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Cloud, CloudOff, RefreshCw, Smartphone, LogOut, User as UserIcon, QrCode } from 'lucide-react';
 import { NAV_ITEMS } from './constants';
 import Dashboard from './components/Dashboard';
@@ -18,6 +18,13 @@ import { Client, Order, Fabric, Folder, Task, User } from './types';
 import { dataService } from './services/dataService';
 import { getTaskSummary } from './services/taskUtils';
 
+const EDGE_ZONE_PX = 20;
+const OPEN_THRESHOLD_PX = 50;
+const CLOSE_THRESHOLD_PX = 40;
+const DRAWER_TOUCH_ZONE_PX = 320;
+const GESTURE_LOCK_THRESHOLD_PX = 12;
+const MOBILE_BREAKPOINT_PX = 768;
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -31,10 +38,16 @@ const App: React.FC = () => {
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [taskPrefill, setTaskPrefill] = useState<TaskPrefill | null>(null);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   
   // New state for deep-linking/navigation
   const [preSelectedFolderId, setPreSelectedFolderId] = useState<string | null>(null);
   const [highlightedOrderId, setHighlightedOrderId] = useState<string | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const isEdgeSwipeCandidateRef = useRef(false);
+  const isHorizontalGestureLockedRef = useRef(false);
+  const hasHandledSwipeRef = useRef(false);
 
   const isCloud = dataService.isCloud();
 
@@ -78,6 +91,28 @@ const App: React.FC = () => {
       loadAllData();
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!isMobileDrawerOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileDrawerOpen]);
+
+  useEffect(() => {
+    if (!isMobileDrawerOpen) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMobileDrawerOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [isMobileDrawerOpen]);
 
   const handleLogin = (user: User) => {
     setCurrentUser(user);
@@ -330,9 +365,79 @@ const App: React.FC = () => {
   const taskSummary = getTaskSummary(tasks);
   const taskAlertCount = taskSummary.urgentOrOverdue;
   const mobileNavItems = visibleNavItems.slice(0, 5);
+  const mobileOverflowNavItems = visibleNavItems.slice(5);
+  const hasMobileOverflowNav = mobileOverflowNavItems.length > 0;
+
+  const resetSwipeState = () => {
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+    isEdgeSwipeCandidateRef.current = false;
+    isHorizontalGestureLockedRef.current = false;
+    hasHandledSwipeRef.current = false;
+  };
+
+  const handleMobileTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (!hasMobileOverflowNav || typeof window === 'undefined' || window.innerWidth >= MOBILE_BREAKPOINT_PX) return;
+    if (event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+    touchStartXRef.current = touch.clientX;
+    touchStartYRef.current = touch.clientY;
+    isHorizontalGestureLockedRef.current = false;
+    hasHandledSwipeRef.current = false;
+
+    const isFromEdge = touch.clientX >= window.innerWidth - EDGE_ZONE_PX;
+    const isInDrawerZone = touch.clientX >= window.innerWidth - DRAWER_TOUCH_ZONE_PX;
+    isEdgeSwipeCandidateRef.current = isFromEdge || (isMobileDrawerOpen && isInDrawerZone);
+  };
+
+  const handleMobileTouchMove = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (!hasMobileOverflowNav || typeof window === 'undefined' || window.innerWidth >= MOBILE_BREAKPOINT_PX) return;
+    if (!isEdgeSwipeCandidateRef.current || hasHandledSwipeRef.current) return;
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+
+    const touch = event.touches[0];
+    if (!touch) return;
+
+    const deltaX = touch.clientX - touchStartXRef.current;
+    const deltaY = touch.clientY - touchStartYRef.current;
+
+    if (!isHorizontalGestureLockedRef.current) {
+      if (Math.abs(deltaX) < GESTURE_LOCK_THRESHOLD_PX && Math.abs(deltaY) < GESTURE_LOCK_THRESHOLD_PX) {
+        return;
+      }
+      if (Math.abs(deltaX) <= Math.abs(deltaY)) {
+        isEdgeSwipeCandidateRef.current = false;
+        return;
+      }
+      isHorizontalGestureLockedRef.current = true;
+    }
+
+    event.preventDefault();
+
+    if (!isMobileDrawerOpen && deltaX <= -OPEN_THRESHOLD_PX) {
+      setIsMobileDrawerOpen(true);
+      hasHandledSwipeRef.current = true;
+      return;
+    }
+    if (isMobileDrawerOpen && deltaX >= CLOSE_THRESHOLD_PX) {
+      setIsMobileDrawerOpen(false);
+      hasHandledSwipeRef.current = true;
+    }
+  };
+
+  const handleMobileTouchEnd = () => {
+    resetSwipeState();
+  };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden font-assistant selection:bg-rose-100">
+    <div
+      className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden font-assistant selection:bg-rose-100"
+      onTouchStart={handleMobileTouchStart}
+      onTouchMove={handleMobileTouchMove}
+      onTouchEnd={handleMobileTouchEnd}
+      onTouchCancel={handleMobileTouchEnd}
+    >
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-white border-l border-gray-200 flex-col shadow-lg z-30">
         <div className="p-6">
@@ -443,6 +548,60 @@ const App: React.FC = () => {
             onScan={handleScanResult} 
             onClose={() => setIsScannerOpen(false)} 
           />
+        )}
+
+        {/* Mobile Drawer Handle */}
+        {hasMobileOverflowNav && (
+          <div
+            aria-hidden="true"
+            className="md:hidden fixed top-1/2 right-0 -translate-y-1/2 z-30 pointer-events-none"
+          >
+            <div className={`w-1.5 h-16 rounded-l-full transition-colors ${isMobileDrawerOpen ? 'bg-rose-400/70' : 'bg-gray-300/80'}`} />
+          </div>
+        )}
+
+        {/* Mobile Drawer Backdrop */}
+        {hasMobileOverflowNav && (
+          <div
+            className={`md:hidden fixed inset-0 bg-black/40 transition-opacity z-[45] ${isMobileDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            onClick={() => setIsMobileDrawerOpen(false)}
+            aria-hidden={!isMobileDrawerOpen}
+          />
+        )}
+
+        {/* Mobile Drawer */}
+        {hasMobileOverflowNav && (
+          <aside
+            role="dialog"
+            aria-modal={isMobileDrawerOpen}
+            aria-hidden={!isMobileDrawerOpen}
+            aria-label="ניווט נוסף"
+            className={`md:hidden fixed top-0 bottom-0 right-0 w-72 max-w-[85vw] bg-white border-l border-gray-200 shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          >
+            <div className="px-4 py-5 border-b border-gray-100">
+              <p className="text-sm font-black text-gray-800">ניווט נוסף</p>
+              <p className="text-[11px] text-gray-500 mt-1">עמודים שלא מופיעים בסרגל התחתון</p>
+            </div>
+            <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+              {mobileOverflowNavItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    activeTab === item.id
+                      ? 'bg-rose-50 text-rose-600 font-semibold border border-rose-100'
+                      : 'text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  {item.icon}
+                  <span className="text-sm">{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          </aside>
         )}
 
         {/* Mobile Navbar */}
