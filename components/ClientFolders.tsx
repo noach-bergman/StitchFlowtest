@@ -102,6 +102,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const selectedFolderPaidAmount = selectedFolderFinancials?.paidAmount || 0;
   const selectedFolderRemaining = selectedFolderFinancials?.remaining || 0;
   const selectedFolderPaymentStatus = selectedFolderFinancials?.paymentStatus || 'לא שולם';
+  const canMoveSelectedFolderToArchive = !!selectedFolder && (selectedFolder.isArchived || selectedFolderRemaining <= 0);
 
   const filteredFolders = folders.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -543,6 +544,20 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   };
 
   const toggleArchive = (folderId: string) => {
+    const targetFolder = folders.find((folder) => folder.id === folderId);
+    if (!targetFolder) return;
+
+    const willArchive = !targetFolder.isArchived;
+    if (willArchive) {
+      const financials = folderFinancials.get(folderId);
+      const remaining = financials?.remaining ?? 0;
+      if (remaining > 0) {
+        alert('לא ניתן להעביר לארכיון לפני שהתשלום הושלם במלואו.');
+        setFolderToArchive(null);
+        return;
+      }
+    }
+
     setFolders(folders.map(f => f.id === folderId ? { ...f, isArchived: !f.isArchived } : f));
     setSelectedFolderId(null);
     setFolderToArchive(null);
@@ -733,7 +748,20 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                  <button onClick={() => setFolders(folders.map(f => f.id === selectedFolderId ? {...f, isDelivered: !f.isDelivered} : f))} className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${selectedFolder?.isDelivered ? 'bg-emerald-500 text-white border-transparent shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
                     <CheckCircle2 /> <span className="text-xs font-black">נמסר</span>
                  </button>
-                 <button onClick={() => setFolderToArchive(selectedFolder!)} className="flex flex-col items-center gap-3 py-6 rounded-[2rem] bg-indigo-50 border border-indigo-100 text-indigo-500">
+                 <button
+                    onClick={() => {
+                      if (!canMoveSelectedFolderToArchive) {
+                        alert('לא ניתן להעביר לארכיון לפני שהתשלום הושלם במלואו.');
+                        return;
+                      }
+                      setFolderToArchive(selectedFolder!);
+                    }}
+                    className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border ${
+                      canMoveSelectedFolderToArchive
+                        ? 'bg-indigo-50 border-indigo-100 text-indigo-500'
+                        : 'bg-slate-50 border-slate-100 text-slate-400'
+                    }`}
+                 >
                     <Archive /> <span className="text-xs font-black">ארכיון</span>
                  </button>
               </div>

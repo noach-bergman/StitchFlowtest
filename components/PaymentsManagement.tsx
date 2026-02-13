@@ -22,7 +22,9 @@ const PaymentsManagement: React.FC<PaymentsManagementProps> = ({ folders, orders
   const [statusFilter, setStatusFilter] = useState<'הכל' | PaymentStatus>('הכל');
 
   const rows = useMemo(() => {
-    const mappedRows = folders.map((folder) => {
+    const mappedRows = folders
+      .filter((folder) => !folder.isArchived)
+      .map((folder) => {
       const total = getFolderTotal(folder.id, orders);
       const paidAmount = getEffectivePaidAmount(folder, total);
       const status = getPaymentStatus(total, paidAmount);
