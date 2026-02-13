@@ -93,7 +93,8 @@ PRINT_FAILED_ALERT_WINDOW_MINUTES=10
 # Frontend print config
 # VITE_PRINT_API_BASE_URL=https://your-app-domain.com
 VITE_PRINT_SOURCE=web
-VITE_PRINT_DEFAULT_PRINTER_ID=default-zebra
+# Optional legacy fallback if app_settings.default_printer_id is not used yet
+# VITE_PRINT_DEFAULT_PRINTER_ID=default-zebra
 VITE_PRINT_API_SHARED_SECRET=replace_with_same_shared_secret_if_needed
 # VITE_PRINT_STATUS_POLL_MS=2000
 # VITE_PRINT_STATUS_MAX_ATTEMPTS=30
