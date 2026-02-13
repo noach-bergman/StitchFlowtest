@@ -43,3 +43,15 @@ export const getRemaining = (total: number, paidAmount: number): number => {
   const safePaid = Math.max(0, toSafeNumber(paidAmount));
   return Math.max(safeTotal - safePaid, 0);
 };
+
+export const getAddPaymentLimit = (total: number, paidAmount: number): number => {
+  const safeTotal = Math.max(0, toSafeNumber(total));
+  const safePaid = Math.max(0, toSafeNumber(paidAmount));
+  return Math.max(safeTotal - safePaid, 0);
+};
+
+export const isPaidAmountWithinCharge = (total: number, nextPaid: number): boolean => {
+  const safeTotal = Math.max(0, toSafeNumber(total));
+  const safeNextPaid = toSafeNumber(nextPaid);
+  return safeNextPaid >= 0 && safeNextPaid <= safeTotal;
+};

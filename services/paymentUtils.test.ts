@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { getPaymentStatus, getRemaining, normalizePaidAmount } from './paymentUtils';
+import {
+  getAddPaymentLimit,
+  getPaymentStatus,
+  getRemaining,
+  isPaidAmountWithinCharge,
+  normalizePaidAmount,
+} from './paymentUtils';
 
 describe('paymentUtils', () => {
   it('marks unpaid when paid is 0 out of total 100', () => {
@@ -21,5 +27,25 @@ describe('paymentUtils', () => {
 
   it('normalizes negative paid amounts to zero', () => {
     expect(normalizePaidAmount({ paidAmount: -50, isPaid: false })).toBe(0);
+  });
+
+  it('returns add payment limit based on remaining balance', () => {
+    expect(getAddPaymentLimit(100, 30)).toBe(70);
+  });
+
+  it('returns zero add limit when already overpaid', () => {
+    expect(getAddPaymentLimit(100, 120)).toBe(0);
+  });
+
+  it('accepts paid amount values inside charge range', () => {
+    expect(isPaidAmountWithinCharge(100, 0)).toBe(true);
+    expect(isPaidAmountWithinCharge(100, 100)).toBe(true);
+    expect(isPaidAmountWithinCharge(0, 0)).toBe(true);
+  });
+
+  it('rejects paid amount values outside charge range', () => {
+    expect(isPaidAmountWithinCharge(100, 120)).toBe(false);
+    expect(isPaidAmountWithinCharge(100, -1)).toBe(false);
+    expect(isPaidAmountWithinCharge(0, 1)).toBe(false);
   });
 });

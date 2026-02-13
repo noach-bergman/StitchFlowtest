@@ -5,7 +5,14 @@ import { Client, Folder, Order, OrderStatus, PaymentStatus } from '../types';
 import { Search, FolderOpen, ArrowRight, Plus, Archive, CheckCircle2, Scissors, Trash2, X, Edit2, DollarSign, FileText, RefreshCw, Hash, Printer, QrCode, ShieldAlert, Sparkles, AlertTriangle, MapPin, Share2, ListTodo } from 'lucide-react';
 import { generateProfessionalReceipt } from '../services/gemini';
 import { STATUS_COLORS } from '../constants';
-import { getEffectivePaidAmount, getFolderTotal, getPaymentStatus, getRemaining } from '../services/paymentUtils';
+import {
+  getAddPaymentLimit,
+  getEffectivePaidAmount,
+  getFolderTotal,
+  getPaymentStatus,
+  getRemaining,
+  isPaidAmountWithinCharge,
+} from '../services/paymentUtils';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 
@@ -55,6 +62,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [pendingPriceDateUpdate, setPendingPriceDateUpdate] = useState<{ order: Order; isEditing: boolean } | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentModalMode, setPaymentModalMode] = useState<'add' | 'edit'>('add');
   const [paymentInput, setPaymentInput] = useState('');
 
   const [activeQrOrder, setActiveQrOrder] = useState<Order | null>(null);
@@ -102,6 +110,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const selectedFolderPaidAmount = selectedFolderFinancials?.paidAmount || 0;
   const selectedFolderRemaining = selectedFolderFinancials?.remaining || 0;
   const selectedFolderPaymentStatus = selectedFolderFinancials?.paymentStatus || 'לא שולם';
+  const selectedAddPaymentLimit = getAddPaymentLimit(folderTotalPrice, selectedFolderPaidAmount);
   const canMoveSelectedFolderToArchive = !!selectedFolder && (selectedFolder.isArchived || selectedFolderRemaining <= 0);
 
   const filteredFolders = folders.filter(f => {
@@ -440,6 +449,15 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
     const total = getFolderTotal(selectedFolder.id, orders);
     const currentPaid = getEffectivePaidAmount(selectedFolder, total);
+    const addLimit = getAddPaymentLimit(total, currentPaid);
+    if (addLimit <= 0) {
+      alert('לא ניתן להוסיף תשלום נוסף. התיק כבר שולם במלואו או מעבר לכך.');
+      return;
+    }
+    if (paymentToAdd > addLimit) {
+      alert('לא ניתן להוסיף יותר מהיתרה לתשלום בתיק.');
+      return;
+    }
     const nextPaidAmount = currentPaid + paymentToAdd;
 
     setFolders(
@@ -451,6 +469,36 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     );
 
     setPaymentInput('');
+    setPaymentModalMode('add');
+    setIsPaymentModalOpen(false);
+  };
+
+  const handleSetPaidAmount = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedFolder || !canEditPayments) return;
+
+    const nextPaidAmount = Number(paymentInput);
+    if (!Number.isFinite(nextPaidAmount)) {
+      alert('יש להזין סכום מספרי תקין.');
+      return;
+    }
+
+    const total = getFolderTotal(selectedFolder.id, orders);
+    if (!isPaidAmountWithinCharge(total, nextPaidAmount)) {
+      alert('הסכום חייב להיות בין 0 לבין סך החיוב בתיק.');
+      return;
+    }
+
+    setFolders(
+      folders.map((folder) =>
+        folder.id === selectedFolder.id
+          ? { ...folder, paidAmount: nextPaidAmount, isPaid: nextPaidAmount > 0 }
+          : folder,
+      ),
+    );
+
+    setPaymentInput('');
+    setPaymentModalMode('add');
     setIsPaymentModalOpen(false);
   };
 
@@ -730,12 +778,16 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-12">
                  <button onClick={handleGenerateReceipt} className="flex flex-col items-center gap-3 py-6 rounded-[2rem] bg-slate-900 text-white shadow-xl hover:bg-black transition-all">
                     <FileText className="text-rose-400" /> <span className="text-xs font-black">הפק קבלה</span>
                  </button>
                  <button
-                    onClick={() => setIsPaymentModalOpen(true)}
+                    onClick={() => {
+                      setPaymentModalMode('add');
+                      setPaymentInput('');
+                      setIsPaymentModalOpen(true);
+                    }}
                     disabled={!canEditPayments}
                     className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${
                       canEditPayments
@@ -744,6 +796,21 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                     }`}
                  >
                     <DollarSign /> <span className="text-xs font-black">הוסף תשלום</span>
+                 </button>
+                 <button
+                    onClick={() => {
+                      setPaymentModalMode('edit');
+                      setPaymentInput(String(selectedFolderPaidAmount));
+                      setIsPaymentModalOpen(true);
+                    }}
+                    disabled={!canEditPayments}
+                    className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${
+                      canEditPayments
+                        ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
+                        : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60 cursor-not-allowed'
+                    }`}
+                 >
+                    <Edit2 /> <span className="text-xs font-black">ערוך תשלום</span>
                  </button>
                  <button onClick={() => setFolders(folders.map(f => f.id === selectedFolderId ? {...f, isDelivered: !f.isDelivered} : f))} className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${selectedFolder?.isDelivered ? 'bg-emerald-500 text-white border-transparent shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
                     <CheckCircle2 /> <span className="text-xs font-black">נמסר</span>
@@ -1072,37 +1139,62 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
             <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-600 mx-auto mb-6">
               <DollarSign size={40} />
             </div>
-            <h3 className="text-2xl font-black text-gray-800 mb-2">הוספת תשלום</h3>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">
+              {paymentModalMode === 'add' ? 'הוספת תשלום' : 'עריכת תשלום'}
+            </h3>
             <p className="text-sm text-gray-500 mb-6">
-              הזן סכום חדש לתיק <b>{selectedFolder.name}</b>
+              {paymentModalMode === 'add'
+                ? <>הזן סכום נוסף לתיק <b>{selectedFolder.name}</b></>
+                : <>עדכן את הסכום הכולל ששולם בתיק <b>{selectedFolder.name}</b></>
+              }
             </p>
-            <form onSubmit={handleAddPayment} className="space-y-5 text-right">
+            <form onSubmit={paymentModalMode === 'add' ? handleAddPayment : handleSetPaidAmount} className="space-y-5 text-right">
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-gray-400 uppercase">סכום תשלום ($)</label>
+                <label className="text-[11px] font-black text-gray-400 uppercase">
+                  {paymentModalMode === 'add' ? 'סכום תשלום נוסף ($)' : 'שולם עד כה ($)'}
+                </label>
                 <input
                   type="number"
                   step="0.01"
-                  min="0.01"
+                  min={paymentModalMode === 'add' ? '0.01' : '0'}
+                  max={paymentModalMode === 'add' ? String(selectedAddPaymentLimit) : String(folderTotalPrice)}
                   required
                   value={paymentInput}
                   onChange={(e) => setPaymentInput(e.target.value)}
-                  placeholder="0.00"
+                  placeholder={paymentModalMode === 'add' ? '0.00' : String(selectedFolderPaidAmount)}
                   className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none focus:bg-white focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
+              {paymentModalMode === 'add' ? (
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-xs font-bold text-gray-500">
+                  ניתן להוסיף עד <b>${selectedAddPaymentLimit.toLocaleString()}</b>
+                  {selectedAddPaymentLimit <= 0 && (
+                    <p className="text-rose-600 mt-1">לא ניתן להוסיף תשלום נוסף. התיק כבר שולם במלואו או מעבר לכך.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-xs font-bold text-gray-500">
+                  ניתן לקבוע ערך בין <b>$0</b> ל־<b>${folderTotalPrice.toLocaleString()}</b>
+                </div>
+              )}
               <div className="flex gap-4">
                 <button
                   type="button"
-                  onClick={() => { setIsPaymentModalOpen(false); setPaymentInput(''); }}
+                  onClick={() => {
+                    setIsPaymentModalOpen(false);
+                    setPaymentModalMode('add');
+                    setPaymentInput('');
+                  }}
                   className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all"
                 >
                   ביטול
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all"
+                  disabled={paymentModalMode === 'add' && selectedAddPaymentLimit <= 0}
+                  className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  שמור תשלום
+                  {paymentModalMode === 'add' ? 'שמור תשלום' : 'שמור סכום'}
                 </button>
               </div>
             </form>
