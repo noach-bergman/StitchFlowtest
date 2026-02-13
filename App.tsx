@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import ClientsList from './components/ClientsList';
 import ClientFolders from './components/ClientFolders';
 import OrdersList from './components/OrdersList';
+import PaymentsManagement from './components/PaymentsManagement';
 import TasksBoard, { TaskPrefill } from './components/TasksBoard';
 import Inventory from './components/Inventory';
 import IncomeSummary from './components/IncomeSummary';
@@ -307,6 +308,7 @@ const App: React.FC = () => {
         />
       );
       case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} onCreateTaskFromOrder={openTaskFromOrder} />;
+      case 'payments': return <PaymentsManagement folders={folders} orders={orders} onNavigateToFolder={navigateToFolder} />;
       case 'income': return <IncomeSummary folders={folders} orders={orders} />;
       case 'inventory': return <Inventory inventory={inventory} setInventory={handleSaveInventory} />;
       case 'data-mgmt': return <DataManagement onImportSuccess={loadAllData} />;

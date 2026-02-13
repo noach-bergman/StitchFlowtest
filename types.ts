@@ -3,6 +3,7 @@ export type OrderStatus = 'חדש' | 'מדידות' | 'בתפירה' | 'מדיד
 export type TaskStatus = 'חדש' | 'בטיפול' | 'בהמתנה' | 'הושלם';
 export type TaskPriority = 'נמוכה' | 'רגילה' | 'גבוהה' | 'דחופה';
 export type UserRole = 'super_admin' | 'admin' | 'staff' | 'viewer';
+export type PaymentStatus = 'לא שולם' | 'שולם חלקית' | 'שולם';
 
 export interface User {
   id: string;
@@ -42,7 +43,8 @@ export interface Folder {
   createdAt: number;
   deadline: string;
   status: 'פעיל' | 'סגור';
-  isPaid: boolean;
+  paidAmount: number;
+  isPaid?: boolean; // Legacy compatibility for older records
   isDelivered: boolean;
   isArchived: boolean;
 }

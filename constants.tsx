@@ -24,6 +24,7 @@ export const NAV_ITEMS = [
   { id: 'clients', label: 'ניהול לקוחות', icon: <Users className="w-5 h-5" /> },
   { id: 'folders', label: 'תיקי לקוחות', icon: <FolderOpen className="w-5 h-5" /> },
   { id: 'orders', label: 'מעקב הזמנות', icon: <Scissors className="w-5 h-5" /> },
+  { id: 'payments', label: 'ניהול תשלומים', icon: <Wallet className="w-5 h-5" /> },
   { id: 'inventory', label: 'ניהול מלאי', icon: <Package className="w-5 h-5" /> },
   { id: 'income', label: 'סיכום הכנסות', icon: <Wallet className="w-5 h-5" />, adminOnly: true },
   { id: 'data-mgmt', label: 'ניהול ענן ונתונים', icon: <Cloud className="w-5 h-5" />, superAdminOnly: true },

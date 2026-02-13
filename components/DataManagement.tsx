@@ -19,7 +19,7 @@ const DataManagement: React.FC<DataManagementProps> = ({ onImportSuccess }) => {
 -- WARNING: The policies below are permissive (anonymous full access) for quick setup only.
 -- Do not use these policies in production without proper auth/RLS restrictions.
 CREATE TABLE clients (id TEXT PRIMARY KEY, name TEXT NOT NULL, phone TEXT, email TEXT, measurements JSONB DEFAULT '{}', notes TEXT, "createdAt" BIGINT NOT NULL);
-CREATE TABLE folders (id TEXT PRIMARY KEY, name TEXT NOT NULL, "clientId" TEXT REFERENCES clients(id) ON DELETE CASCADE, "clientName" TEXT, "createdAt" BIGINT NOT NULL, deadline TEXT, status TEXT DEFAULT 'פעיל', "isPaid" BOOLEAN DEFAULT false, "isDelivered" BOOLEAN DEFAULT false, "isArchived" BOOLEAN DEFAULT false);
+CREATE TABLE folders (id TEXT PRIMARY KEY, name TEXT NOT NULL, "clientId" TEXT REFERENCES clients(id) ON DELETE CASCADE, "clientName" TEXT, "createdAt" BIGINT NOT NULL, deadline TEXT, status TEXT DEFAULT 'פעיל', "paidAmount" NUMERIC DEFAULT 0, "isPaid" BOOLEAN DEFAULT false, "isDelivered" BOOLEAN DEFAULT false, "isArchived" BOOLEAN DEFAULT false);
 CREATE TABLE orders (id TEXT PRIMARY KEY, "displayId" TEXT, "folderId" TEXT REFERENCES folders(id) ON DELETE CASCADE, "clientId" TEXT REFERENCES clients(id) ON DELETE CASCADE, "clientName" TEXT, "itemType" TEXT, description TEXT, status TEXT DEFAULT 'חדש', deadline TEXT, price NUMERIC DEFAULT 0, deposit NUMERIC DEFAULT 0, "fabricNotes" TEXT, "createdAt" BIGINT NOT NULL, "updatedAt" BIGINT NOT NULL, "readyAt" BIGINT);
 CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT DEFAULT '', status TEXT DEFAULT 'חדש', priority TEXT DEFAULT 'רגילה', "dueAt" BIGINT, "assigneeUserId" TEXT, "createdByUserId" TEXT NOT NULL, "clientId" TEXT, "folderId" TEXT, "orderId" TEXT, "createdAt" BIGINT NOT NULL, "updatedAt" BIGINT NOT NULL, "completedAt" BIGINT);
 CREATE TABLE inventory (id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT, type TEXT, quantity NUMERIC DEFAULT 0, "unitPrice" NUMERIC DEFAULT 0, image TEXT);
@@ -113,6 +113,7 @@ CREATE POLICY "anon_full" ON users FOR ALL USING (true) WITH CHECK (true);`;
           createdAt: item.fields.creation_date ? new Date(item.fields.creation_date).getTime() : FALLBACK_DATE,
           deadline: item.fields.completion_date || 'ללא יעד', 
           status: 'סגור',
+          paidAmount: 0,
           isPaid: true,
           isDelivered: true,
           isArchived: isOriginalArchived // שימוש בנתון המקורי מהקובץ
@@ -150,7 +151,17 @@ CREATE POLICY "anon_full" ON users FOR ALL USING (true) WITH CHECK (true);`;
       }
     });
 
-    await performSaves(clients, folders, orders, orphanedCount);
+    const totalsByFolder = new Map<string, number>();
+    orders.forEach((order) => {
+      totalsByFolder.set(order.folderId, (totalsByFolder.get(order.folderId) || 0) + (order.price || 0));
+    });
+
+    const normalizedFolders = folders.map((folder) => ({
+      ...folder,
+      paidAmount: folder.isPaid ? (totalsByFolder.get(folder.id) || 0) : 0,
+    }));
+
+    await performSaves(clients, normalizedFolders, orders, orphanedCount);
   };
 
   const performSaves = async (clients: Client[], folders: Folder[], orders: Order[], orphaned: number) => {

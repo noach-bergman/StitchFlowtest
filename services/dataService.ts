@@ -1,6 +1,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Client, Order, Folder, Fabric, Task, User } from '../types';
+import { normalizePaidAmount } from './paymentUtils';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
@@ -29,6 +30,24 @@ const fetchAllFromTable = async (table: string): Promise<any[]> => {
     }
   } catch (e: any) { console.error(e.message); throw e; }
   return allData;
+};
+
+const normalizeFolderForRead = (folder: any): Folder => {
+  const paidAmount = normalizePaidAmount(folder as Folder);
+  return {
+    ...folder,
+    paidAmount,
+    isPaid: typeof folder?.isPaid === 'boolean' ? folder.isPaid : paidAmount > 0,
+  };
+};
+
+const normalizeFolderForSave = (folder: Folder): Folder => {
+  const paidAmount = normalizePaidAmount(folder);
+  return {
+    ...folder,
+    paidAmount,
+    isPaid: paidAmount > 0,
+  };
 };
 
 export const dataService = {
@@ -101,15 +120,22 @@ export const dataService = {
   },
 
   async getFolders(): Promise<Folder[]> {
-    if (this.isCloud()) { try { return await fetchAllFromTable('folders'); } catch (e) {} }
+    if (this.isCloud()) {
+      try {
+        const folders = await fetchAllFromTable('folders');
+        return (folders || []).map(normalizeFolderForRead);
+      } catch (e) {}
+    }
     const data = localStorage.getItem('stitchflow_folders');
-    return data ? JSON.parse(data) : [];
+    const parsed = data ? JSON.parse(data) : [];
+    return (parsed || []).map(normalizeFolderForRead);
   },
 
   async saveFolders(folders: Folder[]): Promise<void> {
-    localStorage.setItem('stitchflow_folders', JSON.stringify(folders));
+    const normalizedFolders = folders.map(normalizeFolderForSave);
+    localStorage.setItem('stitchflow_folders', JSON.stringify(normalizedFolders));
     if (supabase) {
-      const { error } = await supabase.from('folders').upsert(folders, { onConflict: 'id' });
+      const { error } = await supabase.from('folders').upsert(normalizedFolders, { onConflict: 'id' });
       if (error) throw error;
     }
   },

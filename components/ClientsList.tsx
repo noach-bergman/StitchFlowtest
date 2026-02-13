@@ -4,6 +4,7 @@ import { Client, Order, Folder, Measurements } from '../types';
 import { Search, Plus, Edit2, Trash2, Phone, User, X, AlertTriangle, ShieldAlert, FileText, Wallet, Clock, CheckCircle2, Scissors, ExternalLink, Sparkles, Merge, ArrowLeftRight, Check, XCircle, SearchIcon } from 'lucide-react';
 import { STATUS_COLORS } from '../constants';
 import { dataService } from '../services/dataService';
+import { getEffectivePaidAmount, getFolderTotal, getPaymentStatus } from '../services/paymentUtils';
 
 interface ClientsListProps {
   clients: Client[];
@@ -171,9 +172,18 @@ const ClientsList: React.FC<ClientsListProps> = ({ clients, folders, orders, set
   const getClientStats = (clientId: string) => {
     const clientOrders = orders.filter(o => o.clientId === clientId);
     const clientFolders = folders.filter(f => f.clientId === clientId);
+    const paymentStatusByFolderId = new Map(
+      clientFolders.map((folder) => {
+        const total = getFolderTotal(folder.id, orders);
+        const paidAmount = getEffectivePaidAmount(folder, total);
+        return [folder.id, getPaymentStatus(total, paidAmount)];
+      }),
+    );
+
     const revenue = clientOrders.filter(o => {
       const folder = folders.find(f => f.id === o.folderId);
-      return o.status === 'מוכן' || folder?.isDelivered || folder?.isPaid;
+      const paymentStatus = folder ? paymentStatusByFolderId.get(folder.id) : 'לא שולם';
+      return o.status === 'מוכן' || folder?.isDelivered || paymentStatus === 'שולם' || paymentStatus === 'שולם חלקית';
     }).reduce((sum, o) => sum + (o.price || 0), 0);
     return {
       totalOrders: clientOrders.length,

@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
-import { Client, Order, Folder, OrderStatus } from '../types';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Client, Folder, Order, OrderStatus, PaymentStatus } from '../types';
 // Added ShieldAlert to the import list
 import { Search, FolderOpen, ArrowRight, Plus, Archive, CheckCircle2, Scissors, Trash2, X, Edit2, DollarSign, FileText, RefreshCw, Hash, Printer, QrCode, ShieldAlert, Sparkles, AlertTriangle, MapPin, Share2, ListTodo } from 'lucide-react';
 import { generateProfessionalReceipt } from '../services/gemini';
 import { STATUS_COLORS } from '../constants';
+import { getEffectivePaidAmount, getFolderTotal, getPaymentStatus, getRemaining } from '../services/paymentUtils';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 
@@ -24,6 +25,12 @@ interface ClientFoldersProps {
   onCreateTaskFromFolder?: (folder: Folder) => void;
   onCreateTaskFromOrder?: (order: Order) => void;
 }
+
+const PAYMENT_STATUS_STYLES: Record<PaymentStatus, string> = {
+  'לא שולם': 'bg-rose-50 text-rose-700 border-rose-200',
+  'שולם חלקית': 'bg-amber-50 text-amber-700 border-amber-200',
+  'שולם': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+};
 
 const ClientFolders: React.FC<ClientFoldersProps> = ({ 
   clients, setClients, folders, setFolders, orders, setOrders, 
@@ -47,6 +54,8 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const [folderToArchive, setFolderToArchive] = useState<Folder | null>(null);
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [pendingPriceDateUpdate, setPendingPriceDateUpdate] = useState<{ order: Order; isEditing: boolean } | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentInput, setPaymentInput] = useState('');
 
   const [activeQrOrder, setActiveQrOrder] = useState<Order | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
@@ -62,6 +71,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
   const isAdmin = userRole === 'admin' || userRole === 'super_admin';
   const canCreateTask = userRole !== 'viewer';
+  const canEditPayments = userRole !== 'viewer';
 
   useEffect(() => {
     if (initialFolderId) {
@@ -74,7 +84,24 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
   const selectedFolder = folders.find(f => f.id === selectedFolderId);
   const folderOrders = orders.filter(o => o.folderId === selectedFolderId);
-  const folderTotalPrice = folderOrders.reduce((sum, o) => sum + (o.price || 0), 0);
+
+  const folderFinancials = useMemo(() => {
+    return new Map(
+      folders.map((folder) => {
+        const total = getFolderTotal(folder.id, orders);
+        const paidAmount = getEffectivePaidAmount(folder, total);
+        const paymentStatus = getPaymentStatus(total, paidAmount);
+        const remaining = getRemaining(total, paidAmount);
+        return [folder.id, { total, paidAmount, remaining, paymentStatus }] as const;
+      }),
+    );
+  }, [folders, orders]);
+
+  const selectedFolderFinancials = selectedFolderId ? folderFinancials.get(selectedFolderId) : undefined;
+  const folderTotalPrice = selectedFolderFinancials?.total || 0;
+  const selectedFolderPaidAmount = selectedFolderFinancials?.paidAmount || 0;
+  const selectedFolderRemaining = selectedFolderFinancials?.remaining || 0;
+  const selectedFolderPaymentStatus = selectedFolderFinancials?.paymentStatus || 'לא שולם';
 
   const filteredFolders = folders.filter(f => {
     const matchesSearch = f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -387,6 +414,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       createdAt: Date.now(),
       deadline: formData.get('deadline') as string || 'ללא יעד',
       status: 'פעיל',
+      paidAmount: 0,
       isPaid: false,
       isDelivered: false,
       isArchived: false
@@ -397,6 +425,32 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     setIsFolderModalOpen(false);
     setSelectedClientId('');
     setClientSearchTerm('');
+  };
+
+  const handleAddPayment = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedFolder || !canEditPayments) return;
+
+    const paymentToAdd = Number(paymentInput);
+    if (!Number.isFinite(paymentToAdd) || paymentToAdd <= 0) {
+      alert('יש להזין סכום תשלום חיובי.');
+      return;
+    }
+
+    const total = getFolderTotal(selectedFolder.id, orders);
+    const currentPaid = getEffectivePaidAmount(selectedFolder, total);
+    const nextPaidAmount = currentPaid + paymentToAdd;
+
+    setFolders(
+      folders.map((folder) =>
+        folder.id === selectedFolder.id
+          ? { ...folder, paidAmount: nextPaidAmount, isPaid: nextPaidAmount > 0 }
+          : folder,
+      ),
+    );
+
+    setPaymentInput('');
+    setIsPaymentModalOpen(false);
   };
 
   const handleAddOrder = (e: React.FormEvent<HTMLFormElement>) => {
@@ -596,7 +650,10 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
            </div>
 
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredFolders.map(folder => (
+              {filteredFolders.map(folder => {
+                const financials = folderFinancials.get(folder.id);
+                const folderPaymentStatus = financials?.paymentStatus || 'לא שולם';
+                return (
                 <div key={folder.id} onClick={() => setSelectedFolderId(folder.id)} className={`group bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer relative overflow-hidden`}>
                    <div className={`absolute top-0 right-0 w-2 h-full ${folder.isDelivered ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
                    <div className="flex justify-between items-start mb-6">
@@ -610,9 +667,14 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                       </div>
                    </div>
                    <h4 className="text-xl font-black text-gray-800 mb-1 truncate font-heebo">{folder.name}</h4>
-                   <p className="text-sm text-gray-400 font-bold mb-8">{folder.clientName}</p>
+                   <p className="text-sm text-gray-400 font-bold mb-3">{folder.clientName}</p>
+                   <div className="flex justify-end">
+                     <span className={`px-3 py-1 rounded-full text-[10px] font-black border ${PAYMENT_STATUS_STYLES[folderPaymentStatus]}`}>
+                       {folderPaymentStatus}
+                     </span>
+                   </div>
                 </div>
-              ))}
+              )})}
            </div>
         </div>
       ) : (
@@ -636,12 +698,37 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                  </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-8">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-right">
+                  <p className="text-[10px] font-black text-emerald-600 uppercase">שולם עד כה</p>
+                  <p className="text-2xl font-black text-emerald-700 font-heebo">${selectedFolderPaidAmount.toLocaleString()}</p>
+                </div>
+                <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 text-right">
+                  <p className="text-[10px] font-black text-rose-600 uppercase">יתרה לתשלום</p>
+                  <p className="text-2xl font-black text-rose-700 font-heebo">${selectedFolderRemaining.toLocaleString()}</p>
+                </div>
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-right flex items-center justify-between">
+                  <span className={`px-3 py-1.5 rounded-full text-xs font-black border ${PAYMENT_STATUS_STYLES[selectedFolderPaymentStatus]}`}>
+                    {selectedFolderPaymentStatus}
+                  </span>
+                  <p className="text-[10px] font-black text-slate-500 uppercase">סטטוס תשלום</p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
                  <button onClick={handleGenerateReceipt} className="flex flex-col items-center gap-3 py-6 rounded-[2rem] bg-slate-900 text-white shadow-xl hover:bg-black transition-all">
                     <FileText className="text-rose-400" /> <span className="text-xs font-black">הפק קבלה</span>
                  </button>
-                 <button onClick={() => setFolders(folders.map(f => f.id === selectedFolderId ? {...f, isPaid: !f.isPaid} : f))} className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${selectedFolder?.isPaid ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
-                    <DollarSign /> <span className="text-xs font-black">שולם</span>
+                 <button
+                    onClick={() => setIsPaymentModalOpen(true)}
+                    disabled={!canEditPayments}
+                    className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${
+                      canEditPayments
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
+                        : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60 cursor-not-allowed'
+                    }`}
+                 >
+                    <DollarSign /> <span className="text-xs font-black">הוסף תשלום</span>
                  </button>
                  <button onClick={() => setFolders(folders.map(f => f.id === selectedFolderId ? {...f, isDelivered: !f.isDelivered} : f))} className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${selectedFolder?.isDelivered ? 'bg-emerald-500 text-white border-transparent shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
                     <CheckCircle2 /> <span className="text-xs font-black">נמסר</span>
@@ -948,6 +1035,50 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                  <button onClick={() => resolvePendingPriceDateUpdate(true)} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">עדכן להיום</button>
               </div>
            </div>
+        </div>
+      )}
+
+      {isPaymentModalOpen && selectedFolder && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md">
+          <div className="bg-white rounded-[2.5rem] p-10 max-w-sm w-full text-center shadow-2xl">
+            <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-600 mx-auto mb-6">
+              <DollarSign size={40} />
+            </div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">הוספת תשלום</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              הזן סכום חדש לתיק <b>{selectedFolder.name}</b>
+            </p>
+            <form onSubmit={handleAddPayment} className="space-y-5 text-right">
+              <div className="space-y-2">
+                <label className="text-[11px] font-black text-gray-400 uppercase">סכום תשלום ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  required
+                  value={paymentInput}
+                  onChange={(e) => setPaymentInput(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                />
+              </div>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => { setIsPaymentModalOpen(false); setPaymentInput(''); }}
+                  className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all"
+                >
+                  ביטול
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all"
+                >
+                  שמור תשלום
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
