@@ -10,7 +10,6 @@ import Inventory from './components/Inventory';
 import IncomeSummary from './components/IncomeSummary';
 import DataManagement from './components/DataManagement';
 import UserManagement from './components/UserManagement';
-import PrinterManagement from './components/PrinterManagement';
 import Login from './components/Login';
 import QrScanner from './components/QrScanner';
 import { Client, Order, Fabric, Folder, User } from './types';
@@ -250,7 +249,6 @@ const App: React.FC = () => {
       case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} />;
       case 'income': return <IncomeSummary folders={folders} orders={orders} />;
       case 'inventory': return <Inventory inventory={inventory} setInventory={handleSaveInventory} />;
-      case 'printers': return <PrinterManagement />;
       case 'data-mgmt': return <DataManagement onImportSuccess={loadAllData} />;
       case 'users': return <UserManagement />;
       default: return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={setActiveTab} userRole={currentUser.role} />;

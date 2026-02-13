@@ -14,8 +14,7 @@ import {
   Wallet,
   Cloud,
   ShieldCheck,
-  Package,
-  Printer
+  Package
 } from 'lucide-react';
 
 export const NAV_ITEMS = [
@@ -24,7 +23,6 @@ export const NAV_ITEMS = [
   { id: 'folders', label: 'תיקי לקוחות', icon: <FolderOpen className="w-5 h-5" /> },
   { id: 'orders', label: 'מעקב הזמנות', icon: <Scissors className="w-5 h-5" /> },
   { id: 'inventory', label: 'ניהול מלאי', icon: <Package className="w-5 h-5" /> },
-  { id: 'printers', label: 'ניהול מדפסות', icon: <Printer className="w-5 h-5" />, adminOnly: true },
   { id: 'income', label: 'סיכום הכנסות', icon: <Wallet className="w-5 h-5" />, adminOnly: true },
   { id: 'data-mgmt', label: 'ניהול ענן ונתונים', icon: <Cloud className="w-5 h-5" />, superAdminOnly: true },
   { id: 'users', label: 'ניהול צוות', icon: <ShieldCheck className="w-5 h-5" />, superAdminOnly: true },
