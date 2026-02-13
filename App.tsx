@@ -308,7 +308,11 @@ const App: React.FC = () => {
         />
       );
       case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} onCreateTaskFromOrder={openTaskFromOrder} />;
-      case 'payments': return <PaymentsManagement folders={folders} orders={orders} onNavigateToFolder={navigateToFolder} />;
+      case 'payments':
+        if (currentUser.role === 'viewer') {
+          return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={setActiveTab} userRole={currentUser.role} />;
+        }
+        return <PaymentsManagement folders={folders} orders={orders} onNavigateToFolder={navigateToFolder} />;
       case 'income': return <IncomeSummary folders={folders} orders={orders} />;
       case 'inventory': return <Inventory inventory={inventory} setInventory={handleSaveInventory} />;
       case 'data-mgmt': return <DataManagement onImportSuccess={loadAllData} />;
@@ -320,6 +324,7 @@ const App: React.FC = () => {
   const visibleNavItems = NAV_ITEMS.filter(item => {
     if (item.superAdminOnly) return currentUser.role === 'super_admin';
     if (item.adminOnly) return isAtLeastAdmin;
+    if (item.staffOnly) return currentUser.role !== 'viewer';
     return true;
   });
   const taskSummary = getTaskSummary(tasks);

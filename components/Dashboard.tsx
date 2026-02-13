@@ -62,6 +62,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
 
   const isAtLeastAdmin = userRole === 'admin' || userRole === 'super_admin';
   const isSuperAdmin = userRole === 'super_admin';
+  const isStaffOrAbove = userRole !== 'viewer';
 
   return (
     <div className="space-y-6 md:space-y-8 pb-32 pt-4"> 
@@ -151,7 +152,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
             <NavGridButton label="לקוחות" icon={<Users />} color="bg-blue-50 text-blue-600 border-blue-100" onClick={() => onNavigate('clients')} />
             <NavGridButton label="תיקים" icon={<FolderOpen />} color="bg-rose-50 text-rose-600 border-rose-100" onClick={() => onNavigate('folders')} />
             <NavGridButton label="הזמנות" icon={<Scissors />} color="bg-indigo-50 text-indigo-600 border-indigo-100" onClick={() => onNavigate('orders')} />
-            <NavGridButton label="תשלומים" icon={<Wallet />} color="bg-emerald-50 text-emerald-600 border-emerald-100" onClick={() => onNavigate('payments')} />
+            {isStaffOrAbove && <NavGridButton label="תשלומים" icon={<Wallet />} color="bg-emerald-50 text-emerald-600 border-emerald-100" onClick={() => onNavigate('payments')} />}
             <NavGridButton label="מלאי" icon={<Package />} color="bg-amber-50 text-amber-600 border-amber-100" onClick={() => onNavigate('inventory')} />
             {isAtLeastAdmin && <NavGridButton label="הכנסות" icon={<Wallet />} color="bg-emerald-50 text-emerald-600 border-emerald-100" onClick={() => onNavigate('income')} />}
             {isSuperAdmin && <NavGridButton label="ענן" icon={<Cloud />} color="bg-slate-100 text-slate-600 border-slate-200" onClick={() => onNavigate('data-mgmt')} />}
