@@ -556,14 +556,17 @@ const App: React.FC = () => {
             aria-hidden="true"
             className="md:hidden fixed top-1/2 right-0 -translate-y-1/2 z-30 pointer-events-none"
           >
-            <div className={`w-1.5 h-16 rounded-l-full transition-colors ${isMobileDrawerOpen ? 'bg-rose-400/70' : 'bg-gray-300/80'}`} />
+            <div className="relative">
+              <div className={`absolute inset-0 blur-sm rounded-l-full transition-opacity ${isMobileDrawerOpen ? 'opacity-90 bg-rose-500/50' : 'opacity-60 bg-rose-300/50'}`} />
+              <div className={`relative w-2 h-16 rounded-l-full transition-all bg-gradient-to-b from-rose-400 via-pink-500 to-orange-300 ${isMobileDrawerOpen ? 'shadow-[0_0_14px_rgba(244,63,94,0.45)]' : 'shadow-[0_0_8px_rgba(251,113,133,0.3)]'}`} />
+            </div>
           </div>
         )}
 
         {/* Mobile Drawer Backdrop */}
         {hasMobileOverflowNav && (
           <div
-            className={`md:hidden fixed inset-0 bg-black/40 transition-opacity z-[45] ${isMobileDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            className={`md:hidden fixed inset-0 bg-gradient-to-b from-slate-900/60 via-rose-950/35 to-slate-900/60 backdrop-blur-[1px] transition-opacity z-[45] ${isMobileDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
             onClick={() => setIsMobileDrawerOpen(false)}
             aria-hidden={!isMobileDrawerOpen}
           />
@@ -576,13 +579,15 @@ const App: React.FC = () => {
             aria-modal={isMobileDrawerOpen}
             aria-hidden={!isMobileDrawerOpen}
             aria-label="ניווט נוסף"
-            className={`md:hidden fixed top-0 bottom-0 right-0 w-72 max-w-[85vw] bg-white border-l border-gray-200 shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            className={`md:hidden fixed top-0 bottom-0 right-0 w-72 max-w-[85vw] bg-gradient-to-b from-rose-50 via-white to-orange-50 border-l border-rose-100 shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col overflow-hidden ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
           >
-            <div className="px-4 py-5 border-b border-gray-100">
-              <p className="text-sm font-black text-gray-800">ניווט נוסף</p>
-              <p className="text-[11px] text-gray-500 mt-1">עמודים שלא מופיעים בסרגל התחתון</p>
+            <div className="relative px-4 py-5 border-b border-rose-100 bg-gradient-to-r from-rose-100/80 via-pink-50 to-orange-100/70">
+              <div className="absolute -top-8 -left-4 w-24 h-24 rounded-full bg-rose-300/20 blur-2xl" />
+              <div className="absolute -bottom-10 right-6 w-24 h-24 rounded-full bg-orange-300/20 blur-2xl" />
+              <p className="relative text-sm font-black text-rose-700">ניווט נוסף</p>
+              <p className="relative text-[11px] text-rose-500/90 mt-1">עמודים שלא מופיעים בסרגל התחתון</p>
             </div>
-            <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+            <nav className="flex-1 overflow-y-auto p-3 space-y-2">
               {mobileOverflowNavItems.map((item) => (
                 <button
                   key={item.id}
@@ -590,13 +595,19 @@ const App: React.FC = () => {
                     setActiveTab(item.id);
                     setIsMobileDrawerOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
                     activeTab === item.id
-                      ? 'bg-rose-50 text-rose-600 font-semibold border border-rose-100'
-                      : 'text-gray-500 hover:bg-gray-100'
+                      ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold border border-rose-300 shadow-lg shadow-rose-200/70'
+                      : 'text-slate-600 bg-white/80 border border-rose-100/80 hover:bg-rose-50 hover:border-rose-200'
                   }`}
                 >
-                  {item.icon}
+                  <span className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${
+                    activeTab === item.id
+                      ? 'bg-white/20'
+                      : 'bg-gradient-to-br from-rose-100 to-orange-100 text-rose-600'
+                  }`}>
+                    {item.icon}
+                  </span>
                   <span className="text-sm">{item.label}</span>
                 </button>
               ))}
