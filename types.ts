@@ -72,3 +72,58 @@ export interface Fabric {
   unitPrice: number;
   image?: string;
 }
+
+export type PrintJobStatus = 'queued' | 'sending' | 'printed' | 'failed';
+
+export interface LabelPrintPayload {
+  displayId: string;
+  clientName: string;
+  itemType: string;
+}
+
+export interface PrintJob {
+  id: string;
+  createdAt: string;
+  createdBy: string;
+  source: string;
+  orderId?: string | null;
+  printerId: string;
+  zpl: string;
+  status: PrintJobStatus;
+  attempts: number;
+  lastError?: string | null;
+  dispatchedAt?: string | null;
+  printedAt?: string | null;
+  nextAttemptAt?: string | null;
+  idempotencyKey: string;
+}
+
+export interface Printer {
+  id: string;
+  name: string;
+  publicHost: string;
+  publicPort: number;
+  protocol: 'raw9100';
+  enabled: boolean;
+  allowedSources: string[];
+}
+
+export interface CreatePrintJobRequest {
+  printerId?: string;
+  orderId: string;
+  idempotencyKey: string;
+  source?: string;
+  label: LabelPrintPayload;
+}
+
+export interface CreatePrintJobResponse {
+  jobId: string;
+  status: PrintJobStatus;
+}
+
+export interface PrintJobStatusResponse {
+  jobId: string;
+  status: PrintJobStatus;
+  attempts: number;
+  lastError?: string;
+}

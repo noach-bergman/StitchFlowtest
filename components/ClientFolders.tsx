@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Client, Order, Folder, OrderStatus } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Client, Order, Folder, OrderStatus, PrintJobStatus } from '../types';
 // Added ShieldAlert to the import list
 import { Search, FolderOpen, ArrowRight, Plus, Archive, CheckCircle2, Scissors, Trash2, X, Edit2, DollarSign, FileText, RefreshCw, Hash, Printer, QrCode, ShieldAlert, Sparkles, AlertTriangle, MapPin, Share2 } from 'lucide-react';
 import { generateProfessionalReceipt } from '../services/gemini';
+import { createLabelPrintIdempotencyKey, enqueuePrintJob, waitForPrintCompletion } from '../services/printQueueService';
 import { STATUS_COLORS } from '../constants';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
@@ -50,6 +51,9 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
   const [isPrintingLabel, setIsPrintingLabel] = useState(false);
   const [isSharingLabel, setIsSharingLabel] = useState(false);
+  const [printJobId, setPrintJobId] = useState<string | null>(null);
+  const [printJobStatus, setPrintJobStatus] = useState<PrintJobStatus | null>(null);
+  const [printJobError, setPrintJobError] = useState('');
   
   const [newFolderName, setNewFolderName] = useState('');
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -257,6 +261,9 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     setIsGeneratingQr(true);
     setIsPrintingLabel(false);
     setIsSharingLabel(false);
+    setPrintJobId(null);
+    setPrintJobStatus(null);
+    setPrintJobError('');
     setQrDataUrl('');
     try {
       // Use DisplayId for QR to make it scanable and readable
@@ -298,74 +305,63 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const handlePrintLabel = async () => {
     if (!activeQrOrder || !qrDataUrl || isPrintingLabel) return;
     setIsPrintingLabel(true);
+    setPrintJobError('');
+    setPrintJobStatus('queued');
     try {
-      const printWindow = window.open('', '_blank', 'width=560,height=420');
-      if (!printWindow) {
-        alert('לא ניתן לפתוח חלון הדפסה בדפדפן.');
-        return;
+      const idempotencyKey = createLabelPrintIdempotencyKey({
+        orderId: activeQrOrder.id,
+        displayId: activeQrOrder.displayId,
+      });
+
+      const queueResponse = await enqueuePrintJob({
+        orderId: activeQrOrder.id,
+        idempotencyKey,
+        label: {
+          displayId: activeQrOrder.displayId,
+          clientName: activeQrOrder.clientName,
+          itemType: activeQrOrder.itemType,
+        },
+      });
+
+      setPrintJobId(queueResponse.jobId);
+      setPrintJobStatus(queueResponse.status);
+
+      const finalStatus = await waitForPrintCompletion(queueResponse.jobId);
+      setPrintJobStatus(finalStatus.status);
+
+      if (finalStatus.status === 'failed') {
+        const failureMessage = finalStatus.lastError || 'הדפסה נכשלה אחרי מספר ניסיונות.';
+        setPrintJobError(failureMessage);
+        alert(failureMessage);
+      } else if (finalStatus.status === 'printed') {
+        alert('התווית נשלחה בהצלחה למדפסת Zebra.');
       }
-
-      const safeClient = activeQrOrder.clientName || '';
-      const safeItem = activeQrOrder.itemType || '';
-      const safeDisplayId = activeQrOrder.displayId || '';
-
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="he" dir="rtl">
-        <head>
-          <meta charset="UTF-8" />
-          <title>Label #${safeDisplayId}</title>
-          <style>
-            body {
-              margin: 0;
-              padding: 24px;
-              font-family: Assistant, Arial, sans-serif;
-              background: #fff;
-            }
-            .label {
-              width: 50mm;
-              min-height: 30mm;
-              border: 1px solid #e5e7eb;
-              border-radius: 10px;
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              box-sizing: border-box;
-              padding: 8px;
-            }
-            .meta { flex: 1; text-align: right; overflow: hidden; }
-            .id { font-size: 16px; font-weight: 800; margin: 0; line-height: 1.1; }
-            .name { font-size: 12px; font-weight: 700; margin: 4px 0 0 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-            .item { font-size: 11px; margin: 2px 0 0 0; color: #475569; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
-            img { width: 22mm; height: 22mm; object-fit: contain; }
-            @media print {
-              body { padding: 0; }
-              @page { size: auto; margin: 8mm; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="label">
-            <img src="${qrDataUrl}" alt="QR" />
-            <div class="meta">
-              <p class="id">#${safeDisplayId}</p>
-              <p class="name">${safeClient}</p>
-              <p class="item">${safeItem}</p>
-            </div>
-          </div>
-          <script>
-            setTimeout(() => window.print(), 500);
-          </script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
     } catch (error) {
       console.error('Label print failed:', error);
-      alert('שגיאה בהדפסת התווית.');
+      const message = error instanceof Error ? error.message : 'שגיאה בשליחת התווית לשרת ההדפסה.';
+      setPrintJobError(message);
+      setPrintJobStatus('failed');
+      alert(message);
     } finally {
       setIsPrintingLabel(false);
     }
+  };
+
+  const printStatusLabel = (status: PrintJobStatus | null) => {
+    if (!status) return '';
+    if (status === 'queued') return 'בתור הדפסה';
+    if (status === 'sending') return 'נשלח למדפסת';
+    if (status === 'printed') return 'הודפס בהצלחה';
+    return 'נכשל';
+  };
+
+  const closeQrModal = () => {
+    setActiveQrOrder(null);
+    setIsPrintingLabel(false);
+    setIsSharingLabel(false);
+    setPrintJobId(null);
+    setPrintJobStatus(null);
+    setPrintJobError('');
   };
 
   const handleShareLabelImage = async () => {
@@ -805,7 +801,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
           <div className="bg-white rounded-[3rem] w-full max-w-sm shadow-2xl animate-in zoom-in duration-300 overflow-hidden text-center">
             <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
                <h3 className="text-xl font-black font-heebo">תווית לתיקון</h3>
-               <button onClick={() => setActiveQrOrder(null)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
+               <button onClick={closeQrModal} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
             </div>
             <div className="p-10 space-y-6">
               <div id="label-preview" className="bg-white p-6 rounded-3xl border-2 border-dashed border-slate-200 space-y-4">
@@ -835,7 +831,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   className="w-full bg-rose-600 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:bg-rose-700 active:scale-95 transition-all disabled:opacity-50"
                 >
                   {isPrintingLabel ? <RefreshCw className="animate-spin" size={20} /> : <Printer size={20} />}
-                  {isPrintingLabel ? 'מדפיס...' : 'הדפס'}
+                  {isPrintingLabel ? (printStatusLabel(printJobStatus) || 'מדפיס...') : 'הדפס'}
                 </button>
                 <button
                   onClick={handleShareLabelImage}
@@ -846,6 +842,13 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   {isSharingLabel ? 'משתף...' : 'שתף'}
                 </button>
               </div>
+              {(printJobId || printJobStatus || printJobError) && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-right space-y-1">
+                  {printJobId && <p className="text-[11px] font-bold text-slate-500">Job: {printJobId}</p>}
+                  {printJobStatus && <p className="text-xs font-black text-slate-800">סטטוס: {printStatusLabel(printJobStatus)}</p>}
+                  {printJobError && <p className="text-xs font-black text-rose-600">{printJobError}</p>}
+                </div>
+              )}
             </div>
           </div>
         </div>
