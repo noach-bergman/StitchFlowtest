@@ -106,6 +106,14 @@ export interface Printer {
   protocol: 'raw9100';
   enabled: boolean;
   allowedSources: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AppSetting {
+  key: string;
+  value: string;
+  updatedAt?: string;
 }
 
 export interface CreatePrintJobRequest {
@@ -126,4 +134,37 @@ export interface PrintJobStatusResponse {
   status: PrintJobStatus;
   attempts: number;
   lastError?: string;
+}
+
+export interface PrinterListResponse {
+  printers: Printer[];
+  defaultPrinterId: string | null;
+}
+
+export interface CreatePrinterPayload {
+  id: string;
+  name: string;
+  publicHost: string;
+  publicPort: number;
+  protocol?: 'raw9100';
+  enabled?: boolean;
+  allowedSources?: string[];
+}
+
+export interface UpdatePrinterPayload {
+  name?: string;
+  publicHost?: string;
+  publicPort?: number;
+  protocol?: 'raw9100';
+  enabled?: boolean;
+  allowedSources?: string[];
+}
+
+export interface SetDefaultPrinterResponse {
+  defaultPrinterId: string;
+}
+
+export interface TestPrintResponse {
+  jobId: string;
+  status: PrintJobStatus;
 }

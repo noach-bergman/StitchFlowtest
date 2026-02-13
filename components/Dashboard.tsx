@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Client, Order, Folder } from '../types';
-import { TrendingUp, Users, Scissors, Clock, FolderOpen, Package, Wallet, Cloud, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Users, Scissors, Clock, FolderOpen, Package, Wallet, Cloud, ShieldCheck, Printer } from 'lucide-react';
 import { STATUS_COLORS } from '../constants';
 
 interface DashboardProps {
@@ -151,6 +151,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
             <NavGridButton label="תיקים" icon={<FolderOpen />} color="bg-rose-50 text-rose-600 border-rose-100" onClick={() => onNavigate('folders')} />
             <NavGridButton label="הזמנות" icon={<Scissors />} color="bg-indigo-50 text-indigo-600 border-indigo-100" onClick={() => onNavigate('orders')} />
             <NavGridButton label="מלאי" icon={<Package />} color="bg-amber-50 text-amber-600 border-amber-100" onClick={() => onNavigate('inventory')} />
+            {isAtLeastAdmin && <NavGridButton label="מדפסות" icon={<Printer />} color="bg-cyan-50 text-cyan-700 border-cyan-100" onClick={() => onNavigate('printers')} />}
             {isAtLeastAdmin && <NavGridButton label="הכנסות" icon={<Wallet />} color="bg-emerald-50 text-emerald-600 border-emerald-100" onClick={() => onNavigate('income')} />}
             {isSuperAdmin && <NavGridButton label="ענן" icon={<Cloud />} color="bg-slate-100 text-slate-600 border-slate-200" onClick={() => onNavigate('data-mgmt')} />}
             {isSuperAdmin && <NavGridButton label="צוות" icon={<ShieldCheck />} color="bg-violet-50 text-violet-600 border-violet-100" onClick={() => onNavigate('users')} />}

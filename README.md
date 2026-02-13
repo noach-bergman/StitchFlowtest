@@ -33,8 +33,24 @@ This creates:
 
 - `printers`
 - `print_jobs`
+- `app_settings` (for `default_printer_id`)
 
 Seeded printer ID: `default-zebra` (disabled by default; update host/port and enable after setup).
+
+## Printer Management UI
+
+- New admin page: `ניהול מדפסות` (visible to `admin` and `super_admin`).
+- Supports:
+  - list/create/update printers
+  - enable/disable printer (soft delete behavior)
+  - set global default printer (`app_settings.default_printer_id`)
+  - run `Test Print` and track job status via queue
+
+Rules:
+
+- Disabled printer cannot be set as default.
+- Default printer cannot be disabled until another default is set.
+- Label print jobs can omit `printerId` and will use global default from `app_settings`.
 
 ## Worker
 

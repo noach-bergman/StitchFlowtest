@@ -32,6 +32,12 @@ create table if not exists public.print_jobs (
   idempotency_key text not null unique
 );
 
+create table if not exists public.app_settings (
+  key text primary key,
+  value text not null,
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists print_jobs_status_idx on public.print_jobs(status);
 create index if not exists print_jobs_retry_idx on public.print_jobs(status, next_attempt_at, created_at);
 create index if not exists print_jobs_created_idx on public.print_jobs(created_at desc);
@@ -53,7 +59,17 @@ before update on public.printers
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists app_settings_set_updated_at on public.app_settings;
+create trigger app_settings_set_updated_at
+before update on public.app_settings
+for each row
+execute function public.set_updated_at();
+
 -- Optional seed printer (adjust host/port before use).
 insert into public.printers (id, name, public_host, public_port, protocol, enabled, allowed_sources)
 values ('default-zebra', 'Zebra GX430t', 'example.your-public-host.com', 49100, 'raw9100', false, array['web'])
 on conflict (id) do nothing;
+
+insert into public.app_settings (key, value)
+values ('default_printer_id', 'default-zebra')
+on conflict (key) do nothing;

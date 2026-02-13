@@ -1,5 +1,12 @@
-import { buildPrintIdempotencyKey } from './labelZpl.js';
-import { CreatePrintJobRequest, CreatePrintJobResponse, PrintJobStatusResponse } from '../types';
+import {
+  CreatePrinterPayload,
+  Printer,
+  PrinterListResponse,
+  SetDefaultPrinterResponse,
+  TestPrintResponse,
+  UpdatePrinterPayload,
+} from '../types';
+import { getPrintJobStatus } from './printQueueService';
 
 const envSource: Record<string, string | undefined> = {
   ...(((typeof import.meta !== 'undefined' && (import.meta as any).env) || {}) as Record<string, string | undefined>),
@@ -19,7 +26,6 @@ const readEnv = (...keys: string[]) => {
 const PRINT_API_BASE_URL = readEnv('VITE_PRINT_API_BASE_URL');
 const PRINT_API_SHARED_SECRET = readEnv('VITE_PRINT_API_SHARED_SECRET');
 const PRINT_SOURCE = readEnv('VITE_PRINT_SOURCE') || 'web';
-const LEGACY_DEFAULT_PRINTER_ID = readEnv('VITE_PRINT_DEFAULT_PRINTER_ID');
 const DEFAULT_POLL_INTERVAL_MS = Number(readEnv('VITE_PRINT_STATUS_POLL_MS')) || 2000;
 const DEFAULT_POLL_ATTEMPTS = Number(readEnv('VITE_PRINT_STATUS_MAX_ATTEMPTS')) || 30;
 
@@ -69,94 +75,61 @@ const parseResponse = async <T>(response: Response): Promise<T> => {
   const payload = text ? JSON.parse(text) : {};
 
   if (!response.ok) {
-    const message = payload?.error || `Print API request failed (${response.status})`;
+    const message = payload?.error || `Printers API request failed (${response.status})`;
     throw new Error(message);
   }
 
   return payload as T;
 };
 
-export const enqueuePrintJob = async (input: CreatePrintJobRequest): Promise<CreatePrintJobResponse> => {
-  const payload: any = {
-    orderId: input.orderId,
-    idempotencyKey: input.idempotencyKey,
-    source: input.source || PRINT_SOURCE,
-    label: {
-      displayId: input.label.displayId,
-      clientName: input.label.clientName,
-      itemType: input.label.itemType,
-    },
-  };
-  if (input.printerId) {
-    payload.printerId = input.printerId;
-  } else if (LEGACY_DEFAULT_PRINTER_ID) {
-    // Backward compatibility for deployments not yet using app_settings.default_printer_id.
-    payload.printerId = LEGACY_DEFAULT_PRINTER_ID;
-  }
-
-  const rawBody = JSON.stringify(payload);
+const requestJson = async <T>(path: string, method: string, body?: unknown): Promise<T> => {
+  const rawBody = body ? JSON.stringify(body) : '';
   const signedHeaders = await buildSignedHeaders(rawBody);
 
-  const response = await fetch(buildApiUrl('/api/print-jobs'), {
-    method: 'POST',
+  const response = await fetch(buildApiUrl(path), {
+    method,
     headers: {
-      'content-type': 'application/json',
+      ...(rawBody ? { 'content-type': 'application/json' } : {}),
       ...signedHeaders,
     },
-    body: rawBody,
+    ...(rawBody ? { body: rawBody } : {}),
   });
 
-  return parseResponse<CreatePrintJobResponse>(response);
+  return parseResponse<T>(response);
 };
 
-export const getPrintJobStatus = async (jobId: string): Promise<PrintJobStatusResponse> => {
-  const signedHeaders = await buildSignedHeaders('');
+export const listPrinters = async (): Promise<PrinterListResponse> => requestJson('/api/printers', 'GET');
 
-  const response = await fetch(buildApiUrl(`/api/print-jobs/${encodeURIComponent(jobId)}`), {
-    method: 'GET',
-    headers: {
-      ...signedHeaders,
-    },
-  });
+export const createPrinter = async (payload: CreatePrinterPayload): Promise<{ printer: Printer }> =>
+  requestJson('/api/printers', 'POST', payload);
 
-  return parseResponse<PrintJobStatusResponse>(response);
-};
+export const updatePrinter = async (printerId: string, payload: UpdatePrinterPayload): Promise<{ printer: Printer }> =>
+  requestJson(`/api/printers/${encodeURIComponent(printerId)}`, 'PATCH', payload);
 
-export const waitForPrintCompletion = async (
+export const setDefaultPrinter = async (printerId: string): Promise<SetDefaultPrinterResponse> =>
+  requestJson(`/api/printers/${encodeURIComponent(printerId)}/default`, 'POST', {});
+
+export const sendPrinterTest = async (printerId: string): Promise<TestPrintResponse> =>
+  requestJson(`/api/printers/${encodeURIComponent(printerId)}/test`, 'POST', { source: PRINT_SOURCE });
+
+export const waitForPrinterTestCompletion = async (
   jobId: string,
   {
     pollIntervalMs = DEFAULT_POLL_INTERVAL_MS,
     maxAttempts = DEFAULT_POLL_ATTEMPTS,
   }: { pollIntervalMs?: number; maxAttempts?: number } = {}
-): Promise<PrintJobStatusResponse> => {
+) => {
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   let attempts = 0;
   while (attempts < maxAttempts) {
     attempts += 1;
     const status = await getPrintJobStatus(jobId);
-
     if (status.status === 'printed' || status.status === 'failed') {
       return status;
     }
-
     await delay(pollIntervalMs);
   }
 
-  throw new Error('Timed out while waiting for print completion.');
+  throw new Error('Timed out while waiting for test print completion.');
 };
-
-export const createLabelPrintIdempotencyKey = ({
-  orderId,
-  displayId,
-  printerId,
-}: {
-  orderId: string;
-  displayId: string;
-  printerId?: string;
-}): string =>
-  buildPrintIdempotencyKey({
-    orderId,
-    displayId,
-    printerId: printerId || LEGACY_DEFAULT_PRINTER_ID || 'global-default',
-  });

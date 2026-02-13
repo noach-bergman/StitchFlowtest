@@ -170,15 +170,21 @@ export const setDefaultPrinter = async ({ store, printerId }) => {
   return { defaultPrinterId: id };
 };
 
-export const createPrinterTestJob = async ({ queueStore, printerId, createdBy = 'admin-ui' }) => {
+export const createPrinterTestJob = async ({ queueStore, printerId, createdBy = 'admin-ui', source = 'web' }) => {
   const id = normalizePrinterId(printerId, 'printerId');
+  const printer = await queueStore.getPrinter(id);
+  if (!printer) {
+    const error = new Error('Printer not found');
+    error.code = 'printer_not_found';
+    throw error;
+  }
 
   const suffix = Date.now().toString().slice(-6);
   const displayId = `TEST-${suffix}`;
 
   return enqueuePrintJob({
     store: queueStore,
-    source: 'web',
+    source,
     createdBy,
     input: {
       printerId: id,

@@ -35,6 +35,38 @@ describe('print queue workflow', () => {
     expect(first.status).toBe('queued');
   });
 
+  it('uses default printer when printerId is missing', async () => {
+    const store = new InMemoryPrintQueueStore();
+    store.addPrinter({
+      id: 'printer-default',
+      publicHost: '203.0.113.10',
+      publicPort: 49100,
+      enabled: true,
+      protocol: 'raw9100',
+      allowedSources: ['web'],
+    });
+    store.setDefaultPrinterId('printer-default');
+
+    const result = await enqueuePrintJob({
+      store,
+      input: {
+        orderId: 'order-default',
+        idempotencyKey: 'idem-default',
+        label: {
+          displayId: '9001',
+          clientName: 'Default Client',
+          itemType: 'Trousers',
+        },
+      },
+      source: 'web',
+      createdBy: 'test-user',
+    });
+
+    const job = await store.getJobById(result.jobId);
+    expect(result.status).toBe('queued');
+    expect(job?.printerId).toBe('printer-default');
+  });
+
   it('moves queued job to printed on successful transport', async () => {
     const store = new InMemoryPrintQueueStore();
     store.addPrinter({
