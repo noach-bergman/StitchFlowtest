@@ -21,13 +21,15 @@ const DataManagement: React.FC<DataManagementProps> = ({ onImportSuccess }) => {
 CREATE TABLE clients (id TEXT PRIMARY KEY, name TEXT NOT NULL, phone TEXT, email TEXT, measurements JSONB DEFAULT '{}', notes TEXT, "createdAt" BIGINT NOT NULL);
 CREATE TABLE folders (id TEXT PRIMARY KEY, name TEXT NOT NULL, "clientId" TEXT REFERENCES clients(id) ON DELETE CASCADE, "clientName" TEXT, "createdAt" BIGINT NOT NULL, deadline TEXT, status TEXT DEFAULT 'פעיל', "isPaid" BOOLEAN DEFAULT false, "isDelivered" BOOLEAN DEFAULT false, "isArchived" BOOLEAN DEFAULT false);
 CREATE TABLE orders (id TEXT PRIMARY KEY, "displayId" TEXT, "folderId" TEXT REFERENCES folders(id) ON DELETE CASCADE, "clientId" TEXT REFERENCES clients(id) ON DELETE CASCADE, "clientName" TEXT, "itemType" TEXT, description TEXT, status TEXT DEFAULT 'חדש', deadline TEXT, price NUMERIC DEFAULT 0, deposit NUMERIC DEFAULT 0, "fabricNotes" TEXT, "createdAt" BIGINT NOT NULL, "updatedAt" BIGINT NOT NULL, "readyAt" BIGINT);
+CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT DEFAULT '', status TEXT DEFAULT 'חדש', priority TEXT DEFAULT 'רגילה', "dueAt" BIGINT, "assigneeUserId" TEXT, "createdByUserId" TEXT NOT NULL, "clientId" TEXT, "folderId" TEXT, "orderId" TEXT, "createdAt" BIGINT NOT NULL, "updatedAt" BIGINT NOT NULL, "completedAt" BIGINT);
 CREATE TABLE inventory (id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT, type TEXT, quantity NUMERIC DEFAULT 0, "unitPrice" NUMERIC DEFAULT 0, image TEXT);
 CREATE TABLE users (id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT NOT NULL, permissions JSONB DEFAULT '[]', "createdAt" BIGINT);
 
-ALTER TABLE clients ENABLE ROW LEVEL SECURITY; ALTER TABLE folders ENABLE ROW LEVEL SECURITY; ALTER TABLE orders ENABLE ROW LEVEL SECURITY; ALTER TABLE inventory ENABLE ROW LEVEL SECURITY; ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clients ENABLE ROW LEVEL SECURITY; ALTER TABLE folders ENABLE ROW LEVEL SECURITY; ALTER TABLE orders ENABLE ROW LEVEL SECURITY; ALTER TABLE tasks ENABLE ROW LEVEL SECURITY; ALTER TABLE inventory ENABLE ROW LEVEL SECURITY; ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "anon_full" ON clients FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "anon_full" ON folders FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "anon_full" ON orders FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "anon_full" ON tasks FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "anon_full" ON inventory FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "anon_full" ON users FOR ALL USING (true) WITH CHECK (true);`;
 

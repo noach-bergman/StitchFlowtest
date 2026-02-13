@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Client, Order, Folder } from '../types';
-import { TrendingUp, Users, Scissors, Clock, FolderOpen, Package, Wallet, Cloud, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Users, Scissors, Clock, FolderOpen, Package, Wallet, Cloud, ShieldCheck, ListTodo } from 'lucide-react';
 import { STATUS_COLORS } from '../constants';
 
 interface DashboardProps {
@@ -147,6 +147,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
       <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 text-right">
          <h3 className="text-xl font-black text-gray-800 mb-6">כל הכלים והניהול</h3>
          <div className="grid grid-cols-3 gap-4">
+            <NavGridButton label="משימות" icon={<ListTodo />} color="bg-slate-100 text-slate-700 border-slate-200" onClick={() => onNavigate('tasks')} />
             <NavGridButton label="לקוחות" icon={<Users />} color="bg-blue-50 text-blue-600 border-blue-100" onClick={() => onNavigate('clients')} />
             <NavGridButton label="תיקים" icon={<FolderOpen />} color="bg-rose-50 text-rose-600 border-rose-100" onClick={() => onNavigate('folders')} />
             <NavGridButton label="הזמנות" icon={<Scissors />} color="bg-indigo-50 text-indigo-600 border-indigo-100" onClick={() => onNavigate('orders')} />

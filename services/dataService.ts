@@ -1,6 +1,6 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { Client, Order, Folder, Fabric, User } from '../types';
+import { Client, Order, Folder, Fabric, Task, User } from '../types';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
@@ -141,6 +141,26 @@ export const dataService = {
     if (supabase) await supabase.from('orders').delete().eq('id', id);
     const orders = JSON.parse(localStorage.getItem('stitchflow_orders') || '[]');
     localStorage.setItem('stitchflow_orders', JSON.stringify(orders.filter((o: any) => o.id !== id)));
+  },
+
+  async getTasks(): Promise<Task[]> {
+    if (this.isCloud()) { try { return await fetchAllFromTable('tasks'); } catch (e) {} }
+    const data = localStorage.getItem('stitchflow_tasks');
+    return data ? JSON.parse(data) : [];
+  },
+
+  async saveTasks(tasks: Task[]): Promise<void> {
+    localStorage.setItem('stitchflow_tasks', JSON.stringify(tasks));
+    if (supabase) {
+      const { error } = await supabase.from('tasks').upsert(tasks, { onConflict: 'id' });
+      if (error) throw error;
+    }
+  },
+
+  async deleteTask(id: string): Promise<void> {
+    if (supabase) await supabase.from('tasks').delete().eq('id', id);
+    const tasks = JSON.parse(localStorage.getItem('stitchflow_tasks') || '[]');
+    localStorage.setItem('stitchflow_tasks', JSON.stringify(tasks.filter((task: any) => task.id !== id)));
   },
 
   async mergeClients(sourceId: string, targetId: string, mergedClient: Client): Promise<void> {

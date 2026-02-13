@@ -2,6 +2,7 @@
 import React from 'react';
 import { 
   LayoutDashboard, 
+  ListTodo,
   Users, 
   Scissors, 
   Layers, 
@@ -19,6 +20,7 @@ import {
 
 export const NAV_ITEMS = [
   { id: 'dashboard', label: 'לוח בקרה', icon: <LayoutDashboard className="w-5 h-5" /> },
+  { id: 'tasks', label: 'משימות צוות', icon: <ListTodo className="w-5 h-5" /> },
   { id: 'clients', label: 'ניהול לקוחות', icon: <Users className="w-5 h-5" /> },
   { id: 'folders', label: 'תיקי לקוחות', icon: <FolderOpen className="w-5 h-5" /> },
   { id: 'orders', label: 'מעקב הזמנות', icon: <Scissors className="w-5 h-5" /> },

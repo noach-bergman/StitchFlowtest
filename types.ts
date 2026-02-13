@@ -1,5 +1,7 @@
 
 export type OrderStatus = 'חדש' | 'מדידות' | 'בתפירה' | 'מדידה_שנייה' | 'מוכן';
+export type TaskStatus = 'חדש' | 'בטיפול' | 'בהמתנה' | 'הושלם';
+export type TaskPriority = 'נמוכה' | 'רגילה' | 'גבוהה' | 'דחופה';
 export type UserRole = 'super_admin' | 'admin' | 'staff' | 'viewer';
 
 export interface User {
@@ -61,6 +63,23 @@ export interface Order {
   createdAt: number;
   updatedAt: number; // The timestamp of the last modification
   readyAt?: number; // The timestamp when the order was marked as "מוכן"
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueAt: number | null;
+  assigneeUserId: string | null;
+  createdByUserId: string;
+  clientId?: string;
+  folderId?: string;
+  orderId?: string;
+  createdAt: number;
+  updatedAt: number;
+  completedAt?: number;
 }
 
 export interface Fabric {

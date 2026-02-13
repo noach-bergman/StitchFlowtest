@@ -6,14 +6,16 @@ import Dashboard from './components/Dashboard';
 import ClientsList from './components/ClientsList';
 import ClientFolders from './components/ClientFolders';
 import OrdersList from './components/OrdersList';
+import TasksBoard, { TaskPrefill } from './components/TasksBoard';
 import Inventory from './components/Inventory';
 import IncomeSummary from './components/IncomeSummary';
 import DataManagement from './components/DataManagement';
 import UserManagement from './components/UserManagement';
 import Login from './components/Login';
 import QrScanner from './components/QrScanner';
-import { Client, Order, Fabric, Folder, User } from './types';
+import { Client, Order, Fabric, Folder, Task, User } from './types';
 import { dataService } from './services/dataService';
+import { getTaskSummary } from './services/taskUtils';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -22,9 +24,12 @@ const App: React.FC = () => {
   const [folders, setFolders] = useState<Folder[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [inventory, setInventory] = useState<Fabric[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [taskPrefill, setTaskPrefill] = useState<TaskPrefill | null>(null);
   
   // New state for deep-linking/navigation
   const [preSelectedFolderId, setPreSelectedFolderId] = useState<string | null>(null);
@@ -44,17 +49,21 @@ const App: React.FC = () => {
     if (!currentUser) return;
     setIsSyncing(true);
     try {
-      const [c, f, o, i] = await Promise.all([
+      const [c, f, o, i, t, u] = await Promise.all([
         dataService.getClients(),
         dataService.getFolders(),
         dataService.getOrders(),
-        dataService.getInventory()
+        dataService.getInventory(),
+        dataService.getTasks(),
+        dataService.getUsers().catch(() => [])
       ]);
       
       setClients(c || []);
       setFolders(f || []);
       setOrders(o || []);
       setInventory(i || []);
+      setTasks(t || []);
+      setUsers(u || []);
       setLastSync(new Date());
     } catch (err) {
       console.error("Failed to load data", err);
@@ -126,6 +135,20 @@ const App: React.FC = () => {
       setLastSync(new Date());
     } catch (e: any) {
       alert("שגיאה בשמירה לשרת: " + e.message);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleSaveTasks = async (newTasks: Task[]) => {
+    setTasks(newTasks);
+    setIsSyncing(true);
+    try {
+      await dataService.saveTasks(newTasks);
+      setLastSync(new Date());
+    } catch (e: any) {
+      alert("שגיאה בשמירה לשרת: " + e.message);
+      throw e;
     } finally {
       setIsSyncing(false);
     }
@@ -208,6 +231,28 @@ const App: React.FC = () => {
     }
   };
 
+  const openTaskFromOrder = (order: Order) => {
+    setTaskPrefill({
+      title: `מעקב עבור ${order.itemType}`,
+      description: order.description || '',
+      priority: 'רגילה',
+      clientId: order.clientId,
+      folderId: order.folderId,
+      orderId: order.id,
+    });
+    setActiveTab('tasks');
+  };
+
+  const openTaskFromFolder = (folder: Folder) => {
+    setTaskPrefill({
+      title: `משימה לתיק ${folder.name}`,
+      priority: 'רגילה',
+      clientId: folder.clientId,
+      folderId: folder.id,
+    });
+    setActiveTab('tasks');
+  };
+
   if (!currentUser) {
     return <Login onLogin={handleLogin} />;
   }
@@ -215,6 +260,19 @@ const App: React.FC = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard': return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={setActiveTab} userRole={currentUser.role} />;
+      case 'tasks': return (
+        <TasksBoard
+          tasks={tasks}
+          setTasks={handleSaveTasks}
+          users={users}
+          currentUser={currentUser}
+          clients={clients}
+          folders={folders}
+          orders={orders}
+          initialDraft={taskPrefill}
+          onConsumeInitialDraft={() => setTaskPrefill(null)}
+        />
+      );
       case 'clients': return (
         <ClientsList 
           clients={clients} 
@@ -244,9 +302,11 @@ const App: React.FC = () => {
             setPreSelectedFolderId(null);
             setHighlightedOrderId(null);
           }}
+          onCreateTaskFromFolder={openTaskFromFolder}
+          onCreateTaskFromOrder={openTaskFromOrder}
         />
       );
-      case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} />;
+      case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} onCreateTaskFromOrder={openTaskFromOrder} />;
       case 'income': return <IncomeSummary folders={folders} orders={orders} />;
       case 'inventory': return <Inventory inventory={inventory} setInventory={handleSaveInventory} />;
       case 'data-mgmt': return <DataManagement onImportSuccess={loadAllData} />;
@@ -260,6 +320,9 @@ const App: React.FC = () => {
     if (item.adminOnly) return isAtLeastAdmin;
     return true;
   });
+  const taskSummary = getTaskSummary(tasks);
+  const taskAlertCount = taskSummary.urgentOrOverdue;
+  const mobileNavItems = visibleNavItems.slice(0, 5);
 
   return (
     <div className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden font-assistant selection:bg-rose-100">
@@ -299,6 +362,11 @@ const App: React.FC = () => {
             >
               {item.icon}
               <span className="text-sm">{item.label}</span>
+              {item.id === 'tasks' && taskAlertCount > 0 && (
+                <span className="mr-auto inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full bg-rose-600 text-white text-[10px] font-black">
+                  {taskAlertCount}
+                </span>
+              )}
             </button>
           ))}
         </nav>
@@ -372,7 +440,7 @@ const App: React.FC = () => {
 
         {/* Mobile Navbar */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-2xl border-t border-gray-100 flex justify-around items-center z-40 h-24 px-1 pb-safe shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
-          {visibleNavItems.slice(0, 4).map((item) => (
+          {mobileNavItems.map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
@@ -380,8 +448,13 @@ const App: React.FC = () => {
                 activeTab === item.id ? 'text-rose-600' : 'text-gray-400'
               }`}
             >
-              <div className={`${activeTab === item.id ? 'scale-125' : 'scale-110'} transition-transform`}>
+              <div className={`relative ${activeTab === item.id ? 'scale-125' : 'scale-110'} transition-transform`}>
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 28 })}
+                {item.id === 'tasks' && taskAlertCount > 0 && (
+                  <span className="absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-rose-600 text-white text-[9px] font-black">
+                    {taskAlertCount}
+                  </span>
+                )}
               </div>
               <span className={`text-[11px] font-black tracking-tighter ${activeTab === item.id ? 'opacity-100' : 'opacity-80'}`}>
                 {item.label.split(' ')[0]}

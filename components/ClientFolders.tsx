@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Client, Order, Folder, OrderStatus } from '../types';
 // Added ShieldAlert to the import list
-import { Search, FolderOpen, ArrowRight, Plus, Archive, CheckCircle2, Scissors, Trash2, X, Edit2, DollarSign, FileText, RefreshCw, Hash, Printer, QrCode, ShieldAlert, Sparkles, AlertTriangle, MapPin, Share2 } from 'lucide-react';
+import { Search, FolderOpen, ArrowRight, Plus, Archive, CheckCircle2, Scissors, Trash2, X, Edit2, DollarSign, FileText, RefreshCw, Hash, Printer, QrCode, ShieldAlert, Sparkles, AlertTriangle, MapPin, Share2, ListTodo } from 'lucide-react';
 import { generateProfessionalReceipt } from '../services/gemini';
 import { STATUS_COLORS } from '../constants';
 import QRCode from 'qrcode';
@@ -21,11 +21,14 @@ interface ClientFoldersProps {
   initialFolderId?: string | null;
   highlightedOrderId?: string | null;
   onClearInitialFolder?: () => void;
+  onCreateTaskFromFolder?: (folder: Folder) => void;
+  onCreateTaskFromOrder?: (order: Order) => void;
 }
 
 const ClientFolders: React.FC<ClientFoldersProps> = ({ 
   clients, setClients, folders, setFolders, orders, setOrders, 
-  onDeleteFolder, onDeleteOrder, userRole, initialFolderId, highlightedOrderId, onClearInitialFolder 
+  onDeleteFolder, onDeleteOrder, userRole, initialFolderId, highlightedOrderId, onClearInitialFolder,
+  onCreateTaskFromFolder, onCreateTaskFromOrder
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
@@ -58,6 +61,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
   const [showClientList, setShowClientList] = useState(false);
 
   const isAdmin = userRole === 'admin' || userRole === 'super_admin';
+  const canCreateTask = userRole !== 'viewer';
 
   useEffect(() => {
     if (initialFolderId) {
@@ -610,9 +614,20 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
            </div>
 
            <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex justify-between items-center mt-8">
-              <button onClick={() => { setEditingOrder(null); setTempDisplayId(generateNewDisplayId()); setIsOrderModalOpen(true); }} className="bg-rose-600 text-white px-8 py-4 rounded-full font-black text-sm active:scale-95 transition-all">
-                 הוסף פריט +
-              </button>
+              <div className="flex items-center gap-3">
+                {canCreateTask && onCreateTaskFromFolder && selectedFolder && (
+                  <button
+                    onClick={() => onCreateTaskFromFolder(selectedFolder)}
+                    className="bg-indigo-50 text-indigo-600 px-5 py-4 rounded-full font-black text-sm border border-indigo-100 active:scale-95 transition-all inline-flex items-center gap-2"
+                  >
+                    <ListTodo size={16} />
+                    משימה לתיק
+                  </button>
+                )}
+                <button onClick={() => { setEditingOrder(null); setTempDisplayId(generateNewDisplayId()); setIsOrderModalOpen(true); }} className="bg-rose-600 text-white px-8 py-4 rounded-full font-black text-sm active:scale-95 transition-all">
+                  הוסף פריט +
+                </button>
+              </div>
               <h4 className="text-xl font-black text-gray-800">פריטים בתיק ({folderOrders.length})</h4>
            </div>
 
@@ -623,6 +638,11 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   className={`bg-white rounded-[2.5rem] p-8 shadow-sm border relative group transition-all hover:shadow-xl ${order.id === highlightedOrderId ? 'border-rose-500 ring-4 ring-rose-500/10 animate-pulse' : 'border-gray-100'}`}
                 >
                    <div className="absolute top-6 left-6 flex gap-2">
+                      {canCreateTask && onCreateTaskFromOrder && (
+                        <button onClick={() => onCreateTaskFromOrder(order)} className="p-3 bg-indigo-50 text-indigo-600 rounded-xl active:scale-90 transition-all border border-indigo-100" title="צור משימה לצוות">
+                          <ListTodo size={16} />
+                        </button>
+                      )}
                       <button onClick={() => handleOpenQrLabel(order)} className="p-3 bg-slate-50 text-slate-900 rounded-xl active:scale-90 transition-all border border-slate-100 hover:bg-slate-900 hover:text-white" title="הדפס תווית QR">
                         <QrCode size={16} />
                       </button>

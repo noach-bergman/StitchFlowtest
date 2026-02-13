@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Order, Client, OrderStatus, Folder } from '../types';
-import { Calendar, HelpCircle, Scissors, ChevronRight, Trash2, Clock, Edit2, ShieldAlert, X } from 'lucide-react';
+import { Calendar, HelpCircle, Scissors, ChevronRight, Trash2, Clock, Edit2, ShieldAlert, X, ListTodo } from 'lucide-react';
 import { STATUS_COLORS } from '../constants';
 
 interface OrdersListProps {
@@ -11,14 +11,16 @@ interface OrdersListProps {
   setOrders: (orders: Order[]) => void;
   onDeleteOrder: (id: string) => void;
   userRole?: string;
+  onCreateTaskFromOrder?: (order: Order) => void;
 }
 
-const OrdersList: React.FC<OrdersListProps> = ({ orders, clients, folders, setOrders, onDeleteOrder, userRole }) => {
+const OrdersList: React.FC<OrdersListProps> = ({ orders, clients, folders, setOrders, onDeleteOrder, userRole, onCreateTaskFromOrder }) => {
   const [activeFilter, setActiveFilter] = useState<OrderStatus | 'הכל' | 'פעיל'>('פעיל');
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
   // Update check
   const isAdmin = userRole === 'admin' || userRole === 'super_admin';
+  const canCreateTask = userRole !== 'viewer' && !!onCreateTaskFromOrder;
 
   const filteredOrders = orders.filter(o => {
     const folder = folders.find(f => f.id === o.folderId);
@@ -90,8 +92,17 @@ const OrdersList: React.FC<OrdersListProps> = ({ orders, clients, folders, setOr
             <div key={order.id} className={`bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 relative group transition-all active:scale-[0.98] ${delivered ? 'opacity-60 grayscale' : ''}`}>
               <div className={`absolute top-0 right-0 w-2.5 h-full rounded-r-full ${delivered ? 'bg-emerald-400' : STATUS_COLORS[order.status].split(' ')[0]}`} />
               
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex gap-2 z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex gap-2 z-10">
+                  {canCreateTask && (
+                    <button 
+                      onClick={() => onCreateTaskFromOrder(order)}
+                      className="w-12 h-12 flex items-center justify-center text-indigo-500 bg-indigo-50 rounded-2xl active:scale-90 transition-all shadow-sm border border-indigo-100"
+                      title="צור משימה לצוות"
+                    >
+                      <ListTodo className="w-6 h-6" />
+                    </button>
+                  )}
                   {isAdmin && (
                     <button 
                       onClick={() => setOrderToDelete(order)}
