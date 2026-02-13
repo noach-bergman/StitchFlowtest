@@ -223,37 +223,26 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     const receiptContent = document.getElementById('receipt-preview');
     if (!receiptContent) return;
 
-    // Open a new window for printing to avoid CSS conflicts with the main app (especially the label printer styles)
-    const printWindow = window.open('', '_blank', 'width=800,height=900');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <title>Invoice - ${receiptData?.receiptNumber || 'StitchFlow'}</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
-          <style>
-             body { font-family: 'Playfair Display', serif; }
-             @media print {
-               @page { size: auto; margin: 10mm; }
-               body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-             }
-          </style>
-        </head>
-        <body class="bg-white p-8">
-          ${receiptContent.innerHTML}
-          <script>
-            setTimeout(() => {
-              window.print();
-              // Optional: window.close(); // Only close if you want it to close immediately after print dialog
-            }, 800);
-          </script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
+    let isCleanedUp = false;
+    let fallbackCleanupTimer: number | undefined;
+
+    const cleanup = () => {
+      if (isCleanedUp) return;
+      isCleanedUp = true;
+      document.body.classList.remove('printing-receipt');
+      window.removeEventListener('afterprint', cleanup);
+      if (fallbackCleanupTimer) window.clearTimeout(fallbackCleanupTimer);
+    };
+
+    document.body.classList.add('printing-receipt');
+    window.addEventListener('afterprint', cleanup, { once: true });
+
+    // iOS/PWA browsers can be inconsistent with afterprint.
+    fallbackCleanupTimer = window.setTimeout(cleanup, 60000);
+
+    window.requestAnimationFrame(() => {
+      window.print();
+    });
   };
 
   const handleOpenQrLabel = async (order: Order) => {
@@ -521,6 +510,41 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
   return (
     <div className="space-y-6 text-right pb-32">
+      <style>{`
+        @media print {
+          @page { size: auto; margin: 10mm; }
+
+          body.printing-receipt {
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          body.printing-receipt #root * {
+            visibility: hidden !important;
+          }
+
+          body.printing-receipt #receipt-preview,
+          body.printing-receipt #receipt-preview * {
+            visibility: visible !important;
+          }
+
+          body.printing-receipt #receipt-preview {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            margin: 0 auto !important;
+            width: 100% !important;
+            max-width: 820px !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+            z-index: 2147483647 !important;
+            font-family: 'Playfair Display', serif;
+          }
+        }
+      `}</style>
       {!selectedFolderId ? (
         <div className="space-y-8 animate-in fade-in duration-500">
            <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-100 relative overflow-hidden">
