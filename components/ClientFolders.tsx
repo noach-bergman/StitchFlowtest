@@ -293,42 +293,28 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     const labelContent = document.getElementById('label-preview');
     if (!labelContent) return;
 
-    setIsPrintingLabel(true);
-    try {
-      const printWindow = window.open('', '_blank', 'width=500,height=700');
-      if (!printWindow) {
-        alert('הדפדפן חסם חלון הדפסה. יש לאפשר popups עבור האתר.');
-        return;
-      }
+    let isCleanedUp = false;
+    let fallbackCleanupTimer: number | undefined;
 
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html lang="he" dir="rtl">
-        <head>
-          <title>Label - ${activeQrOrder.displayId}</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-          <style>
-            body { margin: 0; padding: 0; background: white; }
-            @media print {
-              @page { size: auto; margin: 6mm; }
-              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body class="p-4">
-          ${labelContent.innerHTML}
-          <script>
-            setTimeout(() => {
-              window.print();
-            }, 400);
-          </script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-    } finally {
+    const cleanup = () => {
+      if (isCleanedUp) return;
+      isCleanedUp = true;
+      document.body.classList.remove('printing-label');
+      window.removeEventListener('afterprint', cleanup);
+      if (fallbackCleanupTimer) window.clearTimeout(fallbackCleanupTimer);
       setIsPrintingLabel(false);
-    }
+    };
+
+    setIsPrintingLabel(true);
+    document.body.classList.add('printing-label');
+    window.addEventListener('afterprint', cleanup, { once: true });
+
+    // iOS/PWA browsers can be inconsistent with afterprint.
+    fallbackCleanupTimer = window.setTimeout(cleanup, 60000);
+
+    window.requestAnimationFrame(() => {
+      window.print();
+    });
   };
 
   const closeQrModal = () => {
@@ -542,6 +528,35 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
             overflow: visible !important;
             z-index: 2147483647 !important;
             font-family: 'Playfair Display', serif;
+          }
+
+          body.printing-label {
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          body.printing-label #root * {
+            visibility: hidden !important;
+          }
+
+          body.printing-label #label-preview,
+          body.printing-label #label-preview * {
+            visibility: visible !important;
+          }
+
+          body.printing-label #label-preview {
+            position: fixed !important;
+            top: 6mm !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: min(90mm, 92vw) !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+            z-index: 2147483647 !important;
           }
         }
       `}</style>
