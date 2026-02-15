@@ -51,6 +51,7 @@ const App: React.FC = () => {
   const [incomeGatePassword, setIncomeGatePassword] = useState('');
   const [incomeGateError, setIncomeGateError] = useState('');
   const [pendingIncomeGateTarget, setPendingIncomeGateTarget] = useState<'income' | 'dashboard_weekly' | null>(null);
+  const [alertQueue, setAlertQueue] = useState<string[]>([]);
   
   // New state for deep-linking/navigation
   const [preSelectedFolderId, setPreSelectedFolderId] = useState<string | null>(null);
@@ -62,6 +63,7 @@ const App: React.FC = () => {
   const hasHandledSwipeRef = useRef(false);
 
   const isCloud = dataService.isCloud();
+  const activeAlertMessage = alertQueue[0] ?? null;
 
   const isTasksSchemaMismatchError = (error: any): boolean => {
     const message = [
@@ -140,6 +142,25 @@ const App: React.FC = () => {
       loadAllData();
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    const originalAlert = window.alert;
+
+    window.alert = (message?: any) => {
+      const normalizedMessage =
+        typeof message === 'string'
+          ? message
+          : message == null
+            ? ''
+            : String(message);
+
+      setAlertQueue((prev) => [...prev, normalizedMessage]);
+    };
+
+    return () => {
+      window.alert = originalAlert;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isMobileDrawerOpen) return;
@@ -615,6 +636,25 @@ const App: React.FC = () => {
     resetSwipeState();
   };
 
+  const closeActiveAlert = () => {
+    setAlertQueue((prev) => prev.slice(1));
+  };
+
+  useEffect(() => {
+    if (!activeAlertMessage) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeActiveAlert();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => {
+      window.removeEventListener('keydown', handleEscape);
+    };
+  }, [activeAlertMessage]);
+
   return (
     <div
       className="malki-theme flex flex-col md:flex-row h-screen bg-[#fff4f8] overflow-hidden font-assistant selection:bg-rose-200"
@@ -779,6 +819,31 @@ const App: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        )}
+
+        {activeAlertMessage && (
+          <div className="fixed inset-0 z-[170] bg-[#60254366] backdrop-blur-sm flex items-center justify-center p-4" onClick={closeActiveAlert}>
+            <div
+              dir="rtl"
+              className="w-full max-w-sm bg-white rounded-[2rem] border border-[#e5488670] shadow-[0_18px_36px_rgba(229,72,134,0.24)] p-6 text-right"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-end gap-3 mb-3">
+                <h3 className="text-xl font-black text-[#2B2B2B] font-heebo">הודעה</h3>
+                <div className="w-10 h-10 rounded-2xl bg-[#ffe8f3] text-[#E54886] border border-[#e548864d] flex items-center justify-center">
+                  <AlertCircle size={18} />
+                </div>
+              </div>
+              <p className="text-sm text-[#7A7A7A] font-bold leading-7 whitespace-pre-line">{activeAlertMessage}</p>
+              <button
+                type="button"
+                onClick={closeActiveAlert}
+                className="mt-6 w-full rounded-2xl border border-[#e5488680] bg-[#fff3f9] text-[#E54886] py-3 font-black hover:bg-[#E54886] hover:text-white transition-colors duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630]"
+              >
+                סגור
+              </button>
+            </div>
           </div>
         )}
 

@@ -9,6 +9,9 @@ const UserManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   const loadUsers = async () => {
     setIsLoading(true);
@@ -55,18 +58,27 @@ const UserManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteUser = async (id: string, username: string) => {
-    if (username === 'admin') {
-      alert("לא ניתן למחוק את חשבון הניהול הראשי");
+  const handleDeleteUserRequest = (user: User) => {
+    if (user.username === 'admin') {
+      setActionNotice('לא ניתן למחוק את חשבון הניהול הראשי');
       return;
     }
-    if (!window.confirm(`האם אתה בטוח שברצונך למחוק את המשתמש ${username}?`)) return;
+    setUserToDelete(user);
+  };
 
+  const handleConfirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setIsDeletingUser(true);
+    setActionNotice(null);
     try {
-      await dataService.deleteUser(id);
-      setUsers(users.filter(u => u.id !== id));
+      await dataService.deleteUser(userToDelete.id);
+      setUsers((prev) => prev.filter((u) => u.id !== userToDelete.id));
+      setActionNotice(`המשתמש ${userToDelete.username} נמחק בהצלחה`);
+      setUserToDelete(null);
     } catch (err) {
-      alert("שגיאה במחיקת משתמש");
+      setActionNotice("שגיאה במחיקת משתמש");
+    } finally {
+      setIsDeletingUser(false);
     }
   };
 
@@ -100,6 +112,15 @@ const UserManagement: React.FC = () => {
         </button>
       </div>
 
+      {actionNotice && (
+        <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-700 text-sm font-black flex items-center justify-between">
+          <button onClick={() => setActionNotice(null)} className="text-rose-400 hover:text-rose-600 p-1">
+            <AlertCircle size={16} />
+          </button>
+          <span>{actionNotice}</span>
+        </div>
+      )}
+
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4 text-[#7A7A7A]">
           <RefreshCw className="animate-spin" size={32} />
@@ -129,7 +150,7 @@ const UserManagement: React.FC = () => {
             <div key={user.id} className="bg-white border border-rose-100 rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all group animate-in zoom-in duration-300">
                <div className="flex justify-between items-start mb-4">
                   <button 
-                    onClick={() => handleDeleteUser(user.id, user.username)}
+                    onClick={() => handleDeleteUserRequest(user)}
                     className="p-2 text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
                   >
                     <Trash2 size={18} />
@@ -201,6 +222,37 @@ const UserManagement: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {userToDelete && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in duration-200">
+            <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6">
+              <Trash2 size={36} />
+            </div>
+            <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">מחיקת משתמש</h3>
+            <p className="text-sm text-[#7A7A7A] mb-8">
+              האם למחוק את המשתמש <b>{userToDelete.username}</b>?<br />
+              פעולה זו היא סופית.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setUserToDelete(null)}
+                disabled={isDeletingUser}
+                className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all disabled:opacity-50"
+              >
+                ביטול
+              </button>
+              <button
+                onClick={handleConfirmDeleteUser}
+                disabled={isDeletingUser}
+                className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all disabled:opacity-60"
+              >
+                {isDeletingUser ? 'מוחק...' : 'מחק משתמש'}
+              </button>
+            </div>
           </div>
         </div>
       )}
