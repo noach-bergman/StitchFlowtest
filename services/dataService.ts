@@ -178,8 +178,25 @@ export const dataService = {
   async saveTasks(tasks: Task[]): Promise<void> {
     localStorage.setItem('stitchflow_tasks', JSON.stringify(tasks));
     if (supabase) {
-      const { error } = await supabase.from('tasks').upsert(tasks, { onConflict: 'id' });
-      if (error) throw error;
+      const { data: existingTasks, error: fetchError } = await supabase.from('tasks').select('id');
+      if (fetchError) throw fetchError;
+
+      if (tasks.length > 0) {
+        const { error: upsertError } = await supabase.from('tasks').upsert(tasks, { onConflict: 'id' });
+        if (upsertError) throw upsertError;
+      }
+
+      const incomingIds = new Set(tasks.map((task) => task.id));
+      const idsToDelete = (existingTasks || [])
+        .map((task: { id: string | null }) => task.id)
+        .filter((id): id is string => !!id && !incomingIds.has(id));
+
+      const DELETE_CHUNK_SIZE = 500;
+      for (let i = 0; i < idsToDelete.length; i += DELETE_CHUNK_SIZE) {
+        const chunk = idsToDelete.slice(i, i + DELETE_CHUNK_SIZE);
+        const { error: deleteError } = await supabase.from('tasks').delete().in('id', chunk);
+        if (deleteError) throw deleteError;
+      }
     }
   },
 

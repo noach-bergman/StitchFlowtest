@@ -119,6 +119,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const [isClearCompletedModalOpen, setIsClearCompletedModalOpen] = useState(false);
 
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'הכל'>('הכל');
@@ -150,6 +151,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
   }, [orders]);
 
   const summary = useMemo(() => getTaskSummary(tasks), [tasks]);
+  const completedTasksCount = useMemo(() => tasks.filter((task) => task.status === 'הושלם').length, [tasks]);
 
   useEffect(() => {
     if (!activeTask) return;
@@ -493,6 +495,24 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
     }
   };
 
+  const openClearCompletedModal = () => {
+    if (isViewer || completedTasksCount === 0) return;
+    setIsClearCompletedModalOpen(true);
+  };
+
+  const confirmClearCompletedTasks = async () => {
+    if (isViewer || completedTasksCount === 0) return;
+    const nextTasks = tasks.filter((item) => item.status !== 'הושלם');
+    setActiveTask((prev) => (prev ? nextTasks.find((task) => task.id === prev.id) || null : null));
+    try {
+      await saveTaskList(nextTasks);
+    } catch {
+      // Error handled in saveTaskList
+    } finally {
+      setIsClearCompletedModalOpen(false);
+    }
+  };
+
   const getCreateContextLabel = () => {
     if (form.kind === 'order') {
       const order = form.orderId ? ordersById.get(form.orderId) : null;
@@ -518,16 +538,27 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
             </h3>
             <p className="text-sm text-gray-400 font-bold">ניהול תפעולי יומי לפי סטטוס ודדליינים</p>
           </div>
-          <button
-            disabled={!canCreateTask || isSaving}
-            onClick={() => openCreateModal(null)}
-            className="bg-rose-600 text-white px-6 py-3 rounded-2xl font-black text-sm shadow-xl shadow-rose-100 active:scale-95 transition-all disabled:opacity-50"
-          >
-            <span className="inline-flex items-center gap-2">
-              <Plus size={16} />
-              משימה חדשה
-            </span>
-          </button>
+          <div className="flex items-center gap-2">
+            {!isViewer && (
+              <button
+                disabled={isSaving || completedTasksCount === 0}
+                onClick={openClearCompletedModal}
+                className="bg-amber-100 text-amber-800 border border-amber-200 px-4 py-3 rounded-2xl font-black text-sm active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                נקה הושלמו ({completedTasksCount})
+              </button>
+            )}
+            <button
+              disabled={!canCreateTask || isSaving}
+              onClick={() => openCreateModal(null)}
+              className="bg-rose-600 text-white px-6 py-3 rounded-2xl font-black text-sm shadow-xl shadow-rose-100 active:scale-95 transition-all disabled:opacity-50"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Plus size={16} />
+                משימה חדשה
+              </span>
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -822,6 +853,45 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
           onToggleChecklist={(orderId, done) => toggleChecklistItem(activeTask, orderId, done)}
           onMarkCompleted={() => markTaskCompleted(activeTask)}
         />
+      )}
+
+      {isClearCompletedModalOpen && (
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="relative bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in duration-200">
+            <button
+              onClick={() => setIsClearCompletedModalOpen(false)}
+              disabled={isSaving}
+              className="absolute mt-[-12px] mr-[-12px] right-8 top-8 p-2 rounded-full text-gray-300 hover:text-gray-500 transition-colors disabled:opacity-50"
+              aria-label="סגור"
+            >
+              <X size={18} />
+            </button>
+            <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mx-auto mb-6">
+              <CheckCircle2 size={40} />
+            </div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">ניקוי משימות שהושלמו</h3>
+            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+              יימחקו לצמיתות <b>{completedTasksCount}</b> משימות שהושלמו.<br />
+              <span className="text-rose-600 font-bold">פעולה זו היא סופית.</span>
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setIsClearCompletedModalOpen(false)}
+                disabled={isSaving}
+                className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all disabled:opacity-50"
+              >
+                ביטול
+              </button>
+              <button
+                onClick={confirmClearCompletedTasks}
+                disabled={isSaving}
+                className="flex-1 py-4 bg-amber-600 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all disabled:opacity-50"
+              >
+                {isSaving ? 'מנקה...' : 'נקה משימות'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {taskToDelete && (

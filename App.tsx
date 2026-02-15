@@ -220,12 +220,14 @@ const App: React.FC = () => {
   };
 
   const handleSaveTasks = async (newTasks: Task[]) => {
+    const previousTasks = tasks;
     setTasks(newTasks);
     setIsSyncing(true);
     try {
       await dataService.saveTasks(newTasks);
       setLastSync(new Date());
     } catch (e: any) {
+      setTasks(previousTasks);
       if (isTasksSchemaMismatchError(e)) {
         alert("סכמת מסד הנתונים לא מעודכנת למשימות.\nיש להריץ את מיגרציית tasks ב-Data Management או ב-Supabase SQL Editor, ואז לרענן את האפליקציה.");
       } else {
