@@ -5,6 +5,7 @@ import { Search, Plus, Edit2, Trash2, Phone, User, X, AlertTriangle, ShieldAlert
 import { STATUS_COLORS } from '../constants';
 import { dataService } from '../services/dataService';
 import { getEffectivePaidAmount, getFolderTotal, getPaymentStatus } from '../services/paymentUtils';
+import { showUiAlert } from '../services/uiAlert';
 
 interface ClientsListProps {
   clients: Client[];
@@ -136,7 +137,7 @@ const ClientsList: React.FC<ClientsListProps> = ({ clients, folders, orders, set
       }
 
     } catch (err) {
-      alert("שגיאה במיזוג: " + (err as any).message);
+      showUiAlert("שגיאה במיזוג: " + (err as any).message);
     } finally {
       setIsMerging(false);
     }

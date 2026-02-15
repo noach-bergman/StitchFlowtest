@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { FileJson, CheckCircle, AlertTriangle, RefreshCw, Database, Info, ShieldAlert, Wifi, Upload, ShieldCheck, Lock, ExternalLink, Copy, Code } from 'lucide-react';
 import { dataService } from '../services/dataService';
 import { Client, Folder, Order } from '../types';
+import { showUiAlert } from '../services/uiAlert';
 
 interface DataManagementProps {
   onImportSuccess: () => void;
@@ -74,12 +75,12 @@ COMMIT;`;
 
   const copySql = () => {
     navigator.clipboard.writeText(sqlSetupCode);
-    alert("קוד ה-SQL הועתק! הדביקי אותו ב-SQL Editor ב-Supabase.");
+    showUiAlert("קוד ה-SQL הועתק! הדביקי אותו ב-SQL Editor ב-Supabase.");
   };
 
   const copyTasksMigrationSql = () => {
     navigator.clipboard.writeText(tasksMigrationCode);
-    alert("קוד מיגרציית tasks הועתק! הדביקי אותו ב-SQL Editor ב-Supabase.");
+    showUiAlert("קוד מיגרציית tasks הועתק! הדביקי אותו ב-SQL Editor ב-Supabase.");
   };
 
   const checkCloud = async () => {

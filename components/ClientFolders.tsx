@@ -13,6 +13,7 @@ import {
   getRemaining,
   isPaidAmountWithinCharge,
 } from '../services/paymentUtils';
+import { showUiAlert } from '../services/uiAlert';
 import QRCode from 'qrcode';
 import html2canvas from 'html2canvas';
 
@@ -232,7 +233,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               text: `Receipt for ${receiptData.billTo || ''}`.trim(),
             });
             wasShared = true;
-            alert('התמונה שותפה בהצלחה.');
+            showUiAlert('התמונה שותפה בהצלחה.');
           }
         } catch (shareErr: any) {
           if (shareErr?.name === 'AbortError') return;
@@ -243,14 +244,14 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
         if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
           const item = new ClipboardItem({ 'image/png': blob });
           await navigator.clipboard.write([item]);
-          alert('תמונת הקבלה הועתקה ללוח. אפשר להדביק ולשתף.');
+          showUiAlert('תמונת הקבלה הועתקה ללוח. אפשר להדביק ולשתף.');
           return;
         }
-        alert('שיתוף תמונה לא נתמך במכשיר זה, וגם לא ניתן להעתיק תמונה ללוח.');
+        showUiAlert('שיתוף תמונה לא נתמך במכשיר זה, וגם לא ניתן להעתיק תמונה ללוח.');
       }
     } catch (error) {
       console.error('Receipt image sharing failed:', error);
-      alert('שגיאה בהכנת תמונת הקבלה לשיתוף.');
+      showUiAlert('שגיאה בהכנת תמונת הקבלה לשיתוף.');
     } finally {
       setIsSharingReceipt(false);
     }
@@ -385,7 +386,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               text: `${activeQrOrder.clientName} - ${activeQrOrder.itemType}`.trim(),
             });
             wasShared = true;
-            alert('התמונה שותפה בהצלחה.');
+            showUiAlert('התמונה שותפה בהצלחה.');
           }
         } catch (shareErr: any) {
           if (shareErr?.name === 'AbortError') return;
@@ -396,14 +397,14 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
         if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
           const item = new ClipboardItem({ 'image/png': blob });
           await navigator.clipboard.write([item]);
-          alert('תמונת התווית הועתקה ללוח. אפשר להדביק ולשתף.');
+          showUiAlert('תמונת התווית הועתקה ללוח. אפשר להדביק ולשתף.');
           return;
         }
-        alert('שיתוף תמונה לא נתמך במכשיר זה, וגם לא ניתן להעתיק תמונה ללוח.');
+        showUiAlert('שיתוף תמונה לא נתמך במכשיר זה, וגם לא ניתן להעתיק תמונה ללוח.');
       }
     } catch (error) {
       console.error('Label image sharing failed:', error);
-      alert('שגיאה בהכנת תמונת התווית לשיתוף.');
+      showUiAlert('שגיאה בהכנת תמונת התווית לשיתוף.');
     } finally {
       setIsSharingLabel(false);
     }
@@ -443,7 +444,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
     const paymentToAdd = Number(paymentInput);
     if (!Number.isFinite(paymentToAdd) || paymentToAdd <= 0) {
-      alert('יש להזין סכום תשלום חיובי.');
+      showUiAlert('יש להזין סכום תשלום חיובי.');
       return;
     }
 
@@ -451,11 +452,11 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
     const currentPaid = getEffectivePaidAmount(selectedFolder, total);
     const addLimit = getAddPaymentLimit(total, currentPaid);
     if (addLimit <= 0) {
-      alert('לא ניתן להוסיף תשלום נוסף. התיק כבר שולם במלואו או מעבר לכך.');
+      showUiAlert('לא ניתן להוסיף תשלום נוסף. התיק כבר שולם במלואו או מעבר לכך.');
       return;
     }
     if (paymentToAdd > addLimit) {
-      alert('לא ניתן להוסיף יותר מהיתרה לתשלום בתיק.');
+      showUiAlert('לא ניתן להוסיף יותר מהיתרה לתשלום בתיק.');
       return;
     }
     const nextPaidAmount = currentPaid + paymentToAdd;
@@ -479,13 +480,13 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
     const nextPaidAmount = Number(paymentInput);
     if (!Number.isFinite(nextPaidAmount)) {
-      alert('יש להזין סכום מספרי תקין.');
+      showUiAlert('יש להזין סכום מספרי תקין.');
       return;
     }
 
     const total = getFolderTotal(selectedFolder.id, orders);
     if (!isPaidAmountWithinCharge(total, nextPaidAmount)) {
-      alert('הסכום חייב להיות בין 0 לבין סך החיוב בתיק.');
+      showUiAlert('הסכום חייב להיות בין 0 לבין סך החיוב בתיק.');
       return;
     }
 
@@ -600,7 +601,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       const financials = folderFinancials.get(folderId);
       const remaining = financials?.remaining ?? 0;
       if (remaining > 0) {
-        alert('לא ניתן להעביר לארכיון לפני שהתשלום הושלם במלואו.');
+        showUiAlert('לא ניתן להעביר לארכיון לפני שהתשלום הושלם במלואו.');
         setFolderToArchive(null);
         return;
       }
@@ -818,7 +819,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                  <button
                     onClick={() => {
                       if (!canMoveSelectedFolderToArchive) {
-                        alert('לא ניתן להעביר לארכיון לפני שהתשלום הושלם במלואו.');
+                        showUiAlert('לא ניתן להעביר לארכיון לפני שהתשלום הושלם במלואו.');
                         return;
                       }
                       setFolderToArchive(selectedFolder!);
