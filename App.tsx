@@ -50,7 +50,7 @@ const App: React.FC = () => {
   const [isIncomeGateOpen, setIsIncomeGateOpen] = useState(false);
   const [incomeGatePassword, setIncomeGatePassword] = useState('');
   const [incomeGateError, setIncomeGateError] = useState('');
-  const [pendingTabAfterIncomeGate, setPendingTabAfterIncomeGate] = useState<'income' | null>(null);
+  const [pendingIncomeGateTarget, setPendingIncomeGateTarget] = useState<'income' | 'dashboard_weekly' | null>(null);
   
   // New state for deep-linking/navigation
   const [preSelectedFolderId, setPreSelectedFolderId] = useState<string | null>(null);
@@ -175,7 +175,7 @@ const App: React.FC = () => {
     setIsIncomeGateOpen(false);
     setIncomeGatePassword('');
     setIncomeGateError('');
-    setPendingTabAfterIncomeGate(null);
+    setPendingIncomeGateTarget(null);
   };
 
   const handleSaveOrders = async (newOrders: Order[]) => {
@@ -362,8 +362,8 @@ const App: React.FC = () => {
     return true;
   };
 
-  const openIncomeGate = () => {
-    setPendingTabAfterIncomeGate('income');
+  const openIncomeGate = (target: 'income' | 'dashboard_weekly') => {
+    setPendingIncomeGateTarget(target);
     setIncomeGatePassword('');
     setIncomeGateError('');
     setIsIncomeGateOpen(true);
@@ -373,7 +373,7 @@ const App: React.FC = () => {
     setIsIncomeGateOpen(false);
     setIncomeGatePassword('');
     setIncomeGateError('');
-    setPendingTabAfterIncomeGate(null);
+    setPendingIncomeGateTarget(null);
   };
 
   const submitIncomeGatePassword = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -395,8 +395,9 @@ const App: React.FC = () => {
       }
 
       sessionStorage.setItem(INCOME_UNLOCK_SESSION_KEY, String(Date.now() + INCOME_UNLOCK_TTL_MS));
-      const nextTab = pendingTabAfterIncomeGate || 'income';
-      setActiveTab(nextTab);
+      if (pendingIncomeGateTarget === 'income') {
+        setActiveTab('income');
+      }
       closeIncomeGate();
     } catch (error) {
       setIncomeGateError('אירעה שגיאה באימות הסיסמה');
@@ -418,16 +419,29 @@ const App: React.FC = () => {
       return;
     }
 
-    openIncomeGate();
+    openIncomeGate('income');
   };
 
   if (!currentUser) {
     return <Login onLogin={handleLogin} />;
   }
 
+  const isWeeklyRevenueVisible = isIncomeUnlocked();
+
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
+      case 'dashboard':
+        return (
+          <Dashboard
+            clients={clients}
+            folders={folders}
+            orders={orders}
+            onNavigate={handleNavigate}
+            userRole={currentUser.role}
+            isWeeklyRevenueVisible={isWeeklyRevenueVisible}
+            onRequestWeeklyRevenueReveal={() => openIncomeGate('dashboard_weekly')}
+          />
+        );
       case 'tasks': return (
         <TasksBoard
           tasks={tasks}
@@ -477,18 +491,49 @@ const App: React.FC = () => {
       case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} onCreateTaskFromOrder={openTaskFromOrder} />;
       case 'payments':
         if (currentUser.role === 'viewer') {
-          return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
+          return (
+            <Dashboard
+              clients={clients}
+              folders={folders}
+              orders={orders}
+              onNavigate={handleNavigate}
+              userRole={currentUser.role}
+              isWeeklyRevenueVisible={isWeeklyRevenueVisible}
+              onRequestWeeklyRevenueReveal={() => openIncomeGate('dashboard_weekly')}
+            />
+          );
         }
         return <PaymentsManagement folders={folders} orders={orders} onNavigateToFolder={navigateToFolder} />;
       case 'income':
         if (!isAtLeastAdmin || !isIncomeUnlocked()) {
-          return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
+          return (
+            <Dashboard
+              clients={clients}
+              folders={folders}
+              orders={orders}
+              onNavigate={handleNavigate}
+              userRole={currentUser.role}
+              isWeeklyRevenueVisible={isWeeklyRevenueVisible}
+              onRequestWeeklyRevenueReveal={() => openIncomeGate('dashboard_weekly')}
+            />
+          );
         }
         return <IncomeSummary folders={folders} orders={orders} />;
       case 'inventory': return <Inventory inventory={inventory} setInventory={handleSaveInventory} />;
       case 'data-mgmt': return <DataManagement onImportSuccess={loadAllData} />;
       case 'users': return <UserManagement />;
-      default: return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
+      default:
+        return (
+          <Dashboard
+            clients={clients}
+            folders={folders}
+            orders={orders}
+            onNavigate={handleNavigate}
+            userRole={currentUser.role}
+            isWeeklyRevenueVisible={isWeeklyRevenueVisible}
+            onRequestWeeklyRevenueReveal={() => openIncomeGate('dashboard_weekly')}
+          />
+        );
     }
   };
 
@@ -503,6 +548,9 @@ const App: React.FC = () => {
   const mobileNavItems = visibleNavItems.slice(0, 5);
   const mobileOverflowNavItems = visibleNavItems.slice(5);
   const hasMobileOverflowNav = mobileOverflowNavItems.length > 0;
+  const incomeGateDescription = pendingIncomeGateTarget === 'dashboard_weekly'
+    ? 'כדי לחשוף את ערך העבודה השבועי בלוח הבקרה יש להזין את סיסמת המשתמש שלך.'
+    : 'כדי לצפות בדף ההכנסות יש להזין את סיסמת המשתמש שלך.';
 
   const resetSwipeState = () => {
     touchStartXRef.current = null;
@@ -695,12 +743,12 @@ const App: React.FC = () => {
               dir="rtl"
             >
               <div className="flex items-center gap-3 justify-end">
-                <h3 className="text-xl font-black text-gray-800 font-heebo">אימות כניסה להכנסות</h3>
+                <h3 className="text-xl font-black text-gray-800 font-heebo">אימות סיסמה</h3>
                 <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
                   <Lock size={18} />
                 </div>
               </div>
-              <p className="text-sm text-gray-500 font-bold">כדי לצפות בדף ההכנסות יש להזין את סיסמת המשתמש שלך.</p>
+              <p className="text-sm text-gray-500 font-bold">{incomeGateDescription}</p>
               <div className="space-y-2">
                 <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">סיסמה</label>
                 <input

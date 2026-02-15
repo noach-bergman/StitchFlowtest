@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Client, Order, Folder } from '../types';
-import { TrendingUp, Users, Scissors, Clock, FolderOpen, Package, Wallet, Cloud, ShieldCheck, ListTodo } from 'lucide-react';
+import { TrendingUp, Users, Scissors, Clock, FolderOpen, Package, Wallet, Cloud, ShieldCheck, ListTodo, Eye } from 'lucide-react';
 import { STATUS_COLORS } from '../constants';
 
 interface DashboardProps {
@@ -10,9 +10,19 @@ interface DashboardProps {
   orders: Order[];
   onNavigate: (tab: string) => void;
   userRole?: string;
+  isWeeklyRevenueVisible: boolean;
+  onRequestWeeklyRevenueReveal: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavigate, userRole }) => {
+const Dashboard: React.FC<DashboardProps> = ({
+  clients,
+  folders,
+  orders,
+  onNavigate,
+  userRole,
+  isWeeklyRevenueVisible,
+  onRequestWeeklyRevenueReveal
+}) => {
   const activeOrdersCount = orders.filter(o => {
     const folder = folders.find(f => f.id === o.folderId);
     return folder && !folder.isDelivered;
@@ -50,6 +60,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
 
   const isSuperAdmin = userRole === 'super_admin';
   const isStaffOrAbove = userRole !== 'viewer';
+  const weeklyRevenueDisplay = isWeeklyRevenueVisible ? `$${weeklyRevenue.toLocaleString()}` : '$••••••';
 
   return (
     <div className="space-y-6 md:space-y-8 pb-32 pt-4"> 
@@ -68,7 +79,15 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
       {/* Vibrant Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatCard title="עבודות פעילות" value={activeOrdersCount.toString()} icon={<Scissors className="w-6 h-6" />} color="indigo" />
-        <StatCard title="ערך עבודה שבועי" value={`$${weeklyRevenue.toLocaleString()}`} icon={<TrendingUp className="w-6 h-6" />} color="emerald" />
+        <StatCard
+          title="ערך עבודה שבועי"
+          value={weeklyRevenueDisplay}
+          icon={<TrendingUp className="w-6 h-6" />}
+          color="emerald"
+          actionIcon={<Eye className="w-4 h-4" />}
+          actionLabel={isWeeklyRevenueVisible ? 'נתון גלוי' : 'חשיפת ערך עבודה שבועי'}
+          onActionClick={isWeeklyRevenueVisible ? undefined : onRequestWeeklyRevenueReveal}
+        />
         <StatCard title="סך לקוחות" value={clients.length.toString()} icon={<Users className="w-6 h-6" />} color="violet" />
         <StatCard title="עבודות דחופות" value={urgentOrders.toString()} icon={<Clock className="w-6 h-6" />} color="rose" />
       </div>
@@ -134,7 +153,15 @@ const NavGridButton: React.FC<{label: string, icon: any, color: string, onClick:
   </button>
 );
 
-const StatCard: React.FC<{ title: string, value: string, icon: React.ReactNode, color: string }> = ({ title, value, icon, color }) => {
+const StatCard: React.FC<{
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+  color: string;
+  actionIcon?: React.ReactNode;
+  actionLabel?: string;
+  onActionClick?: () => void;
+}> = ({ title, value, icon, color, actionIcon, actionLabel, onActionClick }) => {
   const colorMap: Record<string, { bg: string, text: string, icon: string, border: string }> = {
     indigo: { bg: 'bg-indigo-50/50', text: 'text-indigo-600', icon: 'bg-indigo-600', border: 'border-indigo-100' },
     emerald: { bg: 'bg-emerald-50/50', text: 'text-emerald-600', icon: 'bg-emerald-600', border: 'border-emerald-100' },
@@ -146,8 +173,31 @@ const StatCard: React.FC<{ title: string, value: string, icon: React.ReactNode, 
   return (
     <div className={`bg-white rounded-[2.2rem] p-6 shadow-sm border ${current.border} flex flex-col justify-between h-40 md:h-36 text-right hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative`}>
       <div className={`absolute -left-4 -bottom-4 w-16 h-16 rounded-full opacity-10 ${current.icon}`}></div>
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${current.icon} group-hover:scale-110 transition-transform mr-auto`}>
-        {icon}
+      <div className="z-10 flex items-start justify-between">
+        {actionIcon ? (
+          onActionClick ? (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onActionClick();
+              }}
+              aria-label={actionLabel || title}
+              className="w-8 h-8 rounded-xl bg-white/80 border border-gray-200 text-gray-500 hover:text-rose-600 hover:border-rose-200 transition-colors flex items-center justify-center"
+            >
+              {actionIcon}
+            </button>
+          ) : (
+            <span className="w-8 h-8 rounded-xl bg-white/80 border border-gray-200 text-gray-400 flex items-center justify-center">
+              {actionIcon}
+            </span>
+          )
+        ) : (
+          <span />
+        )}
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${current.icon} group-hover:scale-110 transition-transform`}>
+          {icon}
+        </div>
       </div>
       <div className="z-10">
         <p className="text-gray-400 text-[10px] font-black uppercase tracking-wider mb-1">{title}</p>
