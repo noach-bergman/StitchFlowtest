@@ -34,10 +34,10 @@ const dashboardVars = {
 } as React.CSSProperties;
 
 const orderStatusPillClass: Record<string, string> = {
-  חדש: 'bg-[#fdf0f6] text-[#E54886] border border-[#e5488624]',
-  מדידות: 'bg-[#fff7ee] text-[#c98d1a] border border-[#c9a22730]',
-  בתפירה: 'bg-[#fff2f7] text-[#cf3c79] border border-[#e5488622]',
-  מוכן: 'bg-[#f2f9f4] text-[#2f8a56] border border-[#2f8a5626]'
+  חדש: 'bg-[#fdf0f6] text-[#E54886] border border-[#e5488640]',
+  מדידות: 'bg-[#fff7ee] text-[#c98d1a] border border-[#c9a22745]',
+  בתפירה: 'bg-[#fff2f7] text-[#cf3c79] border border-[#e5488638]',
+  מוכן: 'bg-[#f2f9f4] text-[#2f8a56] border border-[#2f8a5640]'
 };
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -96,7 +96,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       <div
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          background: 'radial-gradient(circle at 82% 28%, rgba(242,106,163,0.18), transparent 42%), radial-gradient(circle at 14% 72%, rgba(248,200,220,0.22), transparent 44%), linear-gradient(180deg, #fff8fb 0%, var(--ms-bg) 55%, #ffeef5 100%)'
+          background: 'radial-gradient(circle at 82% 28%, rgba(242,106,163,0.24), transparent 42%), radial-gradient(circle at 14% 72%, rgba(248,200,220,0.28), transparent 44%), linear-gradient(180deg, #fff8fb 0%, var(--ms-bg) 55%, #ffeaf3 100%)'
         }}
       />
       <div className="pointer-events-none absolute -top-24 right-2 w-80 h-80 rounded-full bg-[#f8c8dc]/35 blur-3xl -z-10" />
@@ -106,10 +106,10 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Welcome Section */}
       <div
-        className="relative p-8 md:p-10 rounded-[1.85rem] md:rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-7 overflow-hidden border border-[#e5488622]"
+        className="relative p-8 md:p-10 rounded-[1.85rem] md:rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-7 overflow-hidden border border-[#e5488636]"
         style={{
-          background: 'linear-gradient(145deg, #fffdfd 0%, #ffeff5 56%, #fbe1ec 100%)',
-          boxShadow: '0 12px 30px rgba(229,72,134,0.11)'
+          background: 'linear-gradient(145deg, #fffdfd 0%, #ffedf4 52%, #fbdde9 100%)',
+          boxShadow: '0 12px 30px rgba(229,72,134,0.13)'
         }}
       >
         <div className="absolute top-0 left-0 w-64 h-64 bg-[#ffffff96] rounded-full -ml-28 -mt-28 blur-[95px]" />
@@ -132,8 +132,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         <div className="flex gap-4 z-10">
           <button
             onClick={() => onNavigate('folders')}
-            className="px-7 py-3.5 rounded-full font-black text-base transition-all duration-200 border bg-white shadow-[0_8px_22px_rgba(229,72,134,0.14)] hover:bg-[var(--ms-primary)] hover:text-white hover:shadow-[0_10px_24px_rgba(229,72,134,0.2)] active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488633] inline-flex items-center gap-2.5"
-            style={{ borderColor: '#e5488633', color: '#8b3664' }}
+            className="px-7 py-3.5 rounded-full font-black text-base transition-all duration-200 border bg-white shadow-[0_8px_22px_rgba(229,72,134,0.16)] hover:bg-[var(--ms-primary)] hover:text-white hover:shadow-[0_10px_24px_rgba(229,72,134,0.22)] active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488644] inline-flex items-center gap-2.5"
+            style={{ borderColor: '#e548864d', color: '#8b3664' }}
           >
             <Scissors size={17} strokeWidth={1.9} />
             ניהול תיקים
@@ -158,12 +158,12 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <div className="lg:col-span-3 rounded-[1.85rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95" style={{ borderColor: '#e548861c', boxShadow: '0 8px 20px rgba(229,72,134,0.075)' }}>
+        <div className="lg:col-span-3 rounded-[1.85rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95" style={{ borderColor: '#e5488636', boxShadow: '0 8px 20px rgba(229,72,134,0.09)' }}>
           <div className="flex justify-between items-center mb-8">
             <button
               onClick={() => onNavigate('orders')}
-              className="text-xs font-black px-5 py-2.5 rounded-full border transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630] hover:bg-[#E54886] hover:text-white"
-              style={{ color: '#8b3664', backgroundColor: '#fff8fb', borderColor: '#e5488622' }}
+              className="text-xs font-black px-5 py-2.5 rounded-full border transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488640] hover:bg-[#E54886] hover:text-white"
+              style={{ color: '#8b3664', backgroundColor: '#fff8fb', borderColor: '#e5488642' }}
             >
               הצג את כל ההזמנות
             </button>
@@ -183,8 +183,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                    className="p-5 md:p-6 rounded-[1.45rem] md:rounded-[1.55rem] border flex justify-between items-center cursor-pointer group transition-all duration-200 hover:-translate-y-0.5"
                    style={{
                      backgroundColor: '#fffbfd',
-                     borderColor: '#e5488617',
-                     boxShadow: '0 5px 13px rgba(229,72,134,0.045)'
+                     borderColor: '#e5488638',
+                     boxShadow: '0 5px 13px rgba(229,72,134,0.055)'
                    }}
                  >
                     <div className="flex items-center gap-4">
@@ -209,7 +209,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Full Navigation Grid for Mobile */}
-      <div className="rounded-[1.85rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95" style={{ borderColor: '#e548861c', boxShadow: '0 8px 20px rgba(229,72,134,0.075)' }}>
+      <div className="rounded-[1.85rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95" style={{ borderColor: '#e5488636', boxShadow: '0 8px 20px rgba(229,72,134,0.09)' }}>
          <h3 className="text-xl font-black mb-6" style={{ color: 'var(--ms-text)' }}>כל הכלים והניהול</h3>
          <div className="grid grid-cols-3 gap-4">
             <NavGridButton label="משימות" icon={<ListTodo />} onClick={() => onNavigate('tasks')} />
@@ -232,12 +232,12 @@ const NavGridButton: React.FC<{label: string, icon: any, onClick: () => void}> =
     className="flex flex-col items-center gap-2 group active:scale-95 transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e548862b] rounded-2xl"
   >
     <div
-      className="w-full aspect-square rounded-[1.4rem] flex items-center justify-center border transition-all duration-200 group-hover:-translate-y-0.5"
+      className="w-full aspect-square rounded-[1.4rem] flex items-center justify-center border transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-[#e5488660]"
       style={{
         backgroundColor: '#fff9fc',
-        borderColor: '#e548861e',
+        borderColor: '#e5488640',
         color: '#E54886',
-        boxShadow: '0 5px 14px rgba(229,72,134,0.08)'
+        boxShadow: '0 5px 14px rgba(229,72,134,0.1)'
       }}
     >
        {React.cloneElement(icon, { size: 27, strokeWidth: 1.8 })}
@@ -258,8 +258,8 @@ const StatCard: React.FC<{
     <div
       className="bg-white rounded-[1.5rem] md:rounded-[1.7rem] p-5 md:p-6 border flex flex-col justify-between h-40 md:h-36 text-right transition-all duration-200 hover:-translate-y-0.5 group overflow-hidden relative"
       style={{
-        borderColor: '#e5488620',
-        boxShadow: '0 7px 18px rgba(229,72,134,0.07)'
+        borderColor: '#e548863d',
+        boxShadow: '0 7px 18px rgba(229,72,134,0.095)'
       }}
     >
       <div className="absolute -bottom-7 -left-7 w-20 h-20 rounded-full bg-[#f7dce8]/55" />
@@ -273,13 +273,13 @@ const StatCard: React.FC<{
                 onActionClick();
               }}
               aria-label={actionLabel || title}
-              className="w-8 h-8 rounded-xl border transition-colors duration-200 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e548862b] hover:text-[#E54886]"
-              style={{ backgroundColor: '#fff9fc', borderColor: '#e5488620', color: '#7A7A7A' }}
+              className="w-8 h-8 rounded-xl border transition-colors duration-200 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488640] hover:text-[#E54886]"
+              style={{ backgroundColor: '#fff9fc', borderColor: '#e5488638', color: '#7A7A7A' }}
             >
               {actionIcon}
             </button>
           ) : (
-            <span className="w-8 h-8 rounded-xl border flex items-center justify-center" style={{ backgroundColor: '#fff9fc', borderColor: '#e5488620', color: '#9ca3af' }}>
+            <span className="w-8 h-8 rounded-xl border flex items-center justify-center" style={{ backgroundColor: '#fff9fc', borderColor: '#e5488638', color: '#9ca3af' }}>
               {actionIcon}
             </span>
           )
@@ -291,8 +291,8 @@ const StatCard: React.FC<{
           style={{
             backgroundColor: '#fbe7f0',
             color: '#E54886',
-            border: '1px solid rgba(229,72,134,0.16)',
-            boxShadow: '0 5px 12px rgba(229,72,134,0.09)'
+            border: '1px solid rgba(229,72,134,0.3)',
+            boxShadow: '0 5px 12px rgba(229,72,134,0.11)'
           }}
         >
           {icon}
