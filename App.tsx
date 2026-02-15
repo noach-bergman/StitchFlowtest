@@ -865,10 +865,7 @@ const App: React.FC = () => {
                   : `active:bg-gray-50 ${activeTab === item.id ? 'text-rose-600' : 'text-gray-400'}`
               }`}
             >
-              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'}`}>
-                {isDashboardActive && activeTab === item.id && (
-                  <span className="absolute -inset-2 rounded-full bg-[#fbe7f1] border border-[#e5488622]" />
-                )}
+              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'} ${isDashboardActive && activeTab === item.id ? 'rounded-full bg-[#fbe7f1] border border-[#e5488622] p-1.5' : ''}`}>
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 28 })}
                 {item.id === 'tasks' && taskAlertCount > 0 && (
                   <span className={`absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-white text-[9px] font-black ${isDashboardActive ? 'bg-[#E54886]' : 'bg-rose-600'}`}>
