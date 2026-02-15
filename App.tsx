@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Cloud, CloudOff, RefreshCw, Smartphone, LogOut, User as UserIcon, QrCode } from 'lucide-react';
+import { Cloud, CloudOff, RefreshCw, Smartphone, LogOut, User as UserIcon, QrCode, Lock, AlertCircle } from 'lucide-react';
 import { NAV_ITEMS } from './constants';
 import Dashboard from './components/Dashboard';
 import ClientsList from './components/ClientsList';
@@ -30,6 +30,8 @@ const CLOSE_THRESHOLD_PX = 40;
 const DRAWER_TOUCH_ZONE_PX = 320;
 const GESTURE_LOCK_THRESHOLD_PX = 12;
 const MOBILE_BREAKPOINT_PX = 768;
+const INCOME_UNLOCK_SESSION_KEY = 'stitchflow_income_unlock_until';
+const INCOME_UNLOCK_TTL_MS = 15 * 60 * 1000;
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -45,6 +47,10 @@ const App: React.FC = () => {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [taskPrefill, setTaskPrefill] = useState<TaskPrefill | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isIncomeGateOpen, setIsIncomeGateOpen] = useState(false);
+  const [incomeGatePassword, setIncomeGatePassword] = useState('');
+  const [incomeGateError, setIncomeGateError] = useState('');
+  const [pendingTabAfterIncomeGate, setPendingTabAfterIncomeGate] = useState<'income' | null>(null);
   
   // New state for deep-linking/navigation
   const [preSelectedFolderId, setPreSelectedFolderId] = useState<string | null>(null);
@@ -165,6 +171,11 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setCurrentUser(null);
     localStorage.removeItem('stitchflow_user');
+    sessionStorage.removeItem(INCOME_UNLOCK_SESSION_KEY);
+    setIsIncomeGateOpen(false);
+    setIncomeGatePassword('');
+    setIncomeGateError('');
+    setPendingTabAfterIncomeGate(null);
   };
 
   const handleSaveOrders = async (newOrders: Order[]) => {
@@ -338,13 +349,85 @@ const App: React.FC = () => {
     setActiveTab('tasks');
   };
 
+  const isIncomeUnlocked = (): boolean => {
+    const rawValue = sessionStorage.getItem(INCOME_UNLOCK_SESSION_KEY);
+    if (!rawValue) return false;
+
+    const unlockUntil = Number(rawValue);
+    if (!Number.isFinite(unlockUntil) || unlockUntil <= Date.now()) {
+      sessionStorage.removeItem(INCOME_UNLOCK_SESSION_KEY);
+      return false;
+    }
+
+    return true;
+  };
+
+  const openIncomeGate = () => {
+    setPendingTabAfterIncomeGate('income');
+    setIncomeGatePassword('');
+    setIncomeGateError('');
+    setIsIncomeGateOpen(true);
+  };
+
+  const closeIncomeGate = () => {
+    setIsIncomeGateOpen(false);
+    setIncomeGatePassword('');
+    setIncomeGateError('');
+    setPendingTabAfterIncomeGate(null);
+  };
+
+  const submitIncomeGatePassword = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!currentUser) return;
+
+    const candidatePassword = incomeGatePassword.trim();
+    if (!candidatePassword) {
+      setIncomeGateError('יש להזין סיסמה');
+      return;
+    }
+
+    setIncomeGateError('');
+    try {
+      const verifiedUser = await dataService.login(currentUser.username, candidatePassword);
+      if (!verifiedUser) {
+        setIncomeGateError('הסיסמה שגויה');
+        return;
+      }
+
+      sessionStorage.setItem(INCOME_UNLOCK_SESSION_KEY, String(Date.now() + INCOME_UNLOCK_TTL_MS));
+      const nextTab = pendingTabAfterIncomeGate || 'income';
+      setActiveTab(nextTab);
+      closeIncomeGate();
+    } catch (error) {
+      setIncomeGateError('אירעה שגיאה באימות הסיסמה');
+    }
+  };
+
+  const handleNavigate = (tabId: string) => {
+    if (tabId !== 'income') {
+      setActiveTab(tabId);
+      return;
+    }
+
+    if (!isAtLeastAdmin) {
+      return;
+    }
+
+    if (isIncomeUnlocked()) {
+      setActiveTab('income');
+      return;
+    }
+
+    openIncomeGate();
+  };
+
   if (!currentUser) {
     return <Login onLogin={handleLogin} />;
   }
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={setActiveTab} userRole={currentUser.role} />;
+      case 'dashboard': return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
       case 'tasks': return (
         <TasksBoard
           tasks={tasks}
@@ -394,14 +477,18 @@ const App: React.FC = () => {
       case 'orders': return <OrdersList orders={orders} clients={clients} folders={folders} setOrders={handleSaveOrders} onDeleteOrder={handleDeleteOrder} userRole={currentUser.role} onCreateTaskFromOrder={openTaskFromOrder} />;
       case 'payments':
         if (currentUser.role === 'viewer') {
-          return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={setActiveTab} userRole={currentUser.role} />;
+          return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
         }
         return <PaymentsManagement folders={folders} orders={orders} onNavigateToFolder={navigateToFolder} />;
-      case 'income': return <IncomeSummary folders={folders} orders={orders} />;
+      case 'income':
+        if (!isAtLeastAdmin || !isIncomeUnlocked()) {
+          return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
+        }
+        return <IncomeSummary folders={folders} orders={orders} />;
       case 'inventory': return <Inventory inventory={inventory} setInventory={handleSaveInventory} />;
       case 'data-mgmt': return <DataManagement onImportSuccess={loadAllData} />;
       case 'users': return <UserManagement />;
-      default: return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={setActiveTab} userRole={currentUser.role} />;
+      default: return <Dashboard clients={clients} folders={folders} orders={orders} onNavigate={handleNavigate} userRole={currentUser.role} />;
     }
   };
 
@@ -514,7 +601,7 @@ const App: React.FC = () => {
           {visibleNavItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleNavigate(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === item.id
                   ? 'bg-rose-50 text-rose-600 font-semibold border border-rose-100'
@@ -599,6 +686,50 @@ const App: React.FC = () => {
           />
         )}
 
+        {isIncomeGateOpen && (
+          <div className="fixed inset-0 z-[70] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeIncomeGate}>
+            <form
+              onSubmit={submitIncomeGatePassword}
+              onClick={(event) => event.stopPropagation()}
+              className="w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-rose-100 p-6 space-y-5 text-right"
+              dir="rtl"
+            >
+              <div className="flex items-center gap-3 justify-end">
+                <h3 className="text-xl font-black text-gray-800 font-heebo">אימות כניסה להכנסות</h3>
+                <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                  <Lock size={18} />
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 font-bold">כדי לצפות בדף ההכנסות יש להזין את סיסמת המשתמש שלך.</p>
+              <div className="space-y-2">
+                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">סיסמה</label>
+                <input
+                  type="password"
+                  value={incomeGatePassword}
+                  onChange={(event) => setIncomeGatePassword(event.target.value)}
+                  autoFocus
+                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-4 outline-none focus:ring-4 focus:ring-rose-200/50 font-bold text-gray-700"
+                  placeholder="הזן סיסמה"
+                />
+              </div>
+              {incomeGateError && (
+                <div className="flex items-center gap-2 justify-end bg-rose-50 border border-rose-100 text-rose-600 rounded-2xl px-4 py-3 text-sm font-bold">
+                  <span>{incomeGateError}</span>
+                  <AlertCircle size={16} />
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button type="button" onClick={closeIncomeGate} className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-600 font-black hover:bg-gray-200 transition-colors">
+                  ביטול
+                </button>
+                <button type="submit" className="flex-1 py-3 rounded-2xl bg-rose-600 text-white font-black hover:bg-rose-700 transition-colors">
+                  כניסה
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
         {/* Mobile Drawer Handle */}
         {hasMobileOverflowNav && (
           <div
@@ -641,7 +772,7 @@ const App: React.FC = () => {
                 <button
                   key={item.id}
                   onClick={() => {
-                    setActiveTab(item.id);
+                    handleNavigate(item.id);
                     setIsMobileDrawerOpen(false);
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
@@ -669,7 +800,7 @@ const App: React.FC = () => {
           {mobileNavItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => handleNavigate(item.id)}
               className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-3 h-full transition-all active:bg-gray-50 ${
                 activeTab === item.id ? 'text-rose-600' : 'text-gray-400'
               }`}

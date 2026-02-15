@@ -38,18 +38,6 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
       return targetDate >= startOfWeek.getTime() && targetDate <= endOfWeek.getTime();
     })
     .reduce((acc, curr) => acc + (curr.price || 0), 0);
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-  const monthlyRevenue = orders
-    .filter(o => {
-      if (!(o.price > 0)) return false;
-      const targetDate = o.readyAt || o.createdAt;
-      return targetDate >= startOfMonth.getTime() && targetDate <= endOfMonth.getTime();
-    })
-    .reduce((acc, curr) => acc + (curr.price || 0), 0);
-  const totalLifetimeRevenue = orders
-    .filter(o => o.price > 0)
-    .reduce((acc, curr) => acc + (curr.price || 0), 0);
 
   const urgentOrders = orders.filter(o => {
     const folder = folders.find(f => f.id === o.folderId);
@@ -60,7 +48,6 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
     return deadlineDate.getTime() <= threeDaysFromNow;
   }).length;
 
-  const isAtLeastAdmin = userRole === 'admin' || userRole === 'super_admin';
   const isSuperAdmin = userRole === 'super_admin';
   const isStaffOrAbove = userRole !== 'viewer';
 
@@ -75,9 +62,6 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
         </div>
         <div className="flex gap-4 z-10">
           <button onClick={() => onNavigate('folders')} className="bg-white/10 hover:bg-white/20 backdrop-blur-md px-6 py-3 rounded-2xl font-black text-sm transition-all border border-white/10">ניהול תיקים</button>
-          {isAtLeastAdmin && (
-            <button onClick={() => onNavigate('income')} className="bg-emerald-600 hover:bg-emerald-700 px-6 py-3 rounded-2xl font-black text-sm transition-all shadow-xl shadow-emerald-600/30">סיכום הכנסות</button>
-          )}
         </div>
       </div>
 
@@ -91,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <div className={`${isAtLeastAdmin ? 'lg:col-span-2' : 'lg:col-span-3'} bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 text-right`}>
+        <div className="lg:col-span-3 bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 text-right">
           <div className="flex justify-between items-center mb-8">
             <button onClick={() => onNavigate('orders')} className="text-xs font-black text-rose-600 bg-rose-50 px-5 py-2 rounded-full hover:bg-rose-100 transition-colors">הצג את כל ההזמנות</button>
             <h3 className="text-xl font-black text-gray-800">פעילות אחרונה</h3>
@@ -121,27 +105,6 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
              })}
           </div>
         </div>
-
-        {isAtLeastAdmin && (
-          <div 
-            onClick={() => onNavigate('income')}
-            className="bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-600 rounded-[2.5rem] p-8 text-white shadow-2xl relative cursor-pointer overflow-hidden group h-full flex flex-col justify-between"
-          >
-            <div className="relative z-10 text-right">
-              <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6 mr-auto border border-white/20 shadow-lg group-hover:scale-110 transition-transform">
-                <Wallet className="text-white w-8 h-8" />
-              </div>
-              <h4 className="font-black text-2xl mb-2 font-heebo">סיכום הכנסות</h4>
-              <p className="text-sm opacity-95 leading-relaxed font-bold">סקירה מהירה של הכנסות החודש וכל התקופות.</p>
-              <div className="mt-6 space-y-1">
-                <p className="text-[11px] font-black uppercase tracking-widest text-emerald-100">החודש</p>
-                <p className="text-4xl font-black font-heebo">${monthlyRevenue.toLocaleString()}</p>
-                <p className="text-[11px] font-black uppercase tracking-widest text-emerald-100 mt-3">כל הזמנים</p>
-                <p className="text-2xl font-black font-heebo">${totalLifetimeRevenue.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Full Navigation Grid for Mobile */}
@@ -154,7 +117,6 @@ const Dashboard: React.FC<DashboardProps> = ({ clients, folders, orders, onNavig
             <NavGridButton label="הזמנות" icon={<Scissors />} color="bg-indigo-50 text-indigo-600 border-indigo-100" onClick={() => onNavigate('orders')} />
             {isStaffOrAbove && <NavGridButton label="תשלומים" icon={<Wallet />} color="bg-emerald-50 text-emerald-600 border-emerald-100" onClick={() => onNavigate('payments')} />}
             <NavGridButton label="מלאי" icon={<Package />} color="bg-amber-50 text-amber-600 border-amber-100" onClick={() => onNavigate('inventory')} />
-            {isAtLeastAdmin && <NavGridButton label="הכנסות" icon={<Wallet />} color="bg-emerald-50 text-emerald-600 border-emerald-100" onClick={() => onNavigate('income')} />}
             {isSuperAdmin && <NavGridButton label="ענן" icon={<Cloud />} color="bg-slate-100 text-slate-600 border-slate-200" onClick={() => onNavigate('data-mgmt')} />}
             {isSuperAdmin && <NavGridButton label="צוות" icon={<ShieldCheck />} color="bg-violet-50 text-violet-600 border-violet-100" onClick={() => onNavigate('users')} />}
          </div>
