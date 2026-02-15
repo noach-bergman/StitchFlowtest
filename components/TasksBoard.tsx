@@ -2,13 +2,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   CalendarClock,
+  CheckCircle2,
   Edit2,
   GripVertical,
   ListFilter,
   ListTodo,
   Plus,
+  ShieldAlert,
   Trash2,
-  UserCircle2
+  UserCircle2,
+  X
 } from 'lucide-react';
 import { Client, Folder, Order, Task, TaskPriority, TaskStatus, User } from '../types';
 import { dateInputToDueAt, dueAtToDateInput, formatTaskDueDate, getTaskSummary, isTaskDueToday, isTaskOverdue } from '../services/taskUtils';
@@ -110,6 +113,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
   const [boardError, setBoardError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'הכל'>('הכל');
@@ -322,13 +326,40 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
     }
   };
 
-  const deleteTask = async (task: Task) => {
-    if (!isAdmin || !window.confirm(`למחוק את המשימה "${task.title}"?`)) return;
-    const nextTasks = tasks.filter((item) => item.id !== task.id);
+  const markTaskCompleted = async (task: Task) => {
+    if (!canEditTask(task) || task.status === 'הושלם') return;
+    const now = Date.now();
+    const nextTasks = tasks.map((item) => {
+      if (item.id !== task.id) return item;
+      return {
+        ...item,
+        status: 'הושלם' as TaskStatus,
+        updatedAt: now,
+        completedAt: item.completedAt || now,
+      };
+    });
     try {
       await saveTaskList(nextTasks);
     } catch {
       // Error handled in saveTaskList
+    }
+  };
+
+  const requestDeleteTask = (task: Task) => {
+    if (!isAdmin) return;
+    setTaskToDelete(task);
+  };
+
+  const confirmDeleteTask = async () => {
+    if (!isAdmin || !taskToDelete) return;
+    const targetId = taskToDelete.id;
+    const nextTasks = tasks.filter((item) => item.id !== targetId);
+    try {
+      await saveTaskList(nextTasks);
+    } catch {
+      // Error handled in saveTaskList
+    } finally {
+      setTaskToDelete(null);
     }
   };
 
@@ -485,10 +516,21 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex gap-1">
+                        {canEditTask(task) && task.status !== 'הושלם' && (
+                          <button
+                            onClick={() => markTaskCompleted(task)}
+                            disabled={isSaving}
+                            className="p-2 rounded-lg bg-emerald-50 text-emerald-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="סמן כהושלמה"
+                          >
+                            <CheckCircle2 size={14} />
+                          </button>
+                        )}
                         {canEditTask(task) && (
                           <button
                             onClick={() => openEditModal(task)}
-                            className="p-2 rounded-lg bg-indigo-50 text-indigo-600 active:scale-95"
+                            disabled={isSaving}
+                            className="p-2 rounded-lg bg-indigo-50 text-indigo-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="עריכת משימה"
                           >
                             <Edit2 size={14} />
@@ -496,8 +538,9 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                         )}
                         {isAdmin && (
                           <button
-                            onClick={() => deleteTask(task)}
-                            className="p-2 rounded-lg bg-rose-50 text-rose-600 active:scale-95"
+                            onClick={() => requestDeleteTask(task)}
+                            disabled={isSaving}
+                            className="p-2 rounded-lg bg-rose-50 text-rose-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="מחיקת משימה"
                           >
                             <Trash2 size={14} />
@@ -701,6 +744,44 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {taskToDelete && (
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="relative bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in duration-200">
+            <button
+              onClick={() => setTaskToDelete(null)}
+              className="absolute mt-[-12px] mr-[-12px] right-8 top-8 p-2 rounded-full text-gray-300 hover:text-gray-500 transition-colors"
+              aria-label="סגור"
+            >
+              <X size={18} />
+            </button>
+            <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6">
+              <ShieldAlert size={40} className="animate-pulse" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-800 mb-2">מחיקת משימה</h3>
+            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+              האם למחוק את <b>{taskToDelete.title}</b>?<br />
+              <span className="text-rose-600 font-bold">פעולה זו היא סופית.</span>
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setTaskToDelete(null)}
+                disabled={isSaving}
+                className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all disabled:opacity-50"
+              >
+                ביטול
+              </button>
+              <button
+                onClick={confirmDeleteTask}
+                disabled={isSaving}
+                className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all disabled:opacity-50"
+              >
+                {isSaving ? 'מוחק...' : 'מחק משימה'}
+              </button>
+            </div>
           </div>
         </div>
       )}
