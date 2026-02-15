@@ -548,6 +548,7 @@ const App: React.FC = () => {
   const mobileNavItems = visibleNavItems.slice(0, 5);
   const mobileOverflowNavItems = visibleNavItems.slice(5);
   const hasMobileOverflowNav = mobileOverflowNavItems.length > 0;
+  const isDashboardActive = activeTab === 'dashboard';
   const incomeGateDescription = pendingIncomeGateTarget === 'dashboard_weekly'
     ? 'כדי לחשוף את ערך העבודה השבועי בלוח הבקרה יש להזין את סיסמת המשתמש שלך.'
     : 'כדי לצפות בדף ההכנסות יש להזין את סיסמת המשתמש שלך.';
@@ -847,19 +848,27 @@ const App: React.FC = () => {
         )}
 
         {/* Mobile Navbar */}
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-2xl border-t border-gray-100 flex justify-around items-center z-40 h-24 px-1 pb-safe shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+        <nav
+          className={`md:hidden fixed bottom-0 left-0 right-0 flex justify-around items-center z-40 h-24 px-1 pb-safe backdrop-blur-2xl transition-colors duration-200 ${
+            isDashboardActive
+              ? 'bg-[#fff8fb]/95 border-t border-[#e5488630] shadow-[0_-8px_26px_rgba(229,72,134,0.14)]'
+              : 'bg-white/95 border-t border-gray-100 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]'
+          }`}
+        >
           {mobileNavItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleNavigate(item.id)}
-              className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-3 h-full transition-all active:bg-gray-50 ${
-                activeTab === item.id ? 'text-rose-600' : 'text-gray-400'
+              className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-3 h-full transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630] ${
+                isDashboardActive
+                  ? `active:bg-[#fbe8f1] ${activeTab === item.id ? 'text-[#E54886]' : 'text-[#7A7A7A]'}`
+                  : `active:bg-gray-50 ${activeTab === item.id ? 'text-rose-600' : 'text-gray-400'}`
               }`}
             >
               <div className={`relative ${activeTab === item.id ? 'scale-125' : 'scale-110'} transition-transform`}>
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 28 })}
                 {item.id === 'tasks' && taskAlertCount > 0 && (
-                  <span className="absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-rose-600 text-white text-[9px] font-black">
+                  <span className={`absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-white text-[9px] font-black ${isDashboardActive ? 'bg-[#E54886]' : 'bg-rose-600'}`}>
                     {taskAlertCount}
                   </span>
                 )}
@@ -873,10 +882,16 @@ const App: React.FC = () => {
             onClick={() => setIsScannerOpen(true)}
             className="flex flex-col items-center justify-center flex-1 -mt-14"
           >
-             <div className="w-16 h-16 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full flex items-center justify-center text-white shadow-2xl border-4 border-white mb-1 active:scale-90 transition-all">
-                <QrCode className="w-8 h-8 text-rose-400" />
+             <div
+              className={`w-16 h-16 rounded-full flex items-center justify-center text-white border-4 border-white mb-1 active:scale-90 transition-all duration-200 ${
+                isDashboardActive
+                  ? 'bg-gradient-to-br from-[#F26AA3] to-[#E54886] shadow-[0_12px_26px_rgba(229,72,134,0.34)]'
+                  : 'bg-gradient-to-br from-slate-900 to-slate-700 shadow-2xl'
+              }`}
+             >
+                <QrCode className={`w-8 h-8 ${isDashboardActive ? 'text-white' : 'text-rose-400'}`} />
              </div>
-             <span className="text-[11px] font-black text-slate-700 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">סריקת QR</span>
+             <span className={`text-[11px] font-black px-3 py-1 rounded-full shadow-sm border ${isDashboardActive ? 'text-[#7A7A7A] bg-[#fff8fb] border-[#e5488620]' : 'text-slate-700 bg-white border-slate-100'}`}>סריקת QR</span>
           </button>
         </nav>
       </div>
