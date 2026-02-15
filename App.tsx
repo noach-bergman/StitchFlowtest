@@ -31,7 +31,7 @@ const DRAWER_TOUCH_ZONE_PX = 320;
 const GESTURE_LOCK_THRESHOLD_PX = 12;
 const MOBILE_BREAKPOINT_PX = 768;
 const INCOME_UNLOCK_SESSION_KEY = 'stitchflow_income_unlock_until';
-const INCOME_UNLOCK_TTL_MS = 15 * 60 * 1000;
+const INCOME_UNLOCK_TTL_MS = 3 * 60 * 1000;
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
