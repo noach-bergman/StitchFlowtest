@@ -22,13 +22,104 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600;700&family=Heebo:wght@300;500;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --ms-primary: #E54886;
+        --ms-secondary: #F26AA3;
+        --ms-soft: #F8C8DC;
+        --ms-bg: #FFF4F8;
+        --ms-surface: #FFFFFF;
+        --ms-text: #2B2B2B;
+        --ms-muted: #7A7A7A;
+        --ms-accent: #C9A227;
+        --ms-border: rgba(229, 72, 134, 0.26);
+        --ms-border-strong: rgba(229, 72, 134, 0.38);
+        --ms-shadow-soft: 0 8px 20px rgba(229, 72, 134, 0.12);
+        --ms-shadow-md: 0 12px 28px rgba(229, 72, 134, 0.17);
+      }
+
+      html {
+        background: linear-gradient(180deg, #fff4f8 0%, #ffe7f2 52%, #ffdceb 100%);
+      }
+
       body {
         font-family: 'Assistant', sans-serif;
-        background-color: #f8f9fa;
+        color: var(--ms-text);
+        background:
+          radial-gradient(circle at 84% 22%, rgba(242, 106, 163, 0.36), transparent 44%),
+          radial-gradient(circle at 15% 78%, rgba(248, 200, 220, 0.5), transparent 46%),
+          linear-gradient(180deg, #fff4f8 0%, #ffe7f2 52%, #ffdceb 100%);
         -webkit-tap-highlight-color: transparent;
         height: 100%;
       }
+
+      ::selection {
+        background: rgba(229, 72, 134, 0.22);
+      }
+
+      .font-playfair {
+        font-family: 'Playfair Display', serif;
+      }
       .font-heebo { font-family: 'Heebo', sans-serif; }
+
+      .malki-theme .bg-white {
+        background-color: #fffdfd;
+      }
+
+      .malki-theme .bg-gray-50,
+      .malki-theme .bg-slate-50 {
+        background-color: #fff3f9;
+      }
+
+      .malki-theme .bg-slate-100,
+      .malki-theme .bg-gray-100 {
+        background-color: #fee9f3;
+      }
+
+      .malki-theme .border-gray-100,
+      .malki-theme .border-slate-100 {
+        border-color: var(--ms-border);
+      }
+
+      .malki-theme .border-gray-200,
+      .malki-theme .border-slate-200 {
+        border-color: var(--ms-border-strong);
+      }
+
+      .malki-theme .text-gray-800,
+      .malki-theme .text-slate-800,
+      .malki-theme .text-slate-900 {
+        color: var(--ms-text);
+      }
+
+      .malki-theme .text-gray-500,
+      .malki-theme .text-gray-400,
+      .malki-theme .text-slate-400,
+      .malki-theme .text-slate-500,
+      .malki-theme .text-slate-600 {
+        color: var(--ms-muted);
+      }
+
+      .malki-theme .shadow-sm {
+        box-shadow: var(--ms-shadow-soft);
+      }
+
+      .malki-theme .shadow-lg,
+      .malki-theme .shadow-xl,
+      .malki-theme .shadow-2xl {
+        box-shadow: var(--ms-shadow-md);
+      }
+
+      .malki-theme .bg-slate-900 {
+        background: linear-gradient(145deg, #823159 0%, #672548 100%);
+      }
+
+      .malki-theme button:focus-visible,
+      .malki-theme input:focus-visible,
+      .malki-theme textarea:focus-visible,
+      .malki-theme select:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 4px rgba(229, 72, 134, 0.24);
+      }
       
       @media (min-width: 768px) {
         html, body { overflow: hidden; }

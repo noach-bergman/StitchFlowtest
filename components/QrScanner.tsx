@@ -161,7 +161,7 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScan, onClose }) => {
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/95 backdrop-blur-xl animate-in fade-in duration-300 no-print">
       <div className="bg-white rounded-[3rem] w-full max-w-lg overflow-hidden shadow-2xl relative border border-white/20">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-900 text-white">
+        <div className="p-6 border-b border-rose-100 flex justify-between items-center bg-[#6f2f54] text-white">
           <div className="flex items-center gap-2">
             <Camera size={20} className="text-rose-500" />
             <h3 className="text-xl font-black font-heebo">סריקת פריט</h3>
@@ -171,13 +171,13 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScan, onClose }) => {
           </button>
         </div>
         
-        <div className="p-6 min-h-[300px] flex flex-col items-center justify-center bg-slate-900 relative">
+        <div className="p-6 min-h-[300px] flex flex-col items-center justify-center bg-[#6f2f54] relative">
           {error ? (
             <div className="text-center p-8 space-y-4 bg-white rounded-[2rem] w-full animate-in zoom-in">
               <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto">
                 <AlertCircle size={32} />
               </div>
-              <p className="text-gray-800 font-bold">{error}</p>
+              <p className="text-[#2B2B2B] font-bold">{error}</p>
               <button 
                 onClick={() => window.location.reload()}
                 className="bg-rose-600 text-white px-8 py-3 rounded-xl font-black text-sm active:scale-95 transition-all"
@@ -188,9 +188,9 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScan, onClose }) => {
           ) : (
             <div className="relative w-full aspect-square max-w-[350px] overflow-hidden rounded-[2.5rem] border-4 border-slate-800 shadow-inner bg-black">
               {isInitializing && (
-                <div className="absolute inset-0 z-30 bg-slate-900 flex flex-col items-center justify-center gap-4">
+                <div className="absolute inset-0 z-30 bg-[#6f2f54] flex flex-col items-center justify-center gap-4">
                   <RefreshCw className="animate-spin text-rose-500" size={32} />
-                  <p className="text-sm font-bold text-slate-400">מפעיל מצלמה אחורית...</p>
+                  <p className="text-sm font-bold text-rose-100/90">מפעיל מצלמה אחורית...</p>
                 </div>
               )}
               
@@ -212,14 +212,14 @@ const QrScanner: React.FC<QrScannerProps> = ({ onScan, onClose }) => {
             </div>
           )}
           {!error && !isInitializing && (
-            <p className="mt-6 text-center text-sm font-bold text-slate-400 animate-pulse">כווני את המצלמה לברקוד</p>
+            <p className="mt-6 text-center text-sm font-bold text-rose-100/90 animate-pulse">כווני את המצלמה לברקוד</p>
           )}
         </div>
         
-        <div className="p-6 bg-slate-50 border-t border-gray-100">
+        <div className="p-6 bg-[#fff1f8] border-t border-rose-100">
           <button 
             onClick={onClose}
-            className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm active:scale-95 transition-all shadow-lg"
+            className="w-full py-4 bg-[#6f2f54] text-white rounded-2xl font-black text-sm active:scale-95 transition-all shadow-lg"
           >
             סגור סורק
           </button>

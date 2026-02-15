@@ -32,12 +32,12 @@ export const NAV_ITEMS = [
 ];
 
 export const STATUS_COLORS: Record<string, string> = {
-  'חדש': 'bg-blue-100 text-blue-700 border-blue-200',
-  'מדידות': 'bg-violet-100 text-violet-700 border-violet-200',
+  'חדש': 'bg-rose-50 text-rose-700 border-rose-200',
+  'מדידות': 'bg-[#fff1f7] text-[#b03d72] border-[#f2b7d2]',
   'בתפירה': 'bg-amber-100 text-amber-700 border-amber-200',
-  'מדידה_שנייה': 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  'מדידה_שנייה': 'bg-[#ffe8f2] text-[#a93a6b] border-[#f0aeca]',
   'מוכן': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  'נמסר': 'bg-slate-100 text-slate-500 border-slate-200',
+  'נמסר': 'bg-[#fff3f8] text-[#8e5d75] border-[#f1c1d8]',
 };
 
 export const STATUS_ICONS: Record<string, React.ReactNode> = {

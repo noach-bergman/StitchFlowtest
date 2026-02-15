@@ -78,22 +78,22 @@ const UserManagement: React.FC = () => {
   };
 
   const roleColors: Record<UserRole, string> = {
-    super_admin: 'bg-slate-900 text-white border-slate-800',
+    super_admin: 'bg-[#6f2f54] text-white border-slate-800',
     admin: 'bg-rose-100 text-rose-700 border-rose-200',
     staff: 'bg-blue-100 text-blue-700 border-blue-200',
-    viewer: 'bg-gray-100 text-gray-700 border-gray-200'
+    viewer: 'bg-gray-100 text-gray-700 border-rose-200'
   };
 
   return (
     <div className="space-y-6 text-right font-assistant">
-      <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-rose-100 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="text-right">
-          <h3 className="text-2xl font-black text-gray-800 font-heebo">ניהול צוות והרשאות על</h3>
-          <p className="text-sm text-gray-400">רק מנהל על יכול לצפות במסך זה ולהגדיר גישות</p>
+          <h3 className="text-2xl font-black text-[#2B2B2B] font-heebo">ניהול צוות והרשאות על</h3>
+          <p className="text-sm text-[#7A7A7A]">רק מנהל על יכול לצפות במסך זה ולהגדיר גישות</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-slate-200 hover:bg-black transition-all active:scale-95"
+          className="flex items-center gap-2 bg-[#6f2f54] text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-slate-200 hover:bg-black transition-all active:scale-95"
         >
           <UserPlus size={18} />
           הוסף משתמש חדש
@@ -101,14 +101,14 @@ const UserManagement: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-20 gap-4 text-[#7A7A7A]">
           <RefreshCw className="animate-spin" size={32} />
           <p className="font-bold">טוען רשימת משתמשים...</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Default Admin Card (Static) */}
-          <div className="bg-slate-900 border border-slate-800 rounded-[2rem] p-6 relative overflow-hidden group shadow-2xl">
+          <div className="bg-[#6f2f54] border border-slate-800 rounded-[2rem] p-6 relative overflow-hidden group shadow-2xl">
              <div className="absolute top-0 right-0 p-4 opacity-10">
                 <Star className="text-white w-20 h-20 rotate-12" />
              </div>
@@ -126,7 +126,7 @@ const UserManagement: React.FC = () => {
 
           {/* Dynamic Users */}
           {users.map(user => (
-            <div key={user.id} className="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all group animate-in zoom-in duration-300">
+            <div key={user.id} className="bg-white border border-rose-100 rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all group animate-in zoom-in duration-300">
                <div className="flex justify-between items-start mb-4">
                   <button 
                     onClick={() => handleDeleteUser(user.id, user.username)}
@@ -134,12 +134,12 @@ const UserManagement: React.FC = () => {
                   >
                     <Trash2 size={18} />
                   </button>
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform ${user.role === 'super_admin' ? 'bg-slate-900 text-white' : 'bg-rose-50 text-rose-600'}`}>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform ${user.role === 'super_admin' ? 'bg-[#6f2f54] text-white' : 'bg-rose-50 text-rose-600'}`}>
                     {user.role === 'super_admin' ? <Shield size={24} /> : <UserIcon size={24} />}
                   </div>
                </div>
-               <h4 className="text-lg font-bold text-gray-800">{user.username}</h4>
-               <p className="text-[10px] text-gray-400 mb-4 flex items-center gap-1 justify-end">
+               <h4 className="text-lg font-bold text-[#2B2B2B]">{user.username}</h4>
+               <p className="text-[10px] text-[#7A7A7A] mb-4 flex items-center gap-1 justify-end">
                  <Key size={10} /> סיסמה: {user.password ? '••••••' : 'לא מוגדר'}
                </p>
                <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full border text-[10px] font-bold ${roleColors[user.role]}`}>
@@ -149,7 +149,7 @@ const UserManagement: React.FC = () => {
           ))}
 
           {users.length === 0 && !isLoading && (
-            <div className="col-span-full py-12 text-center text-gray-300 italic border-2 border-dashed border-gray-100 rounded-[2rem]">
+            <div className="col-span-full py-12 text-center text-gray-300 italic border-2 border-dashed border-rose-100 rounded-[2rem]">
               אין משתמשים נוספים במערכת
             </div>
           )}
@@ -174,18 +174,18 @@ const UserManagement: React.FC = () => {
               )}
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 pr-1 uppercase">שם משתמש</label>
-                <input name="username" required placeholder="למשל: sarah_couture" className="w-full px-5 py-3 rounded-2xl border border-gray-100 outline-none focus:ring-2 focus:ring-rose-200 transition-all font-bold text-gray-700" />
+                <label className="text-[10px] font-bold text-[#7A7A7A] pr-1 uppercase">שם משתמש</label>
+                <input name="username" required placeholder="למשל: sarah_couture" className="w-full px-5 py-3 rounded-2xl border border-rose-100 outline-none focus:ring-2 focus:ring-[#e5488640] transition-all font-bold text-gray-700" />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 pr-1 uppercase">סיסמה</label>
-                <input name="password" type="password" autoComplete="new-password" required placeholder="הגדר סיסמה" className="w-full px-5 py-3 rounded-2xl border border-gray-100 outline-none focus:ring-2 focus:ring-rose-200 transition-all font-bold text-gray-700" />
+                <label className="text-[10px] font-bold text-[#7A7A7A] pr-1 uppercase">סיסמה</label>
+                <input name="password" type="password" autoComplete="new-password" required placeholder="הגדר סיסמה" className="w-full px-5 py-3 rounded-2xl border border-rose-100 outline-none focus:ring-2 focus:ring-[#e5488640] transition-all font-bold text-gray-700" />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 pr-1 uppercase">דרגת הרשאה</label>
-                <select name="role" required className="w-full px-5 py-3 rounded-2xl border border-gray-100 outline-none bg-gray-50 font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-rose-200">
+                <label className="text-[10px] font-bold text-[#7A7A7A] pr-1 uppercase">דרגת הרשאה</label>
+                <select name="role" required className="w-full px-5 py-3 rounded-2xl border border-rose-100 outline-none bg-[#fff3f9] font-bold text-gray-700 appearance-none focus:ring-2 focus:ring-[#e5488640]">
                   <option value="staff">צוות (לקוחות, תיקים, הזמנות)</option>
                   <option value="admin">מנהל (הכל חוץ מצוות וענן)</option>
                   <option value="super_admin">מנהל על (גישה מלאה להכל)</option>
@@ -194,7 +194,7 @@ const UserManagement: React.FC = () => {
               </div>
 
               <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 font-bold text-gray-400 hover:text-gray-600 transition-colors">ביטול</button>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 font-bold text-[#7A7A7A] hover:text-[#7A7A7A] transition-colors">ביטול</button>
                 <button type="submit" className="flex-[2] bg-rose-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-rose-200 hover:bg-rose-700 transition-all active:scale-95 flex items-center justify-center gap-2">
                   <Check size={18} />
                   צור חשבון

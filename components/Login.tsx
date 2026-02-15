@@ -34,7 +34,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-50 flex items-center justify-center p-0 md:p-4 z-[100] font-assistant" dir="rtl">
+    <div className="fixed inset-0 bg-[#fff1f8] flex items-center justify-center p-0 md:p-4 z-[100] font-assistant" dir="rtl">
       <div className="bg-white w-full h-full md:h-auto md:max-w-md md:rounded-[2.5rem] shadow-2xl shadow-rose-100/50 border border-rose-50 overflow-y-auto flex flex-col">
         <div className="bg-rose-600 p-12 md:p-10 text-center text-white relative shrink-0">
           <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
@@ -51,14 +51,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         <div className="p-10 md:p-10 flex-1">
           <form onSubmit={handleSubmit} className="space-y-8 md:space-y-6">
             <div className="space-y-2">
-              <label className="text-[11px] md:text-xs font-black text-gray-400 mr-2 uppercase tracking-widest">שם משתמש</label>
+              <label className="text-[11px] md:text-xs font-black text-[#7A7A7A] mr-2 uppercase tracking-widest">שם משתמש</label>
               <div className="relative">
-                <UserIcon className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6 md:w-5 md:h-5" />
+                <UserIcon className="absolute right-5 top-1/2 -translate-y-1/2 text-[#7A7A7A] w-6 h-6 md:w-5 md:h-5" />
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] md:rounded-2xl py-6 md:py-4 pr-14 pl-6 outline-none focus:ring-4 focus:ring-rose-200/50 transition-all font-black text-xl md:text-base text-gray-700 shadow-inner"
+                  className="w-full bg-[#fff3f9] border border-rose-100 rounded-[1.5rem] md:rounded-2xl py-6 md:py-4 pr-14 pl-6 outline-none focus:ring-4 focus:ring-[#e5488640] transition-all font-black text-xl md:text-base text-gray-700 shadow-inner"
                   placeholder="הכנס שם משתמש"
                   required
                 />
@@ -66,14 +66,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[11px] md:text-xs font-black text-gray-400 mr-2 uppercase tracking-widest">סיסמה</label>
+              <label className="text-[11px] md:text-xs font-black text-[#7A7A7A] mr-2 uppercase tracking-widest">סיסמה</label>
               <div className="relative">
-                <Lock className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 w-6 h-6 md:w-5 md:h-5" />
+                <Lock className="absolute right-5 top-1/2 -translate-y-1/2 text-[#7A7A7A] w-6 h-6 md:w-5 md:h-5" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-100 rounded-[1.5rem] md:rounded-2xl py-6 md:py-4 pr-14 pl-6 outline-none focus:ring-4 focus:ring-rose-200/50 transition-all font-black text-xl md:text-base text-gray-700 shadow-inner"
+                  className="w-full bg-[#fff3f9] border border-rose-100 rounded-[1.5rem] md:rounded-2xl py-6 md:py-4 pr-14 pl-6 outline-none focus:ring-4 focus:ring-[#e5488640] transition-all font-black text-xl md:text-base text-gray-700 shadow-inner"
                   placeholder="הכנס סיסמה"
                   required
                 />
@@ -103,8 +103,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </button>
           </form>
 
-          <div className="mt-12 md:mt-8 pt-10 md:pt-8 border-t border-gray-100 text-center">
-            <div className="flex items-center justify-center gap-3 text-gray-400 text-[11px] font-black uppercase tracking-[0.2em]">
+          <div className="mt-12 md:mt-8 pt-10 md:pt-8 border-t border-rose-100 text-center">
+            <div className="flex items-center justify-center gap-3 text-[#7A7A7A] text-[11px] font-black uppercase tracking-[0.2em]">
               <ShieldCheck size={18} />
               <span>Personal Couture Ledger</span>
             </div>

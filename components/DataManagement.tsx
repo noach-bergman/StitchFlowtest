@@ -237,14 +237,14 @@ COMMIT;`;
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-24 text-right">
       {/* Cloud Diagnostics */}
-      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-rose-100">
         <div className="flex items-center justify-between mb-6">
-           <button onClick={checkCloud} disabled={connStatus?.loading} className="flex items-center gap-2 px-8 py-3 rounded-2xl font-black text-sm bg-slate-900 text-white active:scale-95 transition-all shadow-lg">
+           <button onClick={checkCloud} disabled={connStatus?.loading} className="flex items-center gap-2 px-8 py-3 rounded-2xl font-black text-sm bg-[#6f2f54] text-white active:scale-95 transition-all shadow-lg">
              {connStatus?.loading ? <RefreshCw className="animate-spin w-4 h-4" /> : <Wifi className="w-4 h-4" />} בדיקת אבטחה וחיבור
            </button>
            <div className="text-right">
-              <h3 className="text-xl font-black text-gray-800 font-heebo">אבחון ענן</h3>
-              <p className="text-xs text-gray-400 font-bold">ודאי שהמערכת מוגנת מפני פריצות</p>
+              <h3 className="text-xl font-black text-[#2B2B2B] font-heebo">אבחון ענן</h3>
+              <p className="text-xs text-[#7A7A7A] font-bold">ודאי שהמערכת מוגנת מפני פריצות</p>
            </div>
         </div>
         
@@ -257,25 +257,25 @@ COMMIT;`;
 
         {/* Security & Setup Section */}
         <div className="mt-8 pt-8 border-t border-gray-50 space-y-4">
-           <h4 className="font-black text-gray-800 mb-2 flex items-center gap-2 justify-end">
+           <h4 className="font-black text-[#2B2B2B] mb-2 flex items-center gap-2 justify-end">
               צעדים להקמת פרויקט חדש <Lock size={16} className="text-rose-500" />
            </h4>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button 
                 onClick={copySql}
-                className="p-5 bg-slate-50 border border-slate-100 rounded-2xl text-right hover:bg-white hover:border-rose-200 transition-all group flex justify-between items-center"
+                className="p-5 bg-[#fff1f8] border border-rose-200 rounded-2xl text-right hover:bg-white hover:border-rose-200 transition-all group flex justify-between items-center"
               >
                  <Copy className="text-gray-300 group-hover:text-rose-500 transition-colors" size={20} />
                  <div>
                     <p className="font-black text-xs mb-1">העתקת קוד הקמת טבלאות</p>
-                    <p className="text-[10px] text-gray-400 font-bold">להדבקה ב-SQL Editor של Supabase</p>
+                    <p className="text-[10px] text-[#7A7A7A] font-bold">להדבקה ב-SQL Editor של Supabase</p>
                  </div>
               </button>
 
-              <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl">
+              <div className="p-5 bg-[#fff1f8] border border-rose-200 rounded-2xl">
                  <p className="font-black text-xs mb-1">עדכון מפתחות ב-Vercel</p>
-                 <p className="text-[10px] text-gray-400 font-bold">ודאי שעדכנת את ה-URL וה-Anon Key בהגדרות ה-Environment Variables.</p>
+                 <p className="text-[10px] text-[#7A7A7A] font-bold">ודאי שעדכנת את ה-URL וה-Anon Key בהגדרות ה-Environment Variables.</p>
               </div>
 
               <button 
@@ -285,7 +285,7 @@ COMMIT;`;
                  <Code className="text-amber-400 group-hover:text-amber-600 transition-colors" size={20} />
                  <div>
                     <p className="font-black text-xs mb-1">העתקת מיגרציית tasks לפרויקט קיים</p>
-                    <p className="text-[10px] text-gray-500 font-bold">לשדרוג טבלת tasks קיימת עם kind/orderSnapshot/folderChecklist.</p>
+                    <p className="text-[10px] text-[#7A7A7A] font-bold">לשדרוג טבלת tasks קיימת עם kind/orderSnapshot/folderChecklist.</p>
                  </div>
               </button>
            </div>
@@ -293,25 +293,25 @@ COMMIT;`;
       </div>
 
       {/* Import Section */}
-      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100">
+      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-rose-100">
         <div className="flex items-center gap-3 mb-6 justify-end">
            <div className="text-right">
-              <h3 className="text-2xl font-black text-gray-800">ייבוא היסטוריה (2024-2026)</h3>
-              <p className="text-sm text-gray-400 font-bold">המערכת תשחזר את מצב הארכיון המקורי של כל תיק</p>
+              <h3 className="text-2xl font-black text-[#2B2B2B]">ייבוא היסטוריה (2024-2026)</h3>
+              <p className="text-sm text-[#7A7A7A] font-bold">המערכת תשחזר את מצב הארכיון המקורי של כל תיק</p>
            </div>
            <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm">
               <Database size={24} />
            </div>
         </div>
 
-        <label className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-gray-100 rounded-[2.5rem] hover:border-rose-200 hover:bg-rose-50/30 transition-all cursor-pointer group relative">
+        <label className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-rose-100 rounded-[2.5rem] hover:border-rose-200 hover:bg-rose-50/30 transition-all cursor-pointer group relative">
           {!isImporting ? (
             <>
-              <div className="w-20 h-20 bg-gray-50 rounded-[2rem] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
+              <div className="w-20 h-20 bg-[#fff3f9] rounded-[2rem] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm">
                 <Upload className="w-10 h-10 text-gray-300 group-hover:text-rose-500" />
               </div>
               <span className="font-black text-gray-700 text-lg">לחצי לבחירת קובץ JSON</span>
-              <p className="text-xs text-gray-400 mt-2 font-bold">העלי שוב את הקובץ לסנכרון חכם</p>
+              <p className="text-xs text-[#7A7A7A] mt-2 font-bold">העלי שוב את הקובץ לסנכרון חכם</p>
             </>
           ) : (
             <div className="flex flex-col items-center gap-4 text-rose-600 font-black">
@@ -371,12 +371,12 @@ COMMIT;`;
         )}
       </div>
 
-      <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
+      <div className="bg-[#6f2f54] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden">
          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
          <h4 className="text-xl font-black mb-4 flex items-center gap-2 justify-end">
             מידע חשוב <Info className="text-rose-500" />
          </h4>
-         <p className="text-xs font-bold text-slate-400 leading-relaxed">
+         <p className="text-xs font-bold text-rose-100/90 leading-relaxed">
             הייבוא כעת מכבד את הסטטוס המקורי של התיקים. תיק שהיה בארכיון במערכת הישנה יישאר שם, ותיק שהיה פעיל יופיע ברשימת התיקים הפעילים שלך.
          </p>
       </div>

@@ -679,7 +679,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       `}</style>
       {!selectedFolderId ? (
         <div className="space-y-8 animate-in fade-in duration-500">
-           <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-100 relative overflow-hidden">
+           <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-rose-100 relative overflow-hidden">
              <div className="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/5 rounded-full blur-3xl"></div>
              <div className="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
                 <button 
@@ -689,22 +689,22 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   <Plus className="w-6 h-6" /> תיק עבודה חדש
                 </button>
                 <div className="text-center md:text-right">
-                  <h3 className="text-3xl font-black text-gray-800 font-heebo">ארכיון הסטודיו</h3>
-                  <p className="text-gray-400 font-bold mt-1">נהלי את כל הפרויקטים במקום אחד</p>
+                  <h3 className="text-3xl font-black text-[#2B2B2B] font-heebo">ארכיון הסטודיו</h3>
+                  <p className="text-[#7A7A7A] font-bold mt-1">נהלי את כל הפרויקטים במקום אחד</p>
                 </div>
              </div>
              
              <div className="flex flex-col md:flex-row gap-4 mt-10">
-                <div className="flex bg-slate-100 p-2 rounded-full border border-slate-200 gap-2 w-fit">
-                   <button onClick={() => setViewMode('active')} className={`px-8 py-3 rounded-full text-xs font-black transition-all ${viewMode === 'active' ? 'bg-white text-rose-600 shadow-md' : 'text-gray-400'}`}>פעילים</button>
-                   <button onClick={() => setViewMode('archived')} className={`px-8 py-3 rounded-full text-xs font-black transition-all ${viewMode === 'archived' ? 'bg-white text-indigo-600 shadow-md' : 'text-gray-400'}`}>ארכיון</button>
+                <div className="flex bg-[#fee9f3] p-2 rounded-full border border-rose-300 gap-2 w-fit">
+                   <button onClick={() => setViewMode('active')} className={`px-8 py-3 rounded-full text-xs font-black transition-all ${viewMode === 'active' ? 'bg-white text-rose-600 shadow-md' : 'text-[#7A7A7A]'}`}>פעילים</button>
+                   <button onClick={() => setViewMode('archived')} className={`px-8 py-3 rounded-full text-xs font-black transition-all ${viewMode === 'archived' ? 'bg-white text-indigo-600 shadow-md' : 'text-[#7A7A7A]'}`}>ארכיון</button>
                 </div>
                 <div className="relative flex-1">
-                   <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400" />
+                   <Search className="absolute right-6 top-1/2 -translate-y-1/2 text-[#7A7A7A]" />
                    <input 
                     type="text" 
                     placeholder="חיפוש לפי שם..." 
-                    className="w-full bg-slate-50 border border-slate-100 rounded-full py-5 pr-14 text-base font-bold outline-none focus:bg-white focus:ring-4 focus:ring-rose-500/5 transition-all text-right"
+                    className="w-full bg-[#fff1f8] border border-rose-200 rounded-full py-5 pr-14 text-base font-bold outline-none focus:bg-white focus:ring-4 focus:ring-rose-500/5 transition-all text-right"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                    />
@@ -717,7 +717,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                 const financials = folderFinancials.get(folder.id);
                 const folderPaymentStatus = financials?.paymentStatus || 'לא שולם';
                 return (
-                <div key={folder.id} onClick={() => setSelectedFolderId(folder.id)} className={`group bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer relative overflow-hidden`}>
+                <div key={folder.id} onClick={() => setSelectedFolderId(folder.id)} className={`group bg-white rounded-[2.5rem] p-8 shadow-sm border border-rose-100 transition-all hover:shadow-2xl hover:-translate-y-2 cursor-pointer relative overflow-hidden`}>
                    <div className={`absolute top-0 right-0 w-2 h-full ${folder.isDelivered ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
                    <div className="flex justify-between items-start mb-6">
                       {isAdmin && (
@@ -729,8 +729,8 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                          {folder.isDelivered ? <CheckCircle2 size={28} /> : <FolderOpen size={28} />}
                       </div>
                    </div>
-                   <h4 className="text-xl font-black text-gray-800 mb-1 truncate font-heebo">{folder.name}</h4>
-                   <p className="text-sm text-gray-400 font-bold mb-3">{folder.clientName}</p>
+                   <h4 className="text-xl font-black text-[#2B2B2B] mb-1 truncate font-heebo">{folder.name}</h4>
+                   <p className="text-sm text-[#7A7A7A] font-bold mb-3">{folder.clientName}</p>
                    <div className="flex justify-end">
                      <span className={`px-3 py-1 rounded-full text-[10px] font-black border ${PAYMENT_STATUS_STYLES[folderPaymentStatus]}`}>
                        {folderPaymentStatus}
@@ -742,20 +742,20 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
         </div>
       ) : (
         <div className="space-y-6 animate-in slide-in-from-left duration-500">
-           <div className="bg-white rounded-[3rem] p-10 md:p-12 shadow-2xl border border-gray-100 relative overflow-hidden">
+           <div className="bg-white rounded-[3rem] p-10 md:p-12 shadow-2xl border border-rose-100 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-full h-2 bg-gradient-to-r from-rose-500 via-pink-500 to-indigo-500"></div>
               <div className="flex flex-col md:flex-row justify-between items-center gap-8 md:gap-12">
                  <div className="flex items-center gap-6">
-                    <button onClick={() => setSelectedFolderId(null)} className="p-5 bg-slate-50 hover:bg-slate-100 rounded-[1.5rem] transition-all active:scale-90">
-                       <ArrowRight size={32} className="text-slate-400" />
+                    <button onClick={() => setSelectedFolderId(null)} className="p-5 bg-[#fff1f8] hover:bg-[#fee9f3] rounded-[1.5rem] transition-all active:scale-90">
+                       <ArrowRight size={32} className="text-[#7A7A7A]" />
                     </button>
                     <div className="text-right">
-                       <h2 className="text-4xl font-black text-gray-800 font-heebo tracking-tighter">{selectedFolder?.name}</h2>
-                       <p className="text-xs font-bold text-gray-400">{selectedFolder?.clientName}</p>
+                       <h2 className="text-4xl font-black text-[#2B2B2B] font-heebo tracking-tighter">{selectedFolder?.name}</h2>
+                       <p className="text-xs font-bold text-[#7A7A7A]">{selectedFolder?.clientName}</p>
                     </div>
                  </div>
                  <div className="flex flex-col items-center">
-                    <div className="bg-slate-900 text-white px-8 py-3 rounded-full font-black mt-3 shadow-xl font-heebo text-xl">
+                    <div className="bg-[#6f2f54] text-white px-8 py-3 rounded-full font-black mt-3 shadow-xl font-heebo text-xl">
                        ${folderTotalPrice}
                     </div>
                  </div>
@@ -770,16 +770,16 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   <p className="text-[10px] font-black text-rose-600 uppercase">יתרה לתשלום</p>
                   <p className="text-2xl font-black text-rose-700 font-heebo">${selectedFolderRemaining.toLocaleString()}</p>
                 </div>
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4 text-right flex items-center justify-between">
+                <div className="bg-[#fff1f8] border border-rose-200 rounded-2xl p-4 text-right flex items-center justify-between">
                   <span className={`px-3 py-1.5 rounded-full text-xs font-black border ${PAYMENT_STATUS_STYLES[selectedFolderPaymentStatus]}`}>
                     {selectedFolderPaymentStatus}
                   </span>
-                  <p className="text-[10px] font-black text-slate-500 uppercase">סטטוס תשלום</p>
+                  <p className="text-[10px] font-black text-[#7A7A7A] uppercase">סטטוס תשלום</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-12">
-                 <button onClick={handleGenerateReceipt} className="flex flex-col items-center gap-3 py-6 rounded-[2rem] bg-slate-900 text-white shadow-xl hover:bg-black transition-all">
+                 <button onClick={handleGenerateReceipt} className="flex flex-col items-center gap-3 py-6 rounded-[2rem] bg-[#6f2f54] text-white shadow-xl hover:bg-black transition-all">
                     <FileText className="text-rose-400" /> <span className="text-xs font-black">הפק קבלה</span>
                  </button>
                  <button
@@ -792,7 +792,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                     className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${
                       canEditPayments
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100'
-                        : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60 cursor-not-allowed'
+                        : 'bg-[#fff1f8] border-rose-200 text-[#7A7A7A] opacity-60 cursor-not-allowed'
                     }`}
                  >
                     <DollarSign /> <span className="text-xs font-black">הוסף תשלום</span>
@@ -807,12 +807,12 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                     className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${
                       canEditPayments
                         ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
-                        : 'bg-slate-50 border-slate-100 text-slate-400 opacity-60 cursor-not-allowed'
+                        : 'bg-[#fff1f8] border-rose-200 text-[#7A7A7A] opacity-60 cursor-not-allowed'
                     }`}
                  >
                     <Edit2 /> <span className="text-xs font-black">ערוך תשלום</span>
                  </button>
-                 <button onClick={() => setFolders(folders.map(f => f.id === selectedFolderId ? {...f, isDelivered: !f.isDelivered} : f))} className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${selectedFolder?.isDelivered ? 'bg-emerald-500 text-white border-transparent shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
+                 <button onClick={() => setFolders(folders.map(f => f.id === selectedFolderId ? {...f, isDelivered: !f.isDelivered} : f))} className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border transition-all ${selectedFolder?.isDelivered ? 'bg-emerald-500 text-white border-transparent shadow-lg' : 'bg-[#fff1f8] border-rose-200 text-[#7A7A7A]'}`}>
                     <CheckCircle2 /> <span className="text-xs font-black">נמסר</span>
                  </button>
                  <button
@@ -826,7 +826,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                     className={`flex flex-col items-center gap-3 py-6 rounded-[2rem] border ${
                       canMoveSelectedFolderToArchive
                         ? 'bg-indigo-50 border-indigo-100 text-indigo-500'
-                        : 'bg-slate-50 border-slate-100 text-slate-400'
+                        : 'bg-[#fff1f8] border-rose-200 text-[#7A7A7A]'
                     }`}
                  >
                     <Archive /> <span className="text-xs font-black">ארכיון</span>
@@ -834,7 +834,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               </div>
            </div>
 
-           <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-gray-100 flex justify-between items-center mt-8">
+           <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-rose-100 flex justify-between items-center mt-8">
               <div className="flex items-center gap-3">
                 {canCreateTask && onCreateTaskFromFolder && selectedFolder && (
                   <button
@@ -849,14 +849,14 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   הוסף פריט +
                 </button>
               </div>
-              <h4 className="text-xl font-black text-gray-800">פריטים בתיק ({folderOrders.length})</h4>
+              <h4 className="text-xl font-black text-[#2B2B2B]">פריטים בתיק ({folderOrders.length})</h4>
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {folderOrders.map(order => (
                 <div 
                   key={order.id} 
-                  className={`bg-white rounded-[2.5rem] p-8 shadow-sm border relative group transition-all hover:shadow-xl ${order.id === highlightedOrderId ? 'border-rose-500 ring-4 ring-rose-500/10 animate-pulse' : 'border-gray-100'}`}
+                  className={`bg-white rounded-[2.5rem] p-8 shadow-sm border relative group transition-all hover:shadow-xl ${order.id === highlightedOrderId ? 'border-rose-500 ring-4 ring-rose-500/10 animate-pulse' : 'border-rose-100'}`}
                 >
                    <div className="absolute top-6 left-6 flex gap-2">
                       {canCreateTask && onCreateTaskFromOrder && (
@@ -864,7 +864,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                           <ListTodo size={16} />
                         </button>
                       )}
-                      <button onClick={() => handleOpenQrLabel(order)} className="p-3 bg-slate-50 text-slate-900 rounded-xl active:scale-90 transition-all border border-slate-100 hover:bg-slate-900 hover:text-white" title="הדפס תווית QR">
+                      <button onClick={() => handleOpenQrLabel(order)} className="p-3 bg-[#fff1f8] text-[#2B2B2B] rounded-xl active:scale-90 transition-all border border-rose-200 hover:bg-[#6f2f54] hover:text-white" title="הדפס תווית QR">
                         <QrCode size={16} />
                       </button>
                       <button onClick={() => { setEditingOrder(order); setTempDisplayId(order.displayId); setIsOrderModalOpen(true); }} className="p-3 bg-indigo-50 text-indigo-500 rounded-xl active:scale-90 transition-all"><Edit2 size={16} /></button>
@@ -872,8 +872,8 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                    </div>
                    <div className="text-right mt-4">
                       <span className="text-[10px] font-black text-indigo-500 bg-indigo-50 px-3 py-1 rounded-lg">#{order.displayId}</span>
-                      <h5 className="text-2xl font-black text-gray-800 mt-2">{order.itemType}</h5>
-                      <p className="text-sm text-gray-400 mt-2 leading-relaxed h-12 overflow-hidden">{order.description || "ללא תיאור"}</p>
+                      <h5 className="text-2xl font-black text-[#2B2B2B] mt-2">{order.itemType}</h5>
+                      <p className="text-sm text-[#7A7A7A] mt-2 leading-relaxed h-12 overflow-hidden">{order.description || "ללא תיאור"}</p>
                    </div>
                    <div className="mt-8 pt-6 border-t border-gray-50 flex justify-between items-center">
                       <select 
@@ -895,23 +895,23 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       {isReceiptModalOpen && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md no-print animate-in fade-in duration-300">
            <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden flex flex-col max-h-[95vh]">
-              <div className="p-6 bg-slate-900 text-white flex justify-between items-center shrink-0">
+              <div className="p-6 bg-[#6f2f54] text-white flex justify-between items-center shrink-0">
                  <h3 className="text-xl font-black font-heebo">הפקת קבלה</h3>
                  <button onClick={() => setIsReceiptModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
               </div>
               
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#fff1f8]">
                 {isGeneratingReceipt ? (
                    <div className="flex flex-col items-center justify-center h-64 space-y-6">
                       <div className="relative">
-                        <div className="w-20 h-20 border-4 border-slate-200 border-t-rose-500 rounded-full animate-spin"></div>
+                        <div className="w-20 h-20 border-4 border-rose-300 border-t-rose-500 rounded-full animate-spin"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
                            <Sparkles className="text-rose-500 animate-pulse" />
                         </div>
                       </div>
                       <div className="text-center space-y-2">
-                        <p className="text-lg font-black text-slate-800">Generating Invoice...</p>
-                        <p className="text-sm text-slate-400 font-bold">Crafting a professional breakdown</p>
+                        <p className="text-lg font-black text-[#2B2B2B]">Generating Invoice...</p>
+                        <p className="text-sm text-[#7A7A7A] font-bold">Crafting a professional breakdown</p>
                       </div>
                    </div>
                 ) : receiptData ? (
@@ -921,8 +921,8 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                       <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/10 rounded-full -ml-16 -mb-16 blur-3xl"></div>
                       
                       {/* Header */}
-                      <div className="bg-slate-900 text-white p-8 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-full h-full opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-rose-500 via-slate-900 to-slate-900"></div>
+                      <div className="bg-[#6f2f54] text-white p-8 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-full h-full opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-rose-500 via-slate-900 to-[#662346]"></div>
                         <div className="relative z-10 flex justify-center items-center">
                            <div className="text-center space-y-4">
                               <img
@@ -936,45 +936,45 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                       </div>
 
                       {/* Info Grid */}
-                      <div className="p-8 grid grid-cols-2 gap-8 border-b border-gray-100">
+                      <div className="p-8 grid grid-cols-2 gap-8 border-b border-rose-100">
                          <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-1"><MapPin size={10} /> Bill To</p>
-                            <p className="font-bold text-slate-800 text-lg leading-tight">{receiptData.billTo}</p>
+                            <p className="text-[10px] font-black text-[#7A7A7A] uppercase tracking-widest mb-2 flex items-center gap-1"><MapPin size={10} /> Bill To</p>
+                            <p className="font-bold text-[#2B2B2B] text-lg leading-tight">{receiptData.billTo}</p>
                          </div>
                          <div className="text-right">
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Date Issued</p>
-                            <p className="font-bold text-slate-800 text-lg font-serif">{receiptData.date}</p>
+                            <p className="text-[10px] font-black text-[#7A7A7A] uppercase tracking-widest mb-2">Date Issued</p>
+                            <p className="font-bold text-[#2B2B2B] text-lg font-serif">{receiptData.date}</p>
                          </div>
                       </div>
 
                       {/* Items Table */}
                       <div className="p-8">
                          <div className="flex justify-between items-end border-b-2 border-slate-900 pb-2 mb-4">
-                            <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Item Description</span>
-                            <span className="text-xs font-black text-slate-900 uppercase tracking-widest">Amount</span>
+                            <span className="text-xs font-black text-[#2B2B2B] uppercase tracking-widest">Item Description</span>
+                            <span className="text-xs font-black text-[#2B2B2B] uppercase tracking-widest">Amount</span>
                          </div>
                          <div className="space-y-4">
                            {receiptData.items?.map((item: any, idx: number) => (
                              <div key={idx} className="flex justify-between items-start pb-4 border-b border-gray-50 last:border-0 last:pb-0 group">
                                 <div>
-                                   <p className="font-bold text-slate-800 text-sm group-hover:text-rose-600 transition-colors">{item.service}</p>
-                                   <p className="text-xs text-slate-400 font-medium mt-0.5">{item.description}</p>
+                                   <p className="font-bold text-[#2B2B2B] text-sm group-hover:text-rose-600 transition-colors">{item.service}</p>
+                                   <p className="text-xs text-[#7A7A7A] font-medium mt-0.5">{item.description}</p>
                                 </div>
-                                <p className="font-bold font-serif text-slate-900">${item.price}</p>
+                                <p className="font-bold font-serif text-[#2B2B2B]">${item.price}</p>
                              </div>
                            ))}
                          </div>
                       </div>
 
                       {/* Totals Section */}
-                      <div className="bg-slate-50 p-8">
+                      <div className="bg-[#fff1f8] p-8">
                          <div className="space-y-3">
                             <div className="flex justify-between items-center text-xs">
-                               <span className="font-bold text-gray-500 uppercase tracking-wider">Subtotal</span>
+                               <span className="font-bold text-[#7A7A7A] uppercase tracking-wider">Subtotal</span>
                                <span className="font-serif font-bold text-slate-600">${receiptData.subtotal}</span>
                             </div>
-                            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                               <span className="font-black text-slate-900 text-sm uppercase tracking-widest">Total Due</span>
+                            <div className="flex justify-between items-center pt-4 border-t border-rose-200">
+                               <span className="font-black text-[#2B2B2B] text-sm uppercase tracking-widest">Total Due</span>
                                <span className="font-serif font-black text-3xl text-rose-600">${receiptData.total}</span>
                             </div>
                          </div>
@@ -982,10 +982,10 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
                       {/* Footer */}
                       <div className="p-8 text-center bg-white">
-                         <p className="text-xs font-serif italic text-slate-400 leading-relaxed">
+                         <p className="text-xs font-serif italic text-[#7A7A7A] leading-relaxed">
                             "{receiptData.footerMessage}"
                          </p>
-                         <div className="mt-6 pt-6 border-t border-dashed border-gray-100 flex justify-center gap-4 text-[10px] text-gray-300 font-bold uppercase tracking-widest">
+                         <div className="mt-6 pt-6 border-t border-dashed border-rose-100 flex justify-center gap-4 text-[10px] text-gray-300 font-bold uppercase tracking-widest">
                             <span>Malki Style</span>
                             <span>•</span>
                             <span>Thank You</span>
@@ -995,22 +995,22 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                 ) : (
                    <div className="text-center py-10">
                       <AlertTriangle className="w-12 h-12 text-rose-500 mx-auto mb-4" />
-                      <p className="font-black text-gray-800">Generation Failed</p>
+                      <p className="font-black text-[#2B2B2B]">Generation Failed</p>
                       <button onClick={() => setIsReceiptModalOpen(false)} className="mt-4 text-rose-600 font-bold underline">Close & Retry</button>
                    </div>
                 )}
               </div>
 
               {!isGeneratingReceipt && receiptData && (
-                 <div className="p-6 border-t border-gray-100 bg-white flex gap-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-10">
-                    <button onClick={() => setIsReceiptModalOpen(false)} className="flex-1 py-4 font-black text-gray-400 hover:text-gray-600 transition-colors">Close</button>
-                    <button onClick={handlePrintReceipt} className="flex-1 border border-slate-200 text-slate-700 font-black rounded-2xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-slate-50">
+                 <div className="p-6 border-t border-rose-100 bg-white flex gap-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-10">
+                    <button onClick={() => setIsReceiptModalOpen(false)} className="flex-1 py-4 font-black text-[#7A7A7A] hover:text-[#7A7A7A] transition-colors">Close</button>
+                    <button onClick={handlePrintReceipt} className="flex-1 border border-rose-300 text-slate-700 font-black rounded-2xl shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-[#fff1f8]">
                        <Printer size={18} /> הדפס
                     </button>
                     <button
                       onClick={handleShareReceiptImage}
                       disabled={isSharingReceipt}
-                      className="flex-[2] bg-slate-900 text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-black disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="flex-[2] bg-[#6f2f54] text-white font-black rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 hover:bg-black disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                        {isSharingReceipt ? <RefreshCw className="animate-spin" size={18} /> : <Share2 size={18} />}
                        {isSharingReceipt ? 'משתף...' : 'שתף תמונה'}
@@ -1025,13 +1025,13 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       {activeQrOrder && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md no-print animate-in fade-in duration-300">
           <div className="bg-white rounded-[3rem] w-full max-w-sm shadow-2xl animate-in zoom-in duration-300 overflow-hidden text-center">
-            <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
+            <div className="p-6 bg-[#6f2f54] text-white flex justify-between items-center">
                <h3 className="text-xl font-black font-heebo">תווית לתיקון</h3>
                <button onClick={closeQrModal} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={24} /></button>
             </div>
             <div className="p-10 space-y-6">
-              <div id="label-preview" className="bg-white p-6 rounded-3xl border-2 border-dashed border-slate-200 space-y-4">
-                <div className="flex justify-center bg-slate-50 p-4 rounded-2xl">
+              <div id="label-preview" className="bg-white p-6 rounded-3xl border-2 border-dashed border-rose-300 space-y-4">
+                <div className="flex justify-center bg-[#fff1f8] p-4 rounded-2xl">
                   {qrDataUrl ? (
                     <img
                       src={qrDataUrl}
@@ -1045,9 +1045,9 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   )}
                 </div>
                 <div className="space-y-1 text-right">
-                  <p className="font-bold text-gray-800 text-lg">{activeQrOrder.clientName}</p>
+                  <p className="font-bold text-[#2B2B2B] text-lg">{activeQrOrder.clientName}</p>
                   <p className="font-black text-rose-600">ID: #{activeQrOrder.displayId}</p>
-                  <p className="text-xs font-bold text-gray-500 truncate">{activeQrOrder.itemType}</p>
+                  <p className="text-xs font-bold text-[#7A7A7A] truncate">{activeQrOrder.itemType}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -1062,7 +1062,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                 <button
                   onClick={handleShareLabelImage}
                   disabled={isGeneratingQr || !qrDataUrl || isSharingLabel}
-                  className="w-full bg-slate-900 text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-50"
+                  className="w-full bg-[#6f2f54] text-white font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all disabled:opacity-50"
                 >
                   {isSharingLabel ? <RefreshCw className="animate-spin" size={20} /> : <Share2 size={20} />}
                   {isSharingLabel ? 'משתף...' : 'שתף'}
@@ -1080,11 +1080,11 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               <div className="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center text-indigo-500 mx-auto mb-6">
                 <Archive size={40} />
               </div>
-              <h3 className="text-2xl font-black text-gray-800 mb-2">ארכיון</h3>
-              <p className="text-sm text-gray-500 mb-8">האם להעביר את <b>{folderToArchive.name}</b> לארכיון?</p>
+              <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">ארכיון</h3>
+              <p className="text-sm text-[#7A7A7A] mb-8">האם להעביר את <b>{folderToArchive.name}</b> לארכיון?</p>
               <div className="flex gap-4">
-                 <button onClick={() => setFolderToArchive(null)} className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all">ביטול</button>
-                 <button onClick={() => toggleArchive(folderToArchive.id)} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">העבר</button>
+                 <button onClick={() => setFolderToArchive(null)} className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all">ביטול</button>
+                 <button onClick={() => toggleArchive(folderToArchive.id)} className="flex-1 py-4 bg-[#6f2f54] text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">העבר</button>
               </div>
            </div>
         </div>
@@ -1096,10 +1096,10 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6 animate-pulse">
                 <ShieldAlert size={40} />
               </div>
-              <h3 className="text-2xl font-black text-gray-800 mb-2">מחיקה סופית</h3>
-              <p className="text-sm text-gray-500 mb-8">זהירות! כל המידע על <b>{folderToDelete.name}</b> יימחק לצמיתות.</p>
+              <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">מחיקה סופית</h3>
+              <p className="text-sm text-[#7A7A7A] mb-8">זהירות! כל המידע על <b>{folderToDelete.name}</b> יימחק לצמיתות.</p>
               <div className="flex gap-4">
-                 <button onClick={() => setFolderToDelete(null)} className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all">ביטול</button>
+                 <button onClick={() => setFolderToDelete(null)} className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all">ביטול</button>
                  <button onClick={() => { onDeleteFolder(folderToDelete.id); setFolderToDelete(null); setSelectedFolderId(null); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">מחק הכל</button>
               </div>
            </div>
@@ -1112,10 +1112,10 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6">
                 <Trash2 size={40} />
               </div>
-              <h3 className="text-2xl font-black text-gray-800 mb-2">מחיקת פריט</h3>
-              <p className="text-sm text-gray-500 mb-8">האם למחוק את <b>{orderToDelete.itemType}</b>?</p>
+              <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">מחיקת פריט</h3>
+              <p className="text-sm text-[#7A7A7A] mb-8">האם למחוק את <b>{orderToDelete.itemType}</b>?</p>
               <div className="flex gap-4">
-                 <button onClick={() => setOrderToDelete(null)} className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all">ביטול</button>
+                 <button onClick={() => setOrderToDelete(null)} className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all">ביטול</button>
                  <button onClick={() => { onDeleteOrder(orderToDelete.id); setOrderToDelete(null); }} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">מחק פריט</button>
               </div>
            </div>
@@ -1128,11 +1128,11 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mx-auto mb-6">
                 <AlertTriangle size={40} />
               </div>
-              <h3 className="text-2xl font-black text-gray-800 mb-2">עדכון תאריך הכנסה</h3>
-              <p className="text-sm text-gray-500 mb-8">שינית את המחיר של <b>{pendingPriceDateUpdate.order.itemType}</b>. האם לעדכן את תאריך ההכנסה להיום?</p>
+              <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">עדכון תאריך הכנסה</h3>
+              <p className="text-sm text-[#7A7A7A] mb-8">שינית את המחיר של <b>{pendingPriceDateUpdate.order.itemType}</b>. האם לעדכן את תאריך ההכנסה להיום?</p>
               <div className="flex gap-4">
-                 <button onClick={() => resolvePendingPriceDateUpdate(false)} className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all">השאר תאריך קיים</button>
-                 <button onClick={() => resolvePendingPriceDateUpdate(true)} className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">עדכן להיום</button>
+                 <button onClick={() => resolvePendingPriceDateUpdate(false)} className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all">השאר תאריך קיים</button>
+                 <button onClick={() => resolvePendingPriceDateUpdate(true)} className="flex-1 py-4 bg-[#6f2f54] text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all">עדכן להיום</button>
               </div>
            </div>
         </div>
@@ -1144,10 +1144,10 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
             <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center text-emerald-600 mx-auto mb-6">
               <DollarSign size={40} />
             </div>
-            <h3 className="text-2xl font-black text-gray-800 mb-2">
+            <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">
               {paymentModalMode === 'add' ? 'הוספת תשלום' : 'עריכת תשלום'}
             </h3>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm text-[#7A7A7A] mb-6">
               {paymentModalMode === 'add'
                 ? <>הזן סכום נוסף לתיק <b>{selectedFolder.name}</b></>
                 : <>עדכן את הסכום הכולל ששולם בתיק <b>{selectedFolder.name}</b></>
@@ -1155,7 +1155,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
             </p>
             <form onSubmit={paymentModalMode === 'add' ? handleAddPayment : handleSetPaidAmount} className="space-y-5 text-right">
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-gray-400 uppercase">
+                <label className="text-[11px] font-black text-[#7A7A7A] uppercase">
                   {paymentModalMode === 'add' ? 'סכום תשלום נוסף ($)' : 'שולם עד כה ($)'}
                 </label>
                 <input
@@ -1167,18 +1167,18 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                   value={paymentInput}
                   onChange={(e) => setPaymentInput(e.target.value)}
                   placeholder={paymentModalMode === 'add' ? '0.00' : String(selectedFolderPaidAmount)}
-                  className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                  className="w-full px-5 py-4 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold outline-none focus:bg-white focus:ring-2 focus:ring-emerald-100"
                 />
               </div>
               {paymentModalMode === 'add' ? (
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-xs font-bold text-gray-500">
+                <div className="bg-[#fff1f8] border border-rose-200 rounded-2xl p-3 text-xs font-bold text-[#7A7A7A]">
                   ניתן להוסיף עד <b>${selectedAddPaymentLimit.toLocaleString()}</b>
                   {selectedAddPaymentLimit <= 0 && (
                     <p className="text-rose-600 mt-1">לא ניתן להוסיף תשלום נוסף. התיק כבר שולם במלואו או מעבר לכך.</p>
                   )}
                 </div>
               ) : (
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-3 text-xs font-bold text-gray-500">
+                <div className="bg-[#fff1f8] border border-rose-200 rounded-2xl p-3 text-xs font-bold text-[#7A7A7A]">
                   ניתן לקבוע ערך בין <b>$0</b> ל־<b>${folderTotalPrice.toLocaleString()}</b>
                 </div>
               )}
@@ -1190,14 +1190,14 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                     setPaymentModalMode('add');
                     setPaymentInput('');
                   }}
-                  className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all"
+                  className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all"
                 >
                   ביטול
                 </button>
                 <button
                   type="submit"
                   disabled={paymentModalMode === 'add' && selectedAddPaymentLimit <= 0}
-                  className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex-1 py-4 bg-[#6f2f54] text-white rounded-2xl font-black shadow-xl active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {paymentModalMode === 'add' ? 'שמור תשלום' : 'שמור סכום'}
                 </button>
@@ -1211,20 +1211,20 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
       {isFolderModalOpen && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md no-print">
            <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl animate-in slide-in-from-bottom duration-300 overflow-hidden">
-              <div className="p-8 bg-slate-900 text-white flex justify-between items-center">
+              <div className="p-8 bg-[#6f2f54] text-white flex justify-between items-center">
                  <h3 className="text-2xl font-black font-heebo">פתיחת תיק עבודה</h3>
                  <button onClick={() => { setIsFolderModalOpen(false); setClientSearchTerm(''); setSelectedClientId(''); setShowClientList(false); }} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={32} /></button>
               </div>
               <div className="p-10 space-y-8 text-right overflow-y-auto max-h-[70vh]">
                  <div className="space-y-4 relative">
-                    <label className="text-[11px] font-black text-gray-400 uppercase mr-2">בחרי לקוח</label>
+                    <label className="text-[11px] font-black text-[#7A7A7A] uppercase mr-2">בחרי לקוח</label>
                     <div className="relative">
-                       <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                       <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7A7A7A] w-5 h-5" />
                        <input 
                         type="text" 
                         placeholder="חפשי לפי שם או טלפון..." 
                         autoComplete="off"
-                        className="w-full pr-12 pl-4 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold text-gray-700 outline-none focus:bg-white focus:ring-4 focus:ring-rose-500/10 transition-all shadow-sm"
+                        className="w-full pr-12 pl-4 py-4 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold text-gray-700 outline-none focus:bg-white focus:ring-4 focus:ring-rose-500/10 transition-all shadow-sm"
                         value={clientSearchTerm}
                         onFocus={() => setShowClientList(true)}
                         onChange={(e) => {
@@ -1235,7 +1235,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                        />
                     </div>
                     {showClientList && !selectedClientId && (
-                      <div className="absolute z-[1100] top-full mt-2 w-full bg-white border border-gray-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto divide-y divide-gray-50">
+                      <div className="absolute z-[1100] top-full mt-2 w-full bg-white border border-rose-100 rounded-2xl shadow-2xl max-h-60 overflow-y-auto divide-y divide-gray-50">
                         {filteredClientsForSearch.length > 0 ? (
                           filteredClientsForSearch.map(c => (
                             <div 
@@ -1247,16 +1247,16 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                               }} 
                               className="p-5 hover:bg-rose-50 cursor-pointer flex justify-between items-center transition-colors group"
                             >
-                              <span className="text-xs text-gray-400 font-heebo group-hover:text-rose-500">{c.phone}</span>
-                              <span className="font-black text-gray-800">{c.name}</span>
+                              <span className="text-xs text-[#7A7A7A] font-heebo group-hover:text-rose-500">{c.phone}</span>
+                              <span className="font-black text-[#2B2B2B]">{c.name}</span>
                             </div>
                           ))
                         ) : (
-                          <div className="p-5 text-center text-gray-400 text-sm italic">לא נמצאו לקוחות</div>
+                          <div className="p-5 text-center text-[#7A7A7A] text-sm italic">לא נמצאו לקוחות</div>
                         )}
                         <div 
                           onClick={() => { setIsQuickAddClientOpen(true); setShowClientList(false); }} 
-                          className="p-5 bg-slate-50 hover:bg-slate-100 cursor-pointer flex items-center justify-center gap-2 text-rose-600 font-black text-sm"
+                          className="p-5 bg-[#fff1f8] hover:bg-[#fee9f3] cursor-pointer flex items-center justify-center gap-2 text-rose-600 font-black text-sm"
                         >
                           <Plus size={16} /> הוספת לקוח חדש +
                         </div>
@@ -1276,12 +1276,12 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
 
                  <form onSubmit={handleAddFolder} className="space-y-8">
                     <div className="space-y-2">
-                       <label className="text-[11px] font-black text-gray-400 uppercase mr-2">שם התיק</label>
-                       <input name="name" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} required placeholder="למשל: שמלת ערב" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold text-gray-700 outline-none focus:bg-white transition-all shadow-sm" />
+                       <label className="text-[11px] font-black text-[#7A7A7A] uppercase mr-2">שם התיק</label>
+                       <input name="name" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} required placeholder="למשל: שמלת ערב" className="w-full px-6 py-4 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold text-gray-700 outline-none focus:bg-white transition-all shadow-sm" />
                     </div>
                     <div className="space-y-2">
-                       <label className="text-[11px] font-black text-gray-400 uppercase mr-2">תאריך יעד</label>
-                       <input name="deadline" type="date" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold text-gray-700 outline-none shadow-sm" />
+                       <label className="text-[11px] font-black text-[#7A7A7A] uppercase mr-2">תאריך יעד</label>
+                       <input name="deadline" type="date" className="w-full px-6 py-4 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold text-gray-700 outline-none shadow-sm" />
                     </div>
                     <button type="submit" disabled={!selectedClientId} className="w-full bg-rose-600 text-white font-black text-xl py-6 rounded-3xl shadow-2xl active:scale-95 transition-all disabled:opacity-50">צור תיק עבודה</button>
                  </form>
@@ -1298,7 +1298,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                  <button onClick={() => setIsOrderModalOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-all"><X size={32} /></button>
               </div>
               <form onSubmit={handleAddOrder} className="p-10 space-y-8 text-right">
-                 <div className="bg-slate-900 p-6 rounded-[2rem] flex items-center justify-between shadow-inner border border-slate-800">
+                 <div className="bg-[#6f2f54] p-6 rounded-[2rem] flex items-center justify-between shadow-inner border border-slate-800">
                     <button type="button" onClick={() => setTempDisplayId(generateNewDisplayId())} className="p-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all">
                        <RefreshCw size={20} />
                     </button>
@@ -1311,18 +1311,18 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                     </div>
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[11px] font-black text-gray-400 uppercase mr-2">סוג הבגד</label>
-                    <input name="itemType" defaultValue={editingOrder?.itemType} placeholder="שמלה, חצאית..." required className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none focus:bg-white transition-all shadow-sm" />
+                    <label className="text-[11px] font-black text-[#7A7A7A] uppercase mr-2">סוג הבגד</label>
+                    <input name="itemType" defaultValue={editingOrder?.itemType} placeholder="שמלה, חצאית..." required className="w-full px-6 py-4 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold outline-none focus:bg-white transition-all shadow-sm" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[11px] font-black text-gray-400 uppercase mr-2">מחיר ($)</label>
-                    <input name="price" type="number" step="0.1" min="0" defaultValue={editingOrder?.price} placeholder="0.00" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none font-heebo shadow-sm" />
+                    <label className="text-[11px] font-black text-[#7A7A7A] uppercase mr-2">מחיר ($)</label>
+                    <input name="price" type="number" step="0.1" min="0" defaultValue={editingOrder?.price} placeholder="0.00" className="w-full px-6 py-4 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold outline-none font-heebo shadow-sm" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[11px] font-black text-gray-400 uppercase mr-2">תיאור התיקון</label>
-                    <textarea name="description" defaultValue={editingOrder?.description} placeholder="מה צריך לעשות?" className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 font-bold h-32 resize-none outline-none focus:bg-white transition-all shadow-sm" />
+                    <label className="text-[11px] font-black text-[#7A7A7A] uppercase mr-2">תיאור התיקון</label>
+                    <textarea name="description" defaultValue={editingOrder?.description} placeholder="מה צריך לעשות?" className="w-full px-6 py-4 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold h-32 resize-none outline-none focus:bg-white transition-all shadow-sm" />
                  </div>
-                 <button type="submit" className="w-full bg-slate-900 text-white font-black text-xl py-6 rounded-3xl shadow-2xl active:scale-95 transition-all">שמור פריט</button>
+                 <button type="submit" className="w-full bg-[#6f2f54] text-white font-black text-xl py-6 rounded-3xl shadow-2xl active:scale-95 transition-all">שמור פריט</button>
               </form>
            </div>
         </div>
@@ -1337,14 +1337,14 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
               </div>
               <form onSubmit={handleQuickAddClient} className="p-8 space-y-6 text-right">
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase pr-1">שם מלא</label>
-                    <input name="name" required placeholder="שם הלקוח" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-gray-100 outline-none focus:bg-white font-bold shadow-sm" />
+                    <label className="text-[10px] font-black text-[#7A7A7A] uppercase pr-1">שם מלא</label>
+                    <input name="name" required placeholder="שם הלקוח" className="w-full px-5 py-4 rounded-2xl bg-[#fff1f8] border border-rose-100 outline-none focus:bg-white font-bold shadow-sm" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-gray-400 uppercase pr-1">טלפון</label>
-                    <input name="phone" required placeholder="מספר נייד" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-gray-100 outline-none focus:bg-white font-bold font-heebo shadow-sm" />
+                    <label className="text-[10px] font-black text-[#7A7A7A] uppercase pr-1">טלפון</label>
+                    <input name="phone" required placeholder="מספר נייד" className="w-full px-5 py-4 rounded-2xl bg-[#fff1f8] border border-rose-100 outline-none focus:bg-white font-bold font-heebo shadow-sm" />
                  </div>
-                 <button type="submit" className="w-full bg-slate-900 text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2">
+                 <button type="submit" className="w-full bg-[#6f2f54] text-white font-black py-5 rounded-3xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2">
                     <CheckCircle2 size={18} /> הוסף ובחר
                  </button>
               </form>

@@ -20,7 +20,7 @@ const TASK_STATUSES: TaskStatus[] = ['חדש', 'בטיפול', 'בהמתנה', '
 const TASK_PRIORITIES: TaskPriority[] = ['נמוכה', 'רגילה', 'גבוהה', 'דחופה'];
 
 const PRIORITY_STYLES: Record<TaskPriority, string> = {
-  נמוכה: 'bg-slate-100 text-slate-600 border-slate-200',
+  נמוכה: 'bg-[#fee9f3] text-slate-600 border-rose-300',
   רגילה: 'bg-blue-100 text-blue-700 border-blue-200',
   גבוהה: 'bg-amber-100 text-amber-700 border-amber-200',
   דחופה: 'bg-rose-100 text-rose-700 border-rose-200',
@@ -529,14 +529,14 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
 
   return (
     <div className="space-y-6 text-right pb-24">
-      <div className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-gray-100 shadow-sm">
+      <div className="bg-white rounded-[2.5rem] p-6 md:p-8 border border-rose-100 shadow-sm">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="text-right">
-            <h3 className="text-2xl font-black text-gray-800 font-heebo flex items-center gap-2 justify-end">
+            <h3 className="text-2xl font-black text-[#2B2B2B] font-heebo flex items-center gap-2 justify-end">
               לוח משימות צוות
               <ListTodo className="text-rose-500" />
             </h3>
-            <p className="text-sm text-gray-400 font-bold">ניהול תפעולי יומי לפי סטטוס ודדליינים</p>
+            <p className="text-sm text-[#7A7A7A] font-bold">ניהול תפעולי יומי לפי סטטוס ודדליינים</p>
           </div>
           <div className="flex items-center gap-2">
             {!isViewer && (
@@ -568,16 +568,16 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
         </div>
       </div>
 
-      <div className="bg-white rounded-[2.5rem] p-5 border border-gray-100 shadow-sm">
+      <div className="bg-white rounded-[2.5rem] p-5 border border-rose-100 shadow-sm">
         <div className="flex items-center justify-end gap-2 mb-4">
-          <span className="text-xs font-black text-gray-400 uppercase tracking-widest">סינון</span>
-          <ListFilter className="text-gray-400" size={16} />
+          <span className="text-xs font-black text-[#7A7A7A] uppercase tracking-widest">סינון</span>
+          <ListFilter className="text-[#7A7A7A]" size={16} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <select
             value={assigneeFilter}
             onChange={(e) => setAssigneeFilter(e.target.value)}
-            className="px-4 py-3 rounded-2xl border border-gray-100 bg-slate-50 text-sm font-bold outline-none"
+            className="px-4 py-3 rounded-2xl border border-rose-100 bg-[#fff1f8] text-sm font-bold outline-none"
           >
             <option value="all">כל העובדים</option>
             <option value="unassigned">ללא שיוך</option>
@@ -588,7 +588,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as TaskPriority | 'הכל')}
-            className="px-4 py-3 rounded-2xl border border-gray-100 bg-slate-50 text-sm font-bold outline-none"
+            className="px-4 py-3 rounded-2xl border border-rose-100 bg-[#fff1f8] text-sm font-bold outline-none"
           >
             <option value="הכל">כל העדיפויות</option>
             {TASK_PRIORITIES.map((priority) => (
@@ -600,12 +600,12 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
             className={`px-4 py-3 rounded-2xl border text-sm font-black transition-all ${
               showOverdueOnly
                 ? 'bg-rose-50 text-rose-700 border-rose-200'
-                : 'bg-slate-50 text-slate-500 border-slate-100'
+                : 'bg-[#fff1f8] text-[#7A7A7A] border-rose-200'
             }`}
           >
             {showOverdueOnly ? 'מציג רק מאחרות' : 'הצג רק מאחרות'}
           </button>
-          <div className="px-4 py-3 rounded-2xl bg-slate-900 text-white text-sm font-black text-center">
+          <div className="px-4 py-3 rounded-2xl bg-[#6f2f54] text-white text-sm font-black text-center">
             דחופות+מאחרות: {summary.urgentOrOverdue}
           </div>
         </div>
@@ -632,8 +632,8 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
             className={`bg-white rounded-[2rem] border p-4 shadow-sm min-h-72 ${STATUS_STYLES[status]}`}
           >
             <div className="flex justify-between items-center mb-4">
-              <span className="text-xs font-black text-gray-400">{groupedTasks[status].length} משימות</span>
-              <h4 className="text-lg font-black text-gray-800">{status}</h4>
+              <span className="text-xs font-black text-[#7A7A7A]">{groupedTasks[status].length} משימות</span>
+              <h4 className="text-lg font-black text-[#2B2B2B]">{status}</h4>
             </div>
 
             <div className="space-y-3">
@@ -653,7 +653,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                     onDragEnd={() => setDraggedTaskId(null)}
                     onClick={() => setActiveTask(task)}
                     className={`rounded-2xl border p-4 bg-white shadow-sm transition-all cursor-pointer ${
-                      overdue ? 'border-rose-200 ring-2 ring-rose-100' : 'border-gray-100'
+                      overdue ? 'border-rose-200 ring-2 ring-rose-100' : 'border-rose-100'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
@@ -699,9 +699,9 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                         )}
                       </div>
                       <div className="text-right min-w-0">
-                        <p className="font-black text-gray-800 leading-tight">{task.title}</p>
+                        <p className="font-black text-[#2B2B2B] leading-tight">{task.title}</p>
                         {task.description && (
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{task.description}</p>
+                          <p className="text-xs text-[#7A7A7A] mt-1 line-clamp-2">{task.description}</p>
                         )}
                       </div>
                     </div>
@@ -722,19 +722,19 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                       )}
                     </div>
 
-                    <div className="text-[11px] text-gray-500 mt-3 space-y-1">
+                    <div className="text-[11px] text-[#7A7A7A] mt-3 space-y-1">
                       <p className="flex items-center gap-1 justify-end">
-                        <CalendarClock size={12} className={overdue ? 'text-rose-500' : dueToday ? 'text-amber-500' : 'text-gray-400'} />
+                        <CalendarClock size={12} className={overdue ? 'text-rose-500' : dueToday ? 'text-amber-500' : 'text-[#7A7A7A]'} />
                         <span className={overdue ? 'text-rose-600 font-black' : dueToday ? 'text-amber-700 font-black' : ''}>
                           {formatTaskDueDate(task.dueAt)}
                         </span>
                       </p>
                       <p className="flex items-center gap-1 justify-end">
-                        <UserCircle2 size={12} className="text-gray-400" />
+                        <UserCircle2 size={12} className="text-[#7A7A7A]" />
                         {assigneeName || 'ללא שיוך'}
                       </p>
                       {(task.orderId || task.folderId || task.clientId) && (
-                        <p className="text-[10px] text-slate-500 font-bold">
+                        <p className="text-[10px] text-[#7A7A7A] font-bold">
                           {task.orderId && ordersById.get(task.orderId) && `הזמנה #${ordersById.get(task.orderId)?.displayId}`}
                           {!task.orderId && task.folderId && foldersById.get(task.folderId)?.name}
                           {!task.orderId && !task.folderId && task.clientId && clientsById.get(task.clientId)?.name}
@@ -742,12 +742,12 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                       )}
                     </div>
 
-                    <div className="pt-3 mt-3 border-t border-gray-100 grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="pt-3 mt-3 border-t border-rose-100 grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
                       <select
                         value={task.status}
                         disabled={!canEditTask(task) || isSaving}
                         onChange={(e) => moveTaskToStatus(task, e.target.value as TaskStatus)}
-                        className="px-2 py-2 rounded-xl border border-gray-100 text-xs font-black bg-slate-50 outline-none"
+                        className="px-2 py-2 rounded-xl border border-rose-100 text-xs font-black bg-[#fff1f8] outline-none"
                       >
                         {TASK_STATUSES.map((taskStatus) => (
                           <option key={taskStatus} value={taskStatus}>{taskStatus}</option>
@@ -757,7 +757,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                         value={task.assigneeUserId || ''}
                         disabled={!canEditTask(task) || isSaving}
                         onChange={(e) => reassignTask(task, e.target.value)}
-                        className="px-2 py-2 rounded-xl border border-gray-100 text-xs font-black bg-slate-50 outline-none"
+                        className="px-2 py-2 rounded-xl border border-rose-100 text-xs font-black bg-[#fff1f8] outline-none"
                       >
                         <option value="">ללא שיוך</option>
                         {allUsers.map((user) => (
@@ -785,7 +785,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
       {isModalOpen && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden">
-            <div className="p-6 bg-slate-900 text-white text-right">
+            <div className="p-6 bg-[#6f2f54] text-white text-right">
               <h4 className="text-2xl font-black font-heebo">{editingTask ? 'עריכת משימה' : 'יצירת משימה חדשה'}</h4>
               <p className="text-xs text-slate-300 mt-1">המשימה נוצרת אוטומטית עבור היום הנוכחי</p>
             </div>
@@ -797,7 +797,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                 </div>
               )}
 
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-black text-slate-700">
+              <div className="p-4 rounded-2xl bg-[#fff1f8] border border-rose-200 text-sm font-black text-slate-700">
                 {getCreateContextLabel()}
               </div>
 
@@ -806,14 +806,14 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                 onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
                 placeholder="כותרת משימה"
                 required
-                className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
+                className="w-full px-4 py-3 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold outline-none"
               />
 
               <textarea
                 value={form.description}
                 onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                 placeholder="תיאור המשימה"
-                className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none min-h-24"
+                className="w-full px-4 py-3 rounded-2xl bg-[#fff1f8] border border-rose-200 font-bold outline-none min-h-24"
               />
 
               <div className="flex gap-3 pt-3">
@@ -824,7 +824,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                     setEditingTask(null);
                     setForm(buildDefaultForm(null));
                   }}
-                  className="flex-1 py-3 text-gray-500 font-black rounded-2xl border border-gray-100"
+                  className="flex-1 py-3 text-[#7A7A7A] font-black rounded-2xl border border-rose-100"
                 >
                   ביטול
                 </button>
@@ -861,7 +861,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
             <button
               onClick={() => setIsClearCompletedModalOpen(false)}
               disabled={isSaving}
-              className="absolute mt-[-12px] mr-[-12px] right-8 top-8 p-2 rounded-full text-gray-300 hover:text-gray-500 transition-colors disabled:opacity-50"
+              className="absolute mt-[-12px] mr-[-12px] right-8 top-8 p-2 rounded-full text-gray-300 hover:text-[#7A7A7A] transition-colors disabled:opacity-50"
               aria-label="סגור"
             >
               <X size={18} />
@@ -869,8 +869,8 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
             <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-amber-500 mx-auto mb-6">
               <CheckCircle2 size={40} />
             </div>
-            <h3 className="text-2xl font-black text-gray-800 mb-2">ניקוי משימות שהושלמו</h3>
-            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+            <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">ניקוי משימות שהושלמו</h3>
+            <p className="text-sm text-[#7A7A7A] mb-8 leading-relaxed">
               יימחקו לצמיתות <b>{completedTasksCount}</b> משימות שהושלמו.<br />
               <span className="text-rose-600 font-bold">פעולה זו היא סופית.</span>
             </p>
@@ -878,7 +878,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
               <button
                 onClick={() => setIsClearCompletedModalOpen(false)}
                 disabled={isSaving}
-                className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all disabled:opacity-50"
+                className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all disabled:opacity-50"
               >
                 ביטול
               </button>
@@ -899,7 +899,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
           <div className="relative bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center animate-in zoom-in duration-200">
             <button
               onClick={() => setTaskToDelete(null)}
-              className="absolute mt-[-12px] mr-[-12px] right-8 top-8 p-2 rounded-full text-gray-300 hover:text-gray-500 transition-colors"
+              className="absolute mt-[-12px] mr-[-12px] right-8 top-8 p-2 rounded-full text-gray-300 hover:text-[#7A7A7A] transition-colors"
               aria-label="סגור"
             >
               <X size={18} />
@@ -907,8 +907,8 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
             <div className="w-20 h-20 bg-rose-50 rounded-3xl flex items-center justify-center text-rose-500 mx-auto mb-6">
               <ShieldAlert size={40} className="animate-pulse" />
             </div>
-            <h3 className="text-2xl font-black text-gray-800 mb-2">מחיקת משימה</h3>
-            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+            <h3 className="text-2xl font-black text-[#2B2B2B] mb-2">מחיקת משימה</h3>
+            <p className="text-sm text-[#7A7A7A] mb-8 leading-relaxed">
               האם למחוק את <b>{taskToDelete.title}</b>?<br />
               <span className="text-rose-600 font-bold">פעולה זו היא סופית.</span>
             </p>
@@ -916,7 +916,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
               <button
                 onClick={() => setTaskToDelete(null)}
                 disabled={isSaving}
-                className="flex-1 py-4 font-black text-gray-400 active:scale-95 transition-all disabled:opacity-50"
+                className="flex-1 py-4 font-black text-[#7A7A7A] active:scale-95 transition-all disabled:opacity-50"
               >
                 ביטול
               </button>
@@ -939,7 +939,7 @@ const SummaryCard: React.FC<{ title: string; value: number; tone: 'rose' | 'ambe
   const styles = {
     rose: 'bg-rose-50 border-rose-100 text-rose-700',
     amber: 'bg-amber-50 border-amber-100 text-amber-700',
-    slate: 'bg-slate-50 border-slate-100 text-slate-700',
+    slate: 'bg-[#fff1f8] border-rose-200 text-slate-700',
   };
   return (
     <div className={`rounded-2xl border p-4 ${styles[tone]}`}>
@@ -964,7 +964,7 @@ const TaskExecutionModal: React.FC<{
   return (
     <div className="fixed inset-0 z-[205] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden">
-        <div className="p-6 bg-slate-900 text-white text-right flex justify-between items-center">
+        <div className="p-6 bg-[#6f2f54] text-white text-right flex justify-between items-center">
           <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors">
             <X size={18} />
           </button>
@@ -975,17 +975,17 @@ const TaskExecutionModal: React.FC<{
         </div>
 
         <div className="p-6 space-y-4 text-right">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-700">
+          <div className="p-4 rounded-2xl bg-[#fff1f8] border border-rose-200 text-sm font-bold text-slate-700">
             סטטוס: <span className="text-rose-600">{task.status}</span> | יעד: {formatTaskDueDate(task.dueAt)}
           </div>
 
           {kind === 'order' && orderSnapshot && (
             <div className="space-y-2 p-4 rounded-2xl border border-indigo-100 bg-indigo-50/50">
               <p className="text-xs font-black text-indigo-600">תיקון יחיד</p>
-              <p className="font-black text-gray-800">#{orderSnapshot.displayId} - {orderSnapshot.itemType}</p>
-              <p className="text-sm text-gray-600">{orderSnapshot.description || 'ללא תיאור'}</p>
-              <p className="text-xs text-gray-500">לקוח: {orderSnapshot.clientName}</p>
-              {orderSnapshot.folderName && <p className="text-xs text-gray-500">תיק: {orderSnapshot.folderName}</p>}
+              <p className="font-black text-[#2B2B2B]">#{orderSnapshot.displayId} - {orderSnapshot.itemType}</p>
+              <p className="text-sm text-[#7A7A7A]">{orderSnapshot.description || 'ללא תיאור'}</p>
+              <p className="text-xs text-[#7A7A7A]">לקוח: {orderSnapshot.clientName}</p>
+              {orderSnapshot.folderName && <p className="text-xs text-[#7A7A7A]">תיק: {orderSnapshot.folderName}</p>}
             </div>
           )}
 
@@ -996,12 +996,12 @@ const TaskExecutionModal: React.FC<{
                 <span className="text-xs font-black text-violet-700">תיק שלם</span>
               </div>
               {checklist.length === 0 && (
-                <div className="p-4 rounded-2xl border border-gray-100 text-sm text-gray-500">
+                <div className="p-4 rounded-2xl border border-rose-100 text-sm text-[#7A7A7A]">
                   אין תיקונים בתיק כרגע.
                 </div>
               )}
               {checklist.map((item) => (
-                <label key={item.orderId} className="flex items-start justify-between gap-3 p-4 rounded-2xl border border-gray-100 bg-white">
+                <label key={item.orderId} className="flex items-start justify-between gap-3 p-4 rounded-2xl border border-rose-100 bg-white">
                   <input
                     type="checkbox"
                     checked={item.done}
@@ -1010,8 +1010,8 @@ const TaskExecutionModal: React.FC<{
                     className="mt-1 w-5 h-5 accent-emerald-600"
                   />
                   <div className="text-right flex-1">
-                    <p className="font-black text-gray-800">#{item.displayId} - {item.itemType}</p>
-                    <p className="text-xs text-gray-500">{item.description || 'ללא תיאור'}</p>
+                    <p className="font-black text-[#2B2B2B]">#{item.displayId} - {item.itemType}</p>
+                    <p className="text-xs text-[#7A7A7A]">{item.description || 'ללא תיאור'}</p>
                   </div>
                 </label>
               ))}
@@ -1019,8 +1019,8 @@ const TaskExecutionModal: React.FC<{
           )}
 
           {kind === 'general' && (
-            <div className="space-y-2 p-4 rounded-2xl border border-gray-100 bg-gray-50">
-              <p className="text-xs font-black text-gray-500">משימה כללית</p>
+            <div className="space-y-2 p-4 rounded-2xl border border-rose-100 bg-[#fff3f9]">
+              <p className="text-xs font-black text-[#7A7A7A]">משימה כללית</p>
               <p className="text-sm text-gray-700 whitespace-pre-wrap">{task.description || 'ללא תיאור'}</p>
             </div>
           )}

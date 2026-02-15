@@ -617,14 +617,14 @@ const App: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col md:flex-row h-screen bg-gray-50 overflow-hidden font-assistant selection:bg-rose-100"
+      className="malki-theme flex flex-col md:flex-row h-screen bg-[#fff4f8] overflow-hidden font-assistant selection:bg-rose-200"
       onTouchStart={handleMobileTouchStart}
       onTouchMove={handleMobileTouchMove}
       onTouchEnd={handleMobileTouchEnd}
       onTouchCancel={handleMobileTouchEnd}
     >
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 bg-white border-l border-gray-200 flex-col shadow-lg z-30">
+      <aside className="hidden md:flex w-64 bg-white/95 border-l border-rose-200 flex-col shadow-xl z-30 backdrop-blur">
         <div className="p-6">
           <h1 className="flex items-center">
             <img
@@ -636,12 +636,12 @@ const App: React.FC = () => {
         </div>
 
         <div className="px-6 py-2 mb-2">
-           <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex items-center gap-3">
+           <div className="bg-[#fff0f7] rounded-xl p-3 border border-rose-200 flex items-center gap-3">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-rose-600 shadow-sm">
                 <UserIcon size={16} />
               </div>
               <div className="min-w-0">
-                 <p className="text-xs font-bold text-gray-800 truncate">{currentUser.username}</p>
+                 <p className="text-xs font-bold text-[#2B2B2B] truncate">{currentUser.username}</p>
                  <p className="text-[9px] text-rose-500 font-black uppercase">{currentUser.role === 'super_admin' ? 'מנהל על' : currentUser.role === 'admin' ? 'מנהל' : 'צוות'}</p>
               </div>
            </div>
@@ -654,8 +654,8 @@ const App: React.FC = () => {
               onClick={() => handleNavigate(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === item.id
-                  ? 'bg-rose-50 text-rose-600 font-semibold border border-rose-100'
-                  : 'text-gray-500 hover:bg-gray-100'
+                  ? 'bg-[#ffeaf4] text-rose-700 font-semibold border border-rose-300 shadow-sm'
+                  : 'text-[#7a7a7a] border border-transparent hover:bg-[#fff1f8] hover:border-rose-200'
               }`}
             >
               {item.icon}
@@ -670,8 +670,8 @@ const App: React.FC = () => {
         </nav>
         
         {/* Connection Status & Logout */}
-        <div className="p-4 border-t border-gray-100 space-y-2 mt-auto">
-           <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold ${isCloud ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'}`}>
+        <div className="p-4 border-t border-rose-100 space-y-2 mt-auto">
+           <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold ${isCloud ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-[#fff0f7] text-[#7a7a7a] border border-rose-200'}`}>
               {isCloud ? <Cloud size={14} /> : <Smartphone size={14} />}
               <span>{isCloud ? 'מחובר לענן' : 'מצב מקומי'}</span>
            </div>
@@ -687,12 +687,12 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 z-20 shadow-sm shrink-0">
+        <header className="h-16 bg-white/95 border-b border-rose-200 flex items-center justify-between px-4 md:px-8 z-20 shadow-sm shrink-0 backdrop-blur">
           <div className="flex items-center gap-2">
              <div className="md:hidden w-9 h-9 rounded-lg overflow-hidden border border-rose-100 shadow-sm bg-white shrink-0">
               <img src="/icons/malki-style-logo-192.png" alt="Malki Style" className="w-full h-full object-cover" />
              </div>
-             <h2 className="text-base md:text-lg font-bold text-gray-800 truncate">
+             <h2 className="text-base md:text-lg font-bold text-[#2B2B2B] truncate">
               {NAV_ITEMS.find(n => n.id === activeTab)?.label}
             </h2>
           </div>
@@ -708,23 +708,23 @@ const App: React.FC = () => {
 
             <button 
               onClick={loadAllData}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border active:scale-95 transition-all ${isCloud ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50 border-gray-100'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border active:scale-95 transition-all ${isCloud ? 'bg-emerald-50 border-emerald-100' : 'bg-[#fff0f7] border-rose-200'}`}
             >
               {isSyncing ? (
                 <RefreshCw className="w-3 h-3 text-rose-500 animate-spin" />
               ) : isCloud ? (
                 <Cloud className="w-3 h-3 text-emerald-500" />
               ) : (
-                <CloudOff className="w-3 h-3 text-gray-400" />
+                <CloudOff className="w-3 h-3 text-[#7A7A7A]" />
               )}
-              <span className={`text-[10px] font-bold hidden sm:inline ${isCloud ? 'text-emerald-700' : 'text-gray-500'}`}>
+              <span className={`text-[10px] font-bold hidden sm:inline ${isCloud ? 'text-emerald-700' : 'text-[#7A7A7A]'}`}>
                 {isSyncing ? 'מרענן...' : isCloud ? 'סנכרון ענן' : 'מקומי'}
               </span>
             </button>
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto pb-32 md:pb-8 w-full bg-gray-50/50">
+        <main className="flex-1 overflow-y-auto pb-32 md:pb-8 w-full bg-transparent">
           <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
             {renderContent()}
           </div>
@@ -739,7 +739,7 @@ const App: React.FC = () => {
         )}
 
         {isIncomeGateOpen && (
-          <div className="fixed inset-0 z-[70] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4" onClick={closeIncomeGate}>
+          <div className="fixed inset-0 z-[70] bg-[#60254366] backdrop-blur-sm flex items-center justify-center p-4" onClick={closeIncomeGate}>
             <form
               onSubmit={submitIncomeGatePassword}
               onClick={(event) => event.stopPropagation()}
@@ -747,20 +747,20 @@ const App: React.FC = () => {
               dir="rtl"
             >
               <div className="flex items-center gap-3 justify-end">
-                <h3 className="text-xl font-black text-gray-800 font-heebo">אימות סיסמה</h3>
+                <h3 className="text-xl font-black text-[#2B2B2B] font-heebo">אימות סיסמה</h3>
                 <div className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center">
                   <Lock size={18} />
                 </div>
               </div>
-              <p className="text-sm text-gray-500 font-bold">{incomeGateDescription}</p>
+              <p className="text-sm text-[#7A7A7A] font-bold">{incomeGateDescription}</p>
               <div className="space-y-2">
-                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">סיסמה</label>
+                <label className="block text-[11px] font-black text-[#7A7A7A] uppercase tracking-widest">סיסמה</label>
                 <input
                   type="password"
                   value={incomeGatePassword}
                   onChange={(event) => setIncomeGatePassword(event.target.value)}
                   autoFocus
-                  className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-4 outline-none focus:ring-4 focus:ring-rose-200/50 font-bold text-gray-700"
+                  className="w-full bg-[#fff3f9] border border-rose-100 rounded-2xl py-4 px-4 outline-none focus:ring-4 focus:ring-[#e5488640] font-bold text-gray-700"
                   placeholder="הזן סיסמה"
                 />
               </div>
@@ -771,7 +771,7 @@ const App: React.FC = () => {
                 </div>
               )}
               <div className="flex gap-3">
-                <button type="button" onClick={closeIncomeGate} className="flex-1 py-3 rounded-2xl bg-gray-100 text-gray-600 font-black hover:bg-gray-200 transition-colors">
+                <button type="button" onClick={closeIncomeGate} className="flex-1 py-3 rounded-2xl bg-gray-100 text-[#7A7A7A] font-black hover:bg-gray-200 transition-colors">
                   ביטול
                 </button>
                 <button type="submit" className="flex-1 py-3 rounded-2xl bg-rose-600 text-white font-black hover:bg-rose-700 transition-colors">
@@ -798,7 +798,7 @@ const App: React.FC = () => {
         {/* Mobile Drawer Backdrop */}
         {hasMobileOverflowNav && (
           <div
-            className={`md:hidden fixed inset-0 bg-gradient-to-b from-slate-900/60 via-rose-950/35 to-slate-900/60 backdrop-blur-[1px] transition-opacity z-[45] ${isMobileDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+            className={`md:hidden fixed inset-0 bg-gradient-to-b from-[#8a3560]/60 via-rose-950/35 to-[#662346]/60 backdrop-blur-[1px] transition-opacity z-[45] ${isMobileDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
             onClick={() => setIsMobileDrawerOpen(false)}
             aria-hidden={!isMobileDrawerOpen}
           />
@@ -830,7 +830,7 @@ const App: React.FC = () => {
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
                     activeTab === item.id
                       ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold border border-rose-300 shadow-lg shadow-rose-200/70'
-                      : 'text-slate-600 bg-white/80 border border-rose-100/80 hover:bg-rose-50 hover:border-rose-200'
+                      : 'text-[#7a7a7a] bg-white/90 border border-rose-200 hover:bg-rose-50 hover:border-rose-300'
                   }`}
                 >
                   <span className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${
@@ -852,7 +852,7 @@ const App: React.FC = () => {
           className={`md:hidden fixed flex justify-around items-center z-40 h-24 px-1 pb-safe backdrop-blur-2xl transition-all duration-200 ${
             isDashboardActive
               ? 'bottom-2 left-2 right-2 rounded-[1.9rem] bg-[#fff4f9]/97 border border-[#e5488668] shadow-[0_10px_30px_rgba(229,72,134,0.24)]'
-              : 'bottom-0 left-0 right-0 bg-white/95 border-t border-gray-100 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]'
+              : 'bottom-2 left-2 right-2 rounded-[1.9rem] bg-[#fff4f9]/97 border border-[#e5488658] shadow-[0_10px_26px_rgba(229,72,134,0.2)]'
           }`}
         >
           {mobileNavItems.map((item) => (
@@ -862,10 +862,10 @@ const App: React.FC = () => {
               className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-3 h-full transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630] ${
                 isDashboardActive
                   ? `active:bg-[#fbe0ec] rounded-2xl ${activeTab === item.id ? 'text-[#E54886] bg-[#ffedf6] shadow-[0_6px_16px_rgba(229,72,134,0.17)]' : 'text-[#7A7A7A] bg-[#fff8fc]'}`
-                  : `active:bg-gray-50 ${activeTab === item.id ? 'text-rose-600' : 'text-gray-400'}`
+                  : `active:bg-[#fbe0ec] rounded-2xl ${activeTab === item.id ? 'text-[#E54886] bg-[#ffedf6] shadow-[0_6px_14px_rgba(229,72,134,0.16)]' : 'text-[#7A7A7A] bg-[#fff8fc]'}`
               }`}
             >
-              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'} ${isDashboardActive ? (activeTab === item.id ? 'rounded-full bg-[#f8d5e5] p-1.5 shadow-[0_4px_10px_rgba(229,72,134,0.16)]' : 'rounded-full bg-[#fff0f7] p-1.5') : ''}`}>
+              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'} ${isDashboardActive ? (activeTab === item.id ? 'rounded-full bg-[#f8d5e5] p-1.5 shadow-[0_4px_10px_rgba(229,72,134,0.16)]' : 'rounded-full bg-[#fff0f7] p-1.5') : (activeTab === item.id ? 'rounded-full bg-[#f8d5e5] p-1.5 shadow-[0_4px_10px_rgba(229,72,134,0.14)]' : 'rounded-full bg-[#fff0f7] p-1.5')}`}>
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 28 })}
                 {item.id === 'tasks' && taskAlertCount > 0 && (
                   <span className={`absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-white text-[9px] font-black ${isDashboardActive ? 'bg-[#E54886]' : 'bg-rose-600'}`}>
@@ -886,12 +886,12 @@ const App: React.FC = () => {
               className={`w-16 h-16 rounded-full flex items-center justify-center text-white border-4 border-white mb-1 active:scale-90 transition-all duration-200 ${
                 isDashboardActive
                   ? 'bg-white border-[#e548867f] shadow-[0_12px_24px_rgba(229,72,134,0.29)]'
-                  : 'bg-gradient-to-br from-slate-900 to-slate-700 shadow-2xl'
+                  : 'bg-white border-[#e5488675] shadow-[0_12px_24px_rgba(229,72,134,0.25)]'
               }`}
              >
-                <QrCode className={`w-8 h-8 ${isDashboardActive ? 'text-[#E54886]' : 'text-rose-400'}`} />
+                <QrCode className={`w-8 h-8 ${isDashboardActive ? 'text-[#E54886]' : 'text-[#E54886]'}`} />
              </div>
-             <span className={`text-[11px] font-black px-3 py-1 rounded-full shadow-sm border ${isDashboardActive ? 'text-[#7A7A7A] bg-[#fff5fa] border-[#e5488668]' : 'text-slate-700 bg-white border-slate-100'}`}>סריקת QR</span>
+             <span className={`text-[11px] font-black px-3 py-1 rounded-full shadow-sm border ${isDashboardActive ? 'text-[#7A7A7A] bg-[#fff5fa] border-[#e5488668]' : 'text-[#7A7A7A] bg-[#fff5fa] border-[#e5488658]'}`}>סריקת QR</span>
           </button>
         </nav>
       </div>

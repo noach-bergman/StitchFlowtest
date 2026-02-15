@@ -88,7 +88,7 @@ const IncomeSummary: React.FC<IncomeSummaryProps> = ({ folders, orders }) => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-rose-900 p-10 md:p-12 rounded-[3rem] text-white shadow-2xl relative overflow-hidden text-right">
+      <div className="bg-gradient-to-br from-[#8a3560] via-[#772d56] to-rose-900 p-10 md:p-12 rounded-[3rem] text-white shadow-2xl relative overflow-hidden text-right">
         <div className="absolute top-0 left-0 w-full h-full opacity-10">
            <div className="absolute top-10 right-10 w-64 h-64 bg-white rounded-full blur-[100px]"></div>
            <div className="absolute bottom-10 left-10 w-64 h-64 bg-rose-500 rounded-full blur-[100px]"></div>
@@ -100,7 +100,7 @@ const IncomeSummary: React.FC<IncomeSummaryProps> = ({ folders, orders }) => {
                  Full Volume Analytics
               </div>
               <h2 className="text-4xl md:text-5xl font-black font-heebo tracking-tighter">סיכום הכנסות וערך עבודה</h2>
-              <p className="text-slate-400 mt-4 font-bold max-w-lg">הדוח מציג כעת את הערך הכולל של כל התיקונים שנרשמו במערכת (כולל ייבוא היסטורי), ללא קשר לסטטוס התשלום.</p>
+              <p className="text-rose-100/90 mt-4 font-bold max-w-lg">הדוח מציג כעת את הערך הכולל של כל התיקונים שנרשמו במערכת (כולל ייבוא היסטורי), ללא קשר לסטטוס התשלום.</p>
            </div>
            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
               <p className="text-xs font-black text-rose-300 uppercase tracking-widest mb-1">ערך עבודה כולל (כל הזמנים)</p>
@@ -149,7 +149,7 @@ const IncomeSummary: React.FC<IncomeSummaryProps> = ({ folders, orders }) => {
         />
       </div>
 
-      <div className="bg-white p-6 rounded-[2rem] border border-gray-100 flex items-center gap-4 text-gray-500 shadow-sm text-right" dir="rtl">
+      <div className="bg-white p-6 rounded-[2rem] border border-rose-100 flex items-center gap-4 text-[#7A7A7A] shadow-sm text-right" dir="rtl">
          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 shrink-0">
             <TrendingUp size={20} />
          </div>
@@ -181,27 +181,27 @@ const PeriodCard: React.FC<PeriodCardProps> = ({ title, amount, count, dateLabel
   }[color];
 
   return (
-    <div className={`bg-white rounded-[2.5rem] p-8 shadow-sm border border-gray-100 flex flex-col h-[420px] transition-all hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden text-right`}>
+    <div className={`bg-white rounded-[2.5rem] p-8 shadow-sm border border-rose-100 flex flex-col h-[420px] transition-all hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden text-right`}>
       <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full opacity-5 ${styles.btn}`}></div>
       
       <div className="flex justify-between items-center mb-8 relative z-10">
          <div className={`w-12 h-12 ${styles.bg} rounded-2xl flex items-center justify-center ${styles.text} shadow-sm group-hover:scale-110 transition-transform`}>
             <Wallet size={24} />
          </div>
-         <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-2xl border border-gray-100">
-            <button onClick={onPrev} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-400 hover:text-gray-900"><ChevronRight size={20} /></button>
+         <div className="flex items-center gap-2 bg-[#fff3f9] p-1.5 rounded-2xl border border-rose-100">
+            <button onClick={onPrev} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-[#7A7A7A] hover:text-gray-900"><ChevronRight size={20} /></button>
             <button 
               onClick={onReset} 
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${isCurrent ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-black transition-all ${isCurrent ? 'bg-white text-gray-900 shadow-sm' : 'text-[#7A7A7A] hover:text-[#7A7A7A]'}`}
             >
               נוכחי
             </button>
-            <button onClick={onNext} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-gray-400 hover:text-gray-900"><ChevronLeft size={20} /></button>
+            <button onClick={onNext} className="p-2 hover:bg-white hover:shadow-sm rounded-xl transition-all text-[#7A7A7A] hover:text-gray-900"><ChevronLeft size={20} /></button>
          </div>
       </div>
 
       <div className="text-right mb-10 flex-1">
-         <h4 className="text-xl font-black text-gray-800 font-heebo">{title}</h4>
+         <h4 className="text-xl font-black text-[#2B2B2B] font-heebo">{title}</h4>
          <div className="flex items-center justify-end gap-1.5 mt-1">
             <span className={`text-xs font-black uppercase tracking-tighter ${styles.text}`}>{dateLabel}</span>
             <Calendar size={12} className="text-gray-300" />
@@ -218,8 +218,8 @@ const PeriodCard: React.FC<PeriodCardProps> = ({ title, amount, count, dateLabel
          
          <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-               <span className="text-xs font-black text-gray-800">{count}</span>
-               <span className="text-[10px] font-bold text-gray-400">תיקונים סה"כ</span>
+               <span className="text-xs font-black text-[#2B2B2B]">{count}</span>
+               <span className="text-[10px] font-bold text-[#7A7A7A]">תיקונים סה"כ</span>
             </div>
             <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${styles.bg} ${styles.text}`}>
                {isCurrent ? 'תקופה פעילה' : 'היסטוריה'}
