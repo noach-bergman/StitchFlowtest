@@ -861,11 +861,11 @@ const App: React.FC = () => {
               onClick={() => handleNavigate(item.id)}
               className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-3 h-full transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630] ${
                 isDashboardActive
-                  ? `active:bg-[#fbe0ec] border rounded-2xl ${activeTab === item.id ? 'text-[#E54886] border-[#e548868f] bg-[#ffedf6] shadow-[0_6px_16px_rgba(229,72,134,0.17)]' : 'text-[#7A7A7A] border-[#e5488648] bg-[#fff8fc]'}`
+                  ? `active:bg-[#fbe0ec] rounded-2xl ${activeTab === item.id ? 'text-[#E54886] bg-[#ffedf6] shadow-[0_6px_16px_rgba(229,72,134,0.17)]' : 'text-[#7A7A7A] bg-[#fff8fc]'}`
                   : `active:bg-gray-50 ${activeTab === item.id ? 'text-rose-600' : 'text-gray-400'}`
               }`}
             >
-              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'} ${isDashboardActive ? (activeTab === item.id ? 'rounded-full bg-[#f8d5e5] border border-[#e5488685] p-1.5 shadow-[0_4px_10px_rgba(229,72,134,0.16)]' : 'rounded-full bg-[#fff0f7] border border-[#e5488648] p-1.5') : ''}`}>
+              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'} ${isDashboardActive ? (activeTab === item.id ? 'rounded-full bg-[#f8d5e5] p-1.5 shadow-[0_4px_10px_rgba(229,72,134,0.16)]' : 'rounded-full bg-[#fff0f7] p-1.5') : ''}`}>
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 28 })}
                 {item.id === 'tasks' && taskAlertCount > 0 && (
                   <span className={`absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-white text-[9px] font-black ${isDashboardActive ? 'bg-[#E54886]' : 'bg-rose-600'}`}>
