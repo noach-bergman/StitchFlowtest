@@ -790,7 +790,7 @@ const App: React.FC = () => {
           >
             <div className="relative">
               <div className={`absolute inset-0 blur-sm rounded-l-full transition-opacity ${isMobileDrawerOpen ? 'opacity-90 bg-rose-500/50' : 'opacity-60 bg-rose-300/50'}`} />
-              <div className={`relative w-2 h-16 rounded-l-full transition-all bg-gradient-to-b from-rose-400 via-pink-500 to-orange-300 ${isMobileDrawerOpen ? 'shadow-[0_0_14px_rgba(244,63,94,0.45)]' : 'shadow-[0_0_8px_rgba(251,113,133,0.3)]'}`} />
+              <div className={`relative w-2 h-16 rounded-l-full transition-all bg-gradient-to-b from-rose-300 via-pink-500 to-rose-400 ${isMobileDrawerOpen ? 'shadow-[0_0_14px_rgba(244,63,94,0.45)]' : 'shadow-[0_0_8px_rgba(251,113,133,0.3)]'}`} />
             </div>
           </div>
         )}
@@ -811,13 +811,13 @@ const App: React.FC = () => {
             aria-modal={isMobileDrawerOpen}
             aria-hidden={!isMobileDrawerOpen}
             aria-label="ניווט נוסף"
-            className={`md:hidden fixed top-0 bottom-0 right-0 w-72 max-w-[85vw] bg-gradient-to-b from-rose-50 via-white to-orange-50 border-l border-rose-100 shadow-2xl z-50 transform transition-transform duration-300 ease-out flex flex-col overflow-hidden ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
+            className={`md:hidden fixed top-0 bottom-0 right-0 w-72 max-w-[85vw] bg-[#fff6fa] border-l border-[#e5488650] shadow-[0_16px_36px_rgba(229,72,134,0.2)] z-50 transform transition-transform duration-300 ease-out flex flex-col overflow-hidden ${isMobileDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}
           >
-            <div className="relative px-4 py-5 border-b border-rose-100 bg-gradient-to-r from-rose-100/80 via-pink-50 to-orange-100/70">
+            <div className="relative px-4 py-5 border-b border-[#e5488640] bg-gradient-to-r from-[#ffe8f3] via-[#fff3f9] to-[#ffe8f3]">
               <div className="absolute -top-8 -left-4 w-24 h-24 rounded-full bg-rose-300/20 blur-2xl" />
-              <div className="absolute -bottom-10 right-6 w-24 h-24 rounded-full bg-orange-300/20 blur-2xl" />
-              <p className="relative text-sm font-black text-rose-700">ניווט נוסף</p>
-              <p className="relative text-[11px] text-rose-500/90 mt-1">עמודים שלא מופיעים בסרגל התחתון</p>
+              <div className="absolute -bottom-10 right-6 w-24 h-24 rounded-full bg-rose-300/20 blur-2xl" />
+              <p className="relative text-sm font-black text-[#8b2f5d]">ניווט נוסף</p>
+              <p className="relative text-[11px] text-[#b75987] mt-1">עמודים שלא מופיעים בסרגל התחתון</p>
             </div>
             <nav className="flex-1 overflow-y-auto p-3 space-y-2">
               {mobileOverflowNavItems.map((item) => (
@@ -829,14 +829,14 @@ const App: React.FC = () => {
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
                     activeTab === item.id
-                      ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white font-semibold border border-rose-300 shadow-lg shadow-rose-200/70'
-                      : 'text-[#7a7a7a] bg-white/90 border border-rose-200 hover:bg-rose-50 hover:border-rose-300'
+                      ? 'bg-[#ffe8f3] text-[#E54886] font-semibold border border-[#e5488670] shadow-[0_8px_16px_rgba(229,72,134,0.16)]'
+                      : 'text-[#7a7a7a] bg-white border border-[#e5488638] hover:bg-[#fff1f8] hover:border-[#e5488660]'
                   }`}
                 >
                   <span className={`inline-flex items-center justify-center w-9 h-9 rounded-xl ${
                     activeTab === item.id
-                      ? 'bg-white/20'
-                      : 'bg-gradient-to-br from-rose-100 to-orange-100 text-rose-600'
+                      ? 'bg-[#f8d7e8] text-[#E54886]'
+                      : 'bg-[#fff1f8] text-rose-600'
                   }`}>
                     {item.icon}
                   </span>
@@ -861,11 +861,11 @@ const App: React.FC = () => {
               onClick={() => handleNavigate(item.id)}
               className={`flex flex-col items-center justify-center gap-1.5 flex-1 py-3 h-full transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630] ${
                 isDashboardActive
-                  ? `active:bg-[#fbe0ec] rounded-2xl ${activeTab === item.id ? 'text-[#E54886] bg-[#ffedf6] shadow-[0_6px_16px_rgba(229,72,134,0.17)]' : 'text-[#7A7A7A] bg-[#fff8fc]'}`
-                  : `active:bg-[#fbe0ec] rounded-2xl ${activeTab === item.id ? 'text-[#E54886] bg-[#ffedf6] shadow-[0_6px_14px_rgba(229,72,134,0.16)]' : 'text-[#7A7A7A] bg-[#fff8fc]'}`
+                  ? `${activeTab === item.id ? 'text-[#E54886]' : 'text-[#7A7A7A]'}`
+                  : `${activeTab === item.id ? 'text-[#E54886]' : 'text-[#7A7A7A]'}`
               }`}
             >
-              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'} ${isDashboardActive ? (activeTab === item.id ? 'rounded-full bg-[#f8d5e5] p-1.5 shadow-[0_4px_10px_rgba(229,72,134,0.16)]' : 'rounded-full bg-[#fff0f7] p-1.5') : (activeTab === item.id ? 'rounded-full bg-[#f8d5e5] p-1.5 shadow-[0_4px_10px_rgba(229,72,134,0.14)]' : 'rounded-full bg-[#fff0f7] p-1.5')}`}>
+              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.14]' : 'scale-100'}`}>
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 28 })}
                 {item.id === 'tasks' && taskAlertCount > 0 && (
                   <span className={`absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-white text-[9px] font-black ${isDashboardActive ? 'bg-[#E54886]' : 'bg-rose-600'}`}>
