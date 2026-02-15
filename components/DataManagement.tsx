@@ -21,7 +21,7 @@ const DataManagement: React.FC<DataManagementProps> = ({ onImportSuccess }) => {
 CREATE TABLE clients (id TEXT PRIMARY KEY, name TEXT NOT NULL, phone TEXT, email TEXT, measurements JSONB DEFAULT '{}', notes TEXT, "createdAt" BIGINT NOT NULL);
 CREATE TABLE folders (id TEXT PRIMARY KEY, name TEXT NOT NULL, "clientId" TEXT REFERENCES clients(id) ON DELETE CASCADE, "clientName" TEXT, "createdAt" BIGINT NOT NULL, deadline TEXT, status TEXT DEFAULT 'פעיל', "paidAmount" NUMERIC DEFAULT 0, "isPaid" BOOLEAN DEFAULT false, "isDelivered" BOOLEAN DEFAULT false, "isArchived" BOOLEAN DEFAULT false);
 CREATE TABLE orders (id TEXT PRIMARY KEY, "displayId" TEXT, "folderId" TEXT REFERENCES folders(id) ON DELETE CASCADE, "clientId" TEXT REFERENCES clients(id) ON DELETE CASCADE, "clientName" TEXT, "itemType" TEXT, description TEXT, status TEXT DEFAULT 'חדש', deadline TEXT, price NUMERIC DEFAULT 0, deposit NUMERIC DEFAULT 0, "fabricNotes" TEXT, "createdAt" BIGINT NOT NULL, "updatedAt" BIGINT NOT NULL, "readyAt" BIGINT);
-CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT DEFAULT '', status TEXT DEFAULT 'חדש', priority TEXT DEFAULT 'רגילה', "dueAt" BIGINT, "assigneeUserId" TEXT, "createdByUserId" TEXT NOT NULL, "clientId" TEXT, "folderId" TEXT, "orderId" TEXT, "createdAt" BIGINT NOT NULL, "updatedAt" BIGINT NOT NULL, "completedAt" BIGINT);
+CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT DEFAULT '', kind TEXT NOT NULL DEFAULT 'general', status TEXT DEFAULT 'חדש', priority TEXT DEFAULT 'רגילה', "dueAt" BIGINT, "assigneeUserId" TEXT, "createdByUserId" TEXT NOT NULL, "clientId" TEXT, "folderId" TEXT, "orderId" TEXT, "orderSnapshot" JSONB, "folderChecklist" JSONB, "createdAt" BIGINT NOT NULL, "updatedAt" BIGINT NOT NULL, "completedAt" BIGINT, CONSTRAINT tasks_kind_check CHECK (kind IN ('general', 'order', 'folder')));
 CREATE TABLE inventory (id TEXT PRIMARY KEY, name TEXT NOT NULL, color TEXT, type TEXT, quantity NUMERIC DEFAULT 0, "unitPrice" NUMERIC DEFAULT 0, image TEXT);
 CREATE TABLE users (id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, password TEXT NOT NULL, role TEXT NOT NULL, permissions JSONB DEFAULT '[]', "createdAt" BIGINT);
 
@@ -33,9 +33,53 @@ CREATE POLICY "anon_full" ON tasks FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "anon_full" ON inventory FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "anon_full" ON users FOR ALL USING (true) WITH CHECK (true);`;
 
+  const tasksMigrationCode = `BEGIN;
+
+ALTER TABLE public.tasks
+  ADD COLUMN IF NOT EXISTS kind text,
+  ADD COLUMN IF NOT EXISTS "orderSnapshot" jsonb,
+  ADD COLUMN IF NOT EXISTS "folderChecklist" jsonb;
+
+ALTER TABLE public.tasks
+  ALTER COLUMN kind SET DEFAULT 'general';
+
+UPDATE public.tasks
+SET kind = CASE
+  WHEN "orderId" IS NOT NULL THEN 'order'
+  WHEN "folderId" IS NOT NULL THEN 'folder'
+  ELSE 'general'
+END
+WHERE kind IS NULL;
+
+ALTER TABLE public.tasks
+  ALTER COLUMN kind SET NOT NULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'tasks_kind_check'
+      AND conrelid = 'public.tasks'::regclass
+  ) THEN
+    ALTER TABLE public.tasks
+      ADD CONSTRAINT tasks_kind_check
+      CHECK (kind IN ('general', 'order', 'folder'));
+  END IF;
+END $$;
+
+NOTIFY pgrst, 'reload schema';
+
+COMMIT;`;
+
   const copySql = () => {
     navigator.clipboard.writeText(sqlSetupCode);
     alert("קוד ה-SQL הועתק! הדביקי אותו ב-SQL Editor ב-Supabase.");
+  };
+
+  const copyTasksMigrationSql = () => {
+    navigator.clipboard.writeText(tasksMigrationCode);
+    alert("קוד מיגרציית tasks הועתק! הדביקי אותו ב-SQL Editor ב-Supabase.");
   };
 
   const checkCloud = async () => {
@@ -233,6 +277,17 @@ CREATE POLICY "anon_full" ON users FOR ALL USING (true) WITH CHECK (true);`;
                  <p className="font-black text-xs mb-1">עדכון מפתחות ב-Vercel</p>
                  <p className="text-[10px] text-gray-400 font-bold">ודאי שעדכנת את ה-URL וה-Anon Key בהגדרות ה-Environment Variables.</p>
               </div>
+
+              <button 
+                onClick={copyTasksMigrationSql}
+                className="p-5 bg-amber-50 border border-amber-100 rounded-2xl text-right hover:bg-white hover:border-amber-300 transition-all group flex justify-between items-center md:col-span-2"
+              >
+                 <Code className="text-amber-400 group-hover:text-amber-600 transition-colors" size={20} />
+                 <div>
+                    <p className="font-black text-xs mb-1">העתקת מיגרציית tasks לפרויקט קיים</p>
+                    <p className="text-[10px] text-gray-500 font-bold">לשדרוג טבלת tasks קיימת עם kind/orderSnapshot/folderChecklist.</p>
+                 </div>
+              </button>
            </div>
         </div>
       </div>

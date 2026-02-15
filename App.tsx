@@ -57,6 +57,24 @@ const App: React.FC = () => {
 
   const isCloud = dataService.isCloud();
 
+  const isTasksSchemaMismatchError = (error: any): boolean => {
+    const message = [
+      error?.message,
+      error?.details,
+      error?.hint
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    if (!message.includes('tasks')) return false;
+
+    const schemaSignals = message.includes('schema cache') || message.includes('could not find') || message.includes('column');
+    const taskColumns = message.includes('kind') || message.includes('ordersnapshot') || message.includes('folderchecklist');
+
+    return schemaSignals && taskColumns;
+  };
+
   // Load session from local storage
   useEffect(() => {
     const savedUser = localStorage.getItem('stitchflow_user');
@@ -208,7 +226,11 @@ const App: React.FC = () => {
       await dataService.saveTasks(newTasks);
       setLastSync(new Date());
     } catch (e: any) {
-      alert("שגיאה בשמירה לשרת: " + e.message);
+      if (isTasksSchemaMismatchError(e)) {
+        alert("סכמת מסד הנתונים לא מעודכנת למשימות.\nיש להריץ את מיגרציית tasks ב-Data Management או ב-Supabase SQL Editor, ואז לרענן את האפליקציה.");
+      } else {
+        alert("שגיאה בשמירה לשרת: " + e.message);
+      }
       throw e;
     } finally {
       setIsSyncing(false);
