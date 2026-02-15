@@ -13,8 +13,8 @@ import {
   UserCircle2,
   X
 } from 'lucide-react';
-import { Client, Folder, Order, Task, TaskPriority, TaskStatus, User } from '../types';
-import { dateInputToDueAt, dueAtToDateInput, formatTaskDueDate, getTaskSummary, isTaskDueToday, isTaskOverdue } from '../services/taskUtils';
+import { Client, Folder, Order, Task, TaskKind, TaskPriority, TaskStatus, User } from '../types';
+import { formatTaskDueDate, getEndOfDayTimestamp, getTaskSummary, isTaskDueToday, isTaskOverdue } from '../services/taskUtils';
 
 const TASK_STATUSES: TaskStatus[] = ['חדש', 'בטיפול', 'בהמתנה', 'הושלם'];
 const TASK_PRIORITIES: TaskPriority[] = ['נמוכה', 'רגילה', 'גבוהה', 'דחופה'];
@@ -36,18 +36,18 @@ const STATUS_STYLES: Record<TaskStatus, string> = {
 interface TaskFormState {
   title: string;
   description: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  dueDate: string;
-  assigneeUserId: string;
+  kind: TaskKind;
   clientId: string;
   folderId: string;
   orderId: string;
 }
 
+type TaskChecklistItem = NonNullable<Task['folderChecklist']>[number];
+
 export interface TaskPrefill {
   title?: string;
   description?: string;
+  kind?: TaskKind;
   status?: TaskStatus;
   priority?: TaskPriority;
   dueAt?: number | null;
@@ -83,13 +83,17 @@ const randomId = () => {
   return Math.random().toString(36).slice(2, 11);
 };
 
+const derivePrefillKind = (prefill?: TaskPrefill | null): TaskKind => {
+  if (prefill?.kind) return prefill.kind;
+  if (prefill?.orderId) return 'order';
+  if (prefill?.folderId) return 'folder';
+  return 'general';
+};
+
 const buildDefaultForm = (prefill?: TaskPrefill | null): TaskFormState => ({
   title: prefill?.title || '',
   description: prefill?.description || '',
-  status: prefill?.status || 'חדש',
-  priority: prefill?.priority || 'רגילה',
-  dueDate: dueAtToDateInput(prefill?.dueAt),
-  assigneeUserId: prefill?.assigneeUserId || '',
+  kind: derivePrefillKind(prefill),
   clientId: prefill?.clientId || '',
   folderId: prefill?.folderId || '',
   orderId: prefill?.orderId || '',
@@ -108,6 +112,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [form, setForm] = useState<TaskFormState>(() => buildDefaultForm(null));
   const [formError, setFormError] = useState<string | null>(null);
   const [boardError, setBoardError] = useState<string | null>(null);
@@ -134,13 +139,82 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
   const clientsById = useMemo(() => new Map(clients.map((client) => [client.id, client])), [clients]);
   const foldersById = useMemo(() => new Map(folders.map((folder) => [folder.id, folder])), [folders]);
   const ordersById = useMemo(() => new Map(orders.map((order) => [order.id, order])), [orders]);
+  const ordersByFolderId = useMemo(() => {
+    const map = new Map<string, Order[]>();
+    for (const order of orders) {
+      const list = map.get(order.folderId) || [];
+      list.push(order);
+      map.set(order.folderId, list);
+    }
+    return map;
+  }, [orders]);
 
   const summary = useMemo(() => getTaskSummary(tasks), [tasks]);
+
+  useEffect(() => {
+    if (!activeTask) return;
+    const refreshed = tasks.find((task) => task.id === activeTask.id);
+    if (!refreshed) {
+      setActiveTask(null);
+      return;
+    }
+    setActiveTask(refreshed);
+  }, [tasks, activeTask]);
 
   const canEditTask = (task: Task): boolean => {
     if (isViewer) return false;
     if (isAdmin) return true;
     return task.status !== 'הושלם';
+  };
+
+  const getTaskKind = (task: Task): TaskKind => {
+    if (task.kind) return task.kind;
+    if (task.folderChecklist && task.folderChecklist.length > 0) return 'folder';
+    if (task.orderSnapshot || task.orderId) return 'order';
+    if (task.folderId) return 'folder';
+    return 'general';
+  };
+
+  const getOrderSnapshot = (task: Task) => {
+    if (task.orderSnapshot) return task.orderSnapshot;
+    if (!task.orderId) return null;
+    const order = ordersById.get(task.orderId);
+    if (!order) return null;
+    const folder = foldersById.get(order.folderId);
+    return {
+      orderId: order.id,
+      displayId: order.displayId,
+      itemType: order.itemType,
+      description: order.description,
+      clientName: order.clientName,
+      folderName: folder?.name,
+    };
+  };
+
+  const getFolderChecklist = (task: Task): TaskChecklistItem[] => {
+    if (task.folderChecklist && task.folderChecklist.length > 0) return task.folderChecklist;
+    if (!task.folderId) return [];
+    const folderOrders = ordersByFolderId.get(task.folderId) || [];
+    return folderOrders.map((order): TaskChecklistItem => ({
+      orderId: order.id,
+      displayId: order.displayId,
+      itemType: order.itemType,
+      description: order.description,
+      done: false,
+    }));
+  };
+
+  const saveTaskList = async (nextTasks: Task[]) => {
+    setIsSaving(true);
+    setBoardError(null);
+    try {
+      await Promise.resolve(setTasks(nextTasks));
+    } catch (err: any) {
+      setBoardError(`שמירת המשימות נכשלה: ${err?.message || 'שגיאה לא ידועה'}`);
+      throw err;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const openCreateModal = (prefill?: TaskPrefill | null) => {
@@ -158,10 +232,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
     setForm({
       title: task.title,
       description: task.description,
-      status: task.status,
-      priority: task.priority,
-      dueDate: dueAtToDateInput(task.dueAt),
-      assigneeUserId: task.assigneeUserId || '',
+      kind: getTaskKind(task),
       clientId: task.clientId || '',
       folderId: task.folderId || '',
       orderId: task.orderId || '',
@@ -212,19 +283,6 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
     return grouped;
   }, [filteredTasks]);
 
-  const saveTaskList = async (nextTasks: Task[]) => {
-    setIsSaving(true);
-    setBoardError(null);
-    try {
-      await Promise.resolve(setTasks(nextTasks));
-    } catch (err: any) {
-      setBoardError(`שמירת המשימות נכשלה: ${err?.message || 'שגיאה לא ידועה'}`);
-      throw err;
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const upsertTask = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
@@ -232,53 +290,79 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
       setFormError('יש להזין כותרת משימה.');
       return;
     }
-    if (!form.status || !form.priority) {
-      setFormError('יש לבחור סטטוס ועדיפות.');
+
+    const now = Date.now();
+    const taskKind = form.kind || 'general';
+    const linkedOrder = form.orderId ? ordersById.get(form.orderId) : null;
+    const linkedFolder = form.folderId ? foldersById.get(form.folderId) : null;
+    const linkedClient = form.clientId ? clientsById.get(form.clientId) : null;
+
+    if (editingTask) {
+      const nextTasks = tasks.map((task) => {
+        if (task.id !== editingTask.id) return task;
+        return {
+          ...task,
+          title: form.title.trim(),
+          description: form.description.trim(),
+          updatedAt: now,
+        };
+      });
+      try {
+        await saveTaskList(nextTasks);
+        setIsModalOpen(false);
+        setEditingTask(null);
+        setForm(buildDefaultForm(null));
+      } catch {
+        // Error handled in saveTaskList
+      }
       return;
     }
 
-    const now = Date.now();
-    const dueAt = dateInputToDueAt(form.dueDate);
-    const selectedOrder = form.orderId ? ordersById.get(form.orderId) : null;
-    const selectedFolder = form.folderId ? foldersById.get(form.folderId) : null;
+    const orderSnapshot = taskKind === 'order' && linkedOrder
+      ? {
+          orderId: linkedOrder.id,
+          displayId: linkedOrder.displayId,
+          itemType: linkedOrder.itemType,
+          description: linkedOrder.description,
+          clientName: linkedOrder.clientName,
+          folderName: linkedFolder?.name,
+        }
+      : undefined;
 
-    const normalizedClientId = selectedOrder?.clientId || selectedFolder?.clientId || form.clientId || undefined;
-    const normalizedFolderId = selectedOrder?.folderId || form.folderId || undefined;
-    const normalizedOrderId = form.orderId || undefined;
+    const folderChecklist = taskKind === 'folder' && linkedFolder
+      ? (ordersByFolderId.get(linkedFolder.id) || []).map((order) => ({
+          orderId: order.id,
+          displayId: order.displayId,
+          itemType: order.itemType,
+          description: order.description,
+          done: false,
+        }))
+      : undefined;
 
-    const base: Task = editingTask ? { ...editingTask } : {
+    const resolvedClientId = linkedOrder?.clientId || linkedFolder?.clientId || linkedClient?.id || form.clientId || undefined;
+    const resolvedFolderId = linkedOrder?.folderId || linkedFolder?.id || form.folderId || undefined;
+    const resolvedOrderId = linkedOrder?.id || form.orderId || undefined;
+
+    const newTask: Task = {
       id: randomId(),
-      createdAt: now,
-      createdByUserId: currentUser.id,
-      completedAt: undefined,
-      title: '',
-      description: '',
-      status: 'חדש',
-      priority: 'רגילה',
-      dueAt: null,
-      assigneeUserId: null,
-      updatedAt: now,
-    };
-
-    const nextTask: Task = {
-      ...base,
       title: form.title.trim(),
       description: form.description.trim(),
-      status: form.status,
-      priority: form.priority,
-      dueAt,
-      assigneeUserId: form.assigneeUserId || null,
-      clientId: normalizedClientId,
-      folderId: normalizedFolderId,
-      orderId: normalizedOrderId,
+      kind: taskKind,
+      status: 'חדש',
+      priority: 'רגילה',
+      dueAt: getEndOfDayTimestamp(now),
+      assigneeUserId: null,
+      createdByUserId: currentUser.id,
+      clientId: resolvedClientId,
+      folderId: resolvedFolderId,
+      orderId: resolvedOrderId,
+      orderSnapshot,
+      folderChecklist,
+      createdAt: now,
       updatedAt: now,
-      completedAt: form.status === 'הושלם' ? (editingTask?.completedAt || now) : undefined,
     };
 
-    const nextTasks = editingTask
-      ? tasks.map((task) => (task.id === editingTask.id ? nextTask : task))
-      : [nextTask, ...tasks];
-
+    const nextTasks = [newTask, ...tasks];
     try {
       await saveTaskList(nextTasks);
       setIsModalOpen(false);
@@ -301,6 +385,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
         completedAt: status === 'הושלם' ? (item.completedAt || now) : undefined,
       };
     });
+    setActiveTask((prev) => nextTasks.find((t) => t.id === prev?.id) || null);
     try {
       await saveTaskList(nextTasks);
     } catch {
@@ -319,6 +404,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
         updatedAt: now,
       };
     });
+    setActiveTask((prev) => nextTasks.find((t) => t.id === prev?.id) || null);
     try {
       await saveTaskList(nextTasks);
     } catch {
@@ -329,15 +415,58 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
   const markTaskCompleted = async (task: Task) => {
     if (!canEditTask(task) || task.status === 'הושלם') return;
     const now = Date.now();
+    const checklist = getTaskKind(task) === 'folder'
+      ? getFolderChecklist(task).map((item) => ({ ...item, done: true, doneAt: item.doneAt || now }))
+      : task.folderChecklist;
     const nextTasks = tasks.map((item) => {
       if (item.id !== task.id) return item;
       return {
         ...item,
         status: 'הושלם' as TaskStatus,
+        folderChecklist: checklist,
         updatedAt: now,
         completedAt: item.completedAt || now,
       };
     });
+    setActiveTask((prev) => nextTasks.find((t) => t.id === prev?.id) || null);
+    try {
+      await saveTaskList(nextTasks);
+    } catch {
+      // Error handled in saveTaskList
+    }
+  };
+
+  const toggleChecklistItem = async (task: Task, orderId: string, done: boolean) => {
+    if (!canEditTask(task) || getTaskKind(task) !== 'folder') return;
+    const now = Date.now();
+    const currentChecklist = getFolderChecklist(task);
+    if (currentChecklist.length === 0) return;
+
+    const nextChecklist = currentChecklist.map((item): TaskChecklistItem => {
+      if (item.orderId !== orderId) return item;
+      return {
+        ...item,
+        done,
+        doneAt: done ? now : undefined,
+      };
+    });
+
+    const allDone = nextChecklist.every((item) => item.done);
+    const nextTasks = tasks.map((item) => {
+      if (item.id !== task.id) return item;
+      const nextStatus: TaskStatus = allDone
+        ? 'הושלם'
+        : (item.status === 'הושלם' ? 'חדש' : item.status);
+      return {
+        ...item,
+        kind: 'folder' as TaskKind,
+        folderChecklist: nextChecklist,
+        status: nextStatus,
+        updatedAt: now,
+        completedAt: allDone ? (item.completedAt || now) : undefined,
+      };
+    });
+    setActiveTask((prev) => nextTasks.find((t) => t.id === prev?.id) || null);
     try {
       await saveTaskList(nextTasks);
     } catch {
@@ -354,6 +483,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
     if (!isAdmin || !taskToDelete) return;
     const targetId = taskToDelete.id;
     const nextTasks = tasks.filter((item) => item.id !== targetId);
+    setActiveTask((prev) => (prev?.id === targetId ? null : prev));
     try {
       await saveTaskList(nextTasks);
     } catch {
@@ -363,43 +493,19 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
     }
   };
 
-  const handleClientChange = (clientId: string) => {
-    setForm((prev) => ({
-      ...prev,
-      clientId,
-      folderId: prev.folderId && foldersById.get(prev.folderId)?.clientId === clientId ? prev.folderId : '',
-      orderId: prev.orderId && ordersById.get(prev.orderId)?.clientId === clientId ? prev.orderId : '',
-    }));
+  const getCreateContextLabel = () => {
+    if (form.kind === 'order') {
+      const order = form.orderId ? ordersById.get(form.orderId) : null;
+      if (order) return `משימה להזמנה #${order.displayId} - ${order.itemType}`;
+      return 'משימה להזמנה מקושרת';
+    }
+    if (form.kind === 'folder') {
+      const folder = form.folderId ? foldersById.get(form.folderId) : null;
+      if (folder) return `משימה לתיק "${folder.name}"`;
+      return 'משימה לתיק מקושר';
+    }
+    return 'משימה כללית יומית';
   };
-
-  const handleFolderChange = (folderId: string) => {
-    const folder = folderId ? foldersById.get(folderId) : null;
-    setForm((prev) => ({
-      ...prev,
-      clientId: folder?.clientId || prev.clientId,
-      folderId,
-      orderId: prev.orderId && ordersById.get(prev.orderId)?.folderId === folderId ? prev.orderId : '',
-    }));
-  };
-
-  const handleOrderChange = (orderId: string) => {
-    const order = orderId ? ordersById.get(orderId) : null;
-    setForm((prev) => ({
-      ...prev,
-      clientId: order?.clientId || prev.clientId,
-      folderId: order?.folderId || prev.folderId,
-      orderId,
-    }));
-  };
-
-  const activeFolders = form.clientId
-    ? folders.filter((folder) => folder.clientId === form.clientId)
-    : folders;
-  const activeOrders = form.folderId
-    ? orders.filter((order) => order.folderId === form.folderId)
-    : form.clientId
-      ? orders.filter((order) => order.clientId === form.clientId)
-      : orders;
 
   return (
     <div className="space-y-6 text-right pb-24">
@@ -410,7 +516,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
               לוח משימות צוות
               <ListTodo className="text-rose-500" />
             </h3>
-            <p className="text-sm text-gray-400 font-bold">ניהול תפעולי לפי סטטוס, דדליין ואחריות</p>
+            <p className="text-sm text-gray-400 font-bold">ניהול תפעולי יומי לפי סטטוס ודדליינים</p>
           </div>
           <button
             disabled={!canCreateTask || isSaving}
@@ -504,13 +610,18 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                 const overdue = isTaskOverdue(task);
                 const dueToday = isTaskDueToday(task);
                 const assigneeName = task.assigneeUserId ? usersById.get(task.assigneeUserId)?.username : null;
+                const taskKind = getTaskKind(task);
+                const checklist = taskKind === 'folder' ? getFolderChecklist(task) : [];
+                const completedChecklist = checklist.filter((item) => item.done).length;
+
                 return (
                   <article
                     key={task.id}
                     draggable={canEditTask(task)}
                     onDragStart={() => setDraggedTaskId(task.id)}
                     onDragEnd={() => setDraggedTaskId(null)}
-                    className={`rounded-2xl border p-4 bg-white shadow-sm transition-all ${
+                    onClick={() => setActiveTask(task)}
+                    className={`rounded-2xl border p-4 bg-white shadow-sm transition-all cursor-pointer ${
                       overdue ? 'border-rose-200 ring-2 ring-rose-100' : 'border-gray-100'
                     }`}
                   >
@@ -518,7 +629,10 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                       <div className="flex gap-1">
                         {canEditTask(task) && task.status !== 'הושלם' && (
                           <button
-                            onClick={() => markTaskCompleted(task)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              markTaskCompleted(task);
+                            }}
                             disabled={isSaving}
                             className="p-2 rounded-lg bg-emerald-50 text-emerald-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="סמן כהושלמה"
@@ -528,7 +642,10 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                         )}
                         {canEditTask(task) && (
                           <button
-                            onClick={() => openEditModal(task)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(task);
+                            }}
                             disabled={isSaving}
                             className="p-2 rounded-lg bg-indigo-50 text-indigo-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="עריכת משימה"
@@ -538,7 +655,10 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                         )}
                         {isAdmin && (
                           <button
-                            onClick={() => requestDeleteTask(task)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              requestDeleteTask(task);
+                            }}
                             disabled={isSaving}
                             className="p-2 rounded-lg bg-rose-50 text-rose-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                             title="מחיקת משימה"
@@ -555,10 +675,20 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                       </div>
                     </div>
 
-                    <div className="flex justify-end mt-3">
+                    <div className="flex justify-between items-center mt-3">
                       <span className={`px-2 py-1 rounded-full border text-[10px] font-black ${PRIORITY_STYLES[task.priority]}`}>
                         {task.priority}
                       </span>
+                      {taskKind === 'order' && (
+                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full border border-indigo-100">
+                          משימת תיקון
+                        </span>
+                      )}
+                      {taskKind === 'folder' && (
+                        <span className="text-[10px] font-black text-violet-600 bg-violet-50 px-2 py-1 rounded-full border border-violet-100">
+                          תיק שלם ({completedChecklist}/{checklist.length})
+                        </span>
+                      )}
                     </div>
 
                     <div className="text-[11px] text-gray-500 mt-3 space-y-1">
@@ -581,7 +711,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                       )}
                     </div>
 
-                    <div className="pt-3 mt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+                    <div className="pt-3 mt-3 border-t border-gray-100 grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
                       <select
                         value={task.status}
                         disabled={!canEditTask(task) || isSaving}
@@ -626,7 +756,7 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
           <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden">
             <div className="p-6 bg-slate-900 text-white text-right">
               <h4 className="text-2xl font-black font-heebo">{editingTask ? 'עריכת משימה' : 'יצירת משימה חדשה'}</h4>
-              <p className="text-xs text-slate-300 mt-1">הגדירי דדליין, עדיפות ואחריות לעובד</p>
+              <p className="text-xs text-slate-300 mt-1">המשימה נוצרת אוטומטית עבור היום הנוכחי</p>
             </div>
 
             <form onSubmit={upsertTask} className="p-6 space-y-4 text-right">
@@ -636,21 +766,17 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input
-                  value={form.title}
-                  onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder="כותרת משימה"
-                  required
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                />
-                <input
-                  value={form.dueDate}
-                  type="date"
-                  onChange={(e) => setForm((prev) => ({ ...prev, dueDate: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                />
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-black text-slate-700">
+                {getCreateContextLabel()}
               </div>
+
+              <input
+                value={form.title}
+                onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+                placeholder="כותרת משימה"
+                required
+                className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
+              />
 
               <textarea
                 value={form.description}
@@ -658,70 +784,6 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
                 placeholder="תיאור המשימה"
                 className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none min-h-24"
               />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <select
-                  value={form.status}
-                  onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as TaskStatus }))}
-                  className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                >
-                  {TASK_STATUSES.map((status) => (
-                    <option key={status} value={status}>{status}</option>
-                  ))}
-                </select>
-                <select
-                  value={form.priority}
-                  onChange={(e) => setForm((prev) => ({ ...prev, priority: e.target.value as TaskPriority }))}
-                  className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                >
-                  {TASK_PRIORITIES.map((priority) => (
-                    <option key={priority} value={priority}>{priority}</option>
-                  ))}
-                </select>
-                <select
-                  value={form.assigneeUserId}
-                  onChange={(e) => setForm((prev) => ({ ...prev, assigneeUserId: e.target.value }))}
-                  className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                >
-                  <option value="">ללא שיוך</option>
-                  {allUsers.map((user) => (
-                    <option key={user.id} value={user.id}>{user.username}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <select
-                  value={form.clientId}
-                  onChange={(e) => handleClientChange(e.target.value)}
-                  className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                >
-                  <option value="">ללא לקוח</option>
-                  {clients.map((client) => (
-                    <option key={client.id} value={client.id}>{client.name}</option>
-                  ))}
-                </select>
-                <select
-                  value={form.folderId}
-                  onChange={(e) => handleFolderChange(e.target.value)}
-                  className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                >
-                  <option value="">ללא תיק</option>
-                  {activeFolders.map((folder) => (
-                    <option key={folder.id} value={folder.id}>{folder.name}</option>
-                  ))}
-                </select>
-                <select
-                  value={form.orderId}
-                  onChange={(e) => handleOrderChange(e.target.value)}
-                  className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100 font-bold outline-none"
-                >
-                  <option value="">ללא הזמנה</option>
-                  {activeOrders.map((order) => (
-                    <option key={order.id} value={order.id}>#{order.displayId} - {order.itemType}</option>
-                  ))}
-                </select>
-              </div>
 
               <div className="flex gap-3 pt-3">
                 <button
@@ -746,6 +808,20 @@ const TasksBoard: React.FC<TasksBoardProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {activeTask && (
+        <TaskExecutionModal
+          task={activeTask}
+          isSaving={isSaving}
+          canEdit={canEditTask(activeTask)}
+          kind={getTaskKind(activeTask)}
+          orderSnapshot={getOrderSnapshot(activeTask)}
+          checklist={getFolderChecklist(activeTask)}
+          onClose={() => setActiveTask(null)}
+          onToggleChecklist={(orderId, done) => toggleChecklistItem(activeTask, orderId, done)}
+          onMarkCompleted={() => markTaskCompleted(activeTask)}
+        />
       )}
 
       {taskToDelete && (
@@ -799,6 +875,97 @@ const SummaryCard: React.FC<{ title: string; value: number; tone: 'rose' | 'ambe
     <div className={`rounded-2xl border p-4 ${styles[tone]}`}>
       <p className="text-xs font-black uppercase tracking-wider">{title}</p>
       <p className="text-3xl font-black font-heebo mt-1">{value}</p>
+    </div>
+  );
+};
+
+const TaskExecutionModal: React.FC<{
+  task: Task;
+  kind: TaskKind;
+  orderSnapshot: Task['orderSnapshot'] | null;
+  checklist: NonNullable<Task['folderChecklist']>;
+  canEdit: boolean;
+  isSaving: boolean;
+  onClose: () => void;
+  onToggleChecklist: (orderId: string, done: boolean) => void;
+  onMarkCompleted: () => void;
+}> = ({ task, kind, orderSnapshot, checklist, canEdit, isSaving, onClose, onToggleChecklist, onMarkCompleted }) => {
+  const completedCount = checklist.filter((item) => item.done).length;
+  return (
+    <div className="fixed inset-0 z-[205] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden">
+        <div className="p-6 bg-slate-900 text-white text-right flex justify-between items-center">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+            <X size={18} />
+          </button>
+          <div>
+            <h4 className="text-2xl font-black font-heebo">{task.title}</h4>
+            <p className="text-xs text-slate-300 mt-1">מה צריך לבצע עכשיו</p>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-4 text-right">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-700">
+            סטטוס: <span className="text-rose-600">{task.status}</span> | יעד: {formatTaskDueDate(task.dueAt)}
+          </div>
+
+          {kind === 'order' && orderSnapshot && (
+            <div className="space-y-2 p-4 rounded-2xl border border-indigo-100 bg-indigo-50/50">
+              <p className="text-xs font-black text-indigo-600">תיקון יחיד</p>
+              <p className="font-black text-gray-800">#{orderSnapshot.displayId} - {orderSnapshot.itemType}</p>
+              <p className="text-sm text-gray-600">{orderSnapshot.description || 'ללא תיאור'}</p>
+              <p className="text-xs text-gray-500">לקוח: {orderSnapshot.clientName}</p>
+              {orderSnapshot.folderName && <p className="text-xs text-gray-500">תיק: {orderSnapshot.folderName}</p>}
+            </div>
+          )}
+
+          {kind === 'folder' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 rounded-2xl border border-violet-100 bg-violet-50/60">
+                <span className="text-xs font-black text-violet-700">{completedCount}/{checklist.length} הושלמו</span>
+                <span className="text-xs font-black text-violet-700">תיק שלם</span>
+              </div>
+              {checklist.length === 0 && (
+                <div className="p-4 rounded-2xl border border-gray-100 text-sm text-gray-500">
+                  אין תיקונים בתיק כרגע.
+                </div>
+              )}
+              {checklist.map((item) => (
+                <label key={item.orderId} className="flex items-start justify-between gap-3 p-4 rounded-2xl border border-gray-100 bg-white">
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    disabled={!canEdit || isSaving}
+                    onChange={(e) => onToggleChecklist(item.orderId, e.target.checked)}
+                    className="mt-1 w-5 h-5 accent-emerald-600"
+                  />
+                  <div className="text-right flex-1">
+                    <p className="font-black text-gray-800">#{item.displayId} - {item.itemType}</p>
+                    <p className="text-xs text-gray-500">{item.description || 'ללא תיאור'}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {kind === 'general' && (
+            <div className="space-y-2 p-4 rounded-2xl border border-gray-100 bg-gray-50">
+              <p className="text-xs font-black text-gray-500">משימה כללית</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{task.description || 'ללא תיאור'}</p>
+            </div>
+          )}
+
+          {canEdit && task.status !== 'הושלם' && (
+            <button
+              onClick={onMarkCompleted}
+              disabled={isSaving}
+              className="w-full py-3 rounded-2xl bg-emerald-600 text-white font-black disabled:opacity-50"
+            >
+              {isSaving ? 'שומר...' : 'סמן משימה כהושלמה'}
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

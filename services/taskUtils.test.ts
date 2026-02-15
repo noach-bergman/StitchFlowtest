@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { Task } from '../types';
-import { getTaskSummary, isTaskDueToday, isTaskOverdue } from './taskUtils';
+import {
+  applyDailyTaskHousekeeping,
+  getEndOfDayTimestamp,
+  getLocalDayKey,
+  getTaskSummary,
+  isTaskDueToday,
+  isTaskOverdue
+} from './taskUtils';
 
 const baseTask: Task = {
   id: 'task-1',
   title: 'בדיקה',
   description: '',
+  kind: 'general',
   status: 'חדש',
   priority: 'רגילה',
   dueAt: null,
@@ -49,5 +57,45 @@ describe('taskUtils', () => {
       unassigned: 1,
       urgentOrOverdue: 2,
     });
+  });
+
+  it('returns local day key in YYYY-MM-DD', () => {
+    const now = new Date('2026-02-13T12:00:00.000Z').getTime();
+    expect(getLocalDayKey(now)).toBe('2026-02-13');
+  });
+
+  it('normalizes missing dueAt and kind during housekeeping', () => {
+    const now = new Date('2026-02-13T12:00:00.000Z').getTime();
+    const task: Task = {
+      ...baseTask,
+      id: 'legacy',
+      kind: undefined,
+      dueAt: null,
+      createdAt: new Date('2026-02-12T09:00:00.000Z').getTime(),
+    };
+    const result = applyDailyTaskHousekeeping([task], now, false);
+
+    expect(result.changed).toBe(true);
+    expect(result.normalizedCount).toBe(1);
+    expect(result.tasks[0].kind).toBe('general');
+    expect(result.tasks[0].dueAt).toBe(getEndOfDayTimestamp(task.createdAt));
+  });
+
+  it('removes completed tasks from previous days on cleanup', () => {
+    const nowDate = new Date();
+    nowDate.setHours(12, 0, 0, 0);
+    const now = nowDate.getTime();
+    const startTodayDate = new Date(now);
+    startTodayDate.setHours(0, 0, 0, 0);
+    const startToday = startTodayDate.getTime();
+    const tasks: Task[] = [
+      { ...baseTask, id: 'done-yesterday', status: 'הושלם', completedAt: startToday - 10 },
+      { ...baseTask, id: 'open-yesterday', dueAt: startToday - 10 },
+      { ...baseTask, id: 'done-today', status: 'הושלם', completedAt: startToday + 10 },
+    ];
+
+    const result = applyDailyTaskHousekeeping(tasks, now, true);
+    expect(result.removedCompletedCount).toBe(1);
+    expect(result.tasks.map(t => t.id)).toEqual(['open-yesterday', 'done-today']);
   });
 });

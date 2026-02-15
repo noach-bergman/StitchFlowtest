@@ -16,7 +16,13 @@ import Login from './components/Login';
 import QrScanner from './components/QrScanner';
 import { Client, Order, Fabric, Folder, Task, User } from './types';
 import { dataService } from './services/dataService';
-import { getTaskSummary } from './services/taskUtils';
+import {
+  applyDailyTaskHousekeeping,
+  getLocalDayKey,
+  getTaskSummary,
+  getStoredTaskHousekeepingDay,
+  setStoredTaskHousekeepingDay
+} from './services/taskUtils';
 
 const EDGE_ZONE_PX = 20;
 const OPEN_THRESHOLD_PX = 50;
@@ -71,13 +77,32 @@ const App: React.FC = () => {
         dataService.getTasks(),
         dataService.getUsers().catch(() => [])
       ]);
+      const rawTasks = t || [];
+      const now = Date.now();
+      const todayKey = getLocalDayKey(now);
+      const lastHousekeepingDay = getStoredTaskHousekeepingDay();
+      const shouldCleanupCompleted = lastHousekeepingDay !== todayKey;
+      const housekeeping = applyDailyTaskHousekeeping(rawTasks, now, shouldCleanupCompleted);
       
       setClients(c || []);
       setFolders(f || []);
       setOrders(o || []);
       setInventory(i || []);
-      setTasks(t || []);
+      setTasks(housekeeping.tasks);
       setUsers(u || []);
+
+      if (housekeeping.changed) {
+        try {
+          await dataService.saveTasks(housekeeping.tasks);
+        } catch (saveErr) {
+          console.error('Failed to persist daily task housekeeping', saveErr);
+        }
+      }
+
+      if (shouldCleanupCompleted) {
+        setStoredTaskHousekeepingDay(todayKey);
+      }
+
       setLastSync(new Date());
     } catch (err) {
       console.error("Failed to load data", err);
@@ -269,9 +294,9 @@ const App: React.FC = () => {
 
   const openTaskFromOrder = (order: Order) => {
     setTaskPrefill({
+      kind: 'order',
       title: `מעקב עבור ${order.itemType}`,
       description: order.description || '',
-      priority: 'רגילה',
       clientId: order.clientId,
       folderId: order.folderId,
       orderId: order.id,
@@ -281,8 +306,8 @@ const App: React.FC = () => {
 
   const openTaskFromFolder = (folder: Folder) => {
     setTaskPrefill({
+      kind: 'folder',
       title: `משימה לתיק ${folder.name}`,
-      priority: 'רגילה',
       clientId: folder.clientId,
       folderId: folder.id,
     });

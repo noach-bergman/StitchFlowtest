@@ -2,6 +2,7 @@
 export type OrderStatus = 'חדש' | 'מדידות' | 'בתפירה' | 'מדידה_שנייה' | 'מוכן';
 export type TaskStatus = 'חדש' | 'בטיפול' | 'בהמתנה' | 'הושלם';
 export type TaskPriority = 'נמוכה' | 'רגילה' | 'גבוהה' | 'דחופה';
+export type TaskKind = 'general' | 'order' | 'folder';
 export type UserRole = 'super_admin' | 'admin' | 'staff' | 'viewer';
 export type PaymentStatus = 'לא שולם' | 'שולם חלקית' | 'שולם';
 
@@ -71,6 +72,7 @@ export interface Task {
   id: string;
   title: string;
   description: string;
+  kind?: TaskKind;
   status: TaskStatus;
   priority: TaskPriority;
   dueAt: number | null;
@@ -79,6 +81,22 @@ export interface Task {
   clientId?: string;
   folderId?: string;
   orderId?: string;
+  orderSnapshot?: {
+    orderId: string;
+    displayId: string;
+    itemType: string;
+    description: string;
+    clientName: string;
+    folderName?: string;
+  };
+  folderChecklist?: Array<{
+    orderId: string;
+    displayId: string;
+    itemType: string;
+    description: string;
+    done: boolean;
+    doneAt?: number;
+  }>;
   createdAt: number;
   updatedAt: number;
   completedAt?: number;
