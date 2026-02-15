@@ -849,10 +849,10 @@ const App: React.FC = () => {
 
         {/* Mobile Navbar */}
         <nav
-          className={`md:hidden fixed bottom-0 left-0 right-0 flex justify-around items-center z-40 h-24 px-1 pb-safe backdrop-blur-2xl transition-colors duration-200 ${
+          className={`md:hidden fixed flex justify-around items-center z-40 h-24 px-1 pb-safe backdrop-blur-2xl transition-all duration-200 ${
             isDashboardActive
-              ? 'bg-[#fff8fb]/95 border-t border-[#e5488630] shadow-[0_-8px_26px_rgba(229,72,134,0.14)]'
-              : 'bg-white/95 border-t border-gray-100 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]'
+              ? 'bottom-2 left-2 right-2 rounded-[1.9rem] bg-[#fffafc]/96 border border-[#e5488624] shadow-[0_8px_28px_rgba(229,72,134,0.16)]'
+              : 'bottom-0 left-0 right-0 bg-white/95 border-t border-gray-100 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]'
           }`}
         >
           {mobileNavItems.map((item) => (
@@ -865,7 +865,10 @@ const App: React.FC = () => {
                   : `active:bg-gray-50 ${activeTab === item.id ? 'text-rose-600' : 'text-gray-400'}`
               }`}
             >
-              <div className={`relative ${activeTab === item.id ? 'scale-125' : 'scale-110'} transition-transform`}>
+              <div className={`relative transition-all duration-200 ${activeTab === item.id ? 'scale-[1.18]' : 'scale-100'}`}>
+                {isDashboardActive && activeTab === item.id && (
+                  <span className="absolute -inset-2 rounded-full bg-[#fbe7f1] border border-[#e5488622]" />
+                )}
                 {React.cloneElement(item.icon as React.ReactElement<any>, { size: 28 })}
                 {item.id === 'tasks' && taskAlertCount > 0 && (
                   <span className={`absolute -top-2 -right-3 inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-white text-[9px] font-black ${isDashboardActive ? 'bg-[#E54886]' : 'bg-rose-600'}`}>
@@ -880,18 +883,18 @@ const App: React.FC = () => {
           ))}
           <button 
             onClick={() => setIsScannerOpen(true)}
-            className="flex flex-col items-center justify-center flex-1 -mt-14"
+            className={`flex flex-col items-center justify-center flex-1 ${isDashboardActive ? '-mt-9' : '-mt-14'}`}
           >
              <div
               className={`w-16 h-16 rounded-full flex items-center justify-center text-white border-4 border-white mb-1 active:scale-90 transition-all duration-200 ${
                 isDashboardActive
-                  ? 'bg-gradient-to-br from-[#F26AA3] to-[#E54886] shadow-[0_12px_26px_rgba(229,72,134,0.34)]'
+                  ? 'bg-white border-[#e5488624] shadow-[0_10px_22px_rgba(229,72,134,0.2)]'
                   : 'bg-gradient-to-br from-slate-900 to-slate-700 shadow-2xl'
               }`}
              >
-                <QrCode className={`w-8 h-8 ${isDashboardActive ? 'text-white' : 'text-rose-400'}`} />
+                <QrCode className={`w-8 h-8 ${isDashboardActive ? 'text-[#E54886]' : 'text-rose-400'}`} />
              </div>
-             <span className={`text-[11px] font-black px-3 py-1 rounded-full shadow-sm border ${isDashboardActive ? 'text-[#7A7A7A] bg-[#fff8fb] border-[#e5488620]' : 'text-slate-700 bg-white border-slate-100'}`}>סריקת QR</span>
+             <span className={`text-[11px] font-black px-3 py-1 rounded-full shadow-sm border ${isDashboardActive ? 'text-[#7A7A7A] bg-[#fffafc] border-[#e5488620]' : 'text-slate-700 bg-white border-slate-100'}`}>סריקת QR</span>
           </button>
         </nav>
       </div>

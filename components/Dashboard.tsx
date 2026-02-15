@@ -18,7 +18,6 @@ const DASHBOARD_THEME = {
   secondary: '#F26AA3',
   softBlush: '#F8C8DC',
   background: '#FFF4F8',
-  white: '#FFFFFF',
   text: '#2B2B2B',
   muted: '#7A7A7A',
   accent: '#C9A227'
@@ -94,39 +93,49 @@ const Dashboard: React.FC<DashboardProps> = ({
       className="relative space-y-6 md:space-y-8 pb-32 pt-4 px-0.5 md:px-0 overflow-hidden"
       style={dashboardVars}
     >
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[var(--ms-bg)]" />
-      <div className="pointer-events-none absolute -top-20 -right-12 w-72 h-72 rounded-full bg-[#f7bfd7]/35 blur-3xl -z-10" />
-      <div className="pointer-events-none absolute top-[32%] -left-16 w-80 h-80 rounded-full bg-[#f9d5e4]/35 blur-3xl -z-10" />
-      <div className="pointer-events-none absolute -bottom-24 right-12 w-72 h-72 rounded-full bg-[#fce3ee]/70 blur-3xl -z-10" />
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{
+          background: 'radial-gradient(circle at 82% 28%, rgba(242,106,163,0.18), transparent 42%), radial-gradient(circle at 14% 72%, rgba(248,200,220,0.22), transparent 44%), linear-gradient(180deg, #fff8fb 0%, var(--ms-bg) 55%, #ffeef5 100%)'
+        }}
+      />
+      <div className="pointer-events-none absolute -top-24 right-2 w-80 h-80 rounded-full bg-[#f8c8dc]/35 blur-3xl -z-10" />
+      <div className="pointer-events-none absolute top-[39%] -left-24 w-96 h-96 rounded-full bg-[#f8c8dc]/28 blur-3xl -z-10" />
+      <div className="pointer-events-none absolute -bottom-32 right-8 w-80 h-80 rounded-full bg-[#f26aa31f] blur-3xl -z-10" />
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-35" style={{ backgroundImage: 'radial-gradient(rgba(229,72,134,0.08) 0.8px, transparent 0.8px)', backgroundSize: '4px 4px' }} />
 
       {/* Welcome Section */}
       <div
-        className="relative p-7 md:p-9 rounded-[1.75rem] md:rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-6 overflow-hidden border border-[#e5488626]"
+        className="relative p-8 md:p-10 rounded-[1.85rem] md:rounded-[2rem] flex flex-col md:flex-row justify-between items-center gap-7 overflow-hidden border border-[#e5488622]"
         style={{
-          background: 'linear-gradient(135deg, #fffafc 0%, #ffe8f1 55%, #ffdbe9 100%)',
-          boxShadow: '0 14px 34px rgba(229,72,134,0.12)'
+          background: 'linear-gradient(145deg, #fffdfd 0%, #ffeff5 56%, #fbe1ec 100%)',
+          boxShadow: '0 12px 30px rgba(229,72,134,0.11)'
         }}
       >
-        <div className="absolute top-0 left-0 w-64 h-64 bg-[#ffffff7d] rounded-full -ml-28 -mt-28 blur-[100px]" />
-        <div className="absolute bottom-0 right-0 w-52 h-52 bg-[#f26aa32b] rounded-full -mr-16 -mb-16 blur-[80px]" />
+        <div className="absolute top-0 left-0 w-64 h-64 bg-[#ffffff96] rounded-full -ml-28 -mt-28 blur-[95px]" />
+        <div className="absolute bottom-0 right-0 w-56 h-56 bg-[#f26aa322] rounded-full -mr-16 -mb-16 blur-[85px]" />
+        <div className="absolute top-14 right-[20%] w-28 h-28 rounded-full bg-white/55 blur-2xl" />
 
-        <div className="text-center md:text-right z-10">
+        <div className="text-center md:text-right z-10 max-w-3xl">
            <h2
-             className="text-[2.05rem] md:text-[2.4rem] leading-tight"
-             style={{ color: 'var(--ms-text)', fontFamily: '"Playfair Display", serif' }}
+             className="text-[2.12rem] md:text-[2.65rem] leading-[1.2] tracking-[0.01em]"
+             style={{ color: '#6f2f54', fontFamily: '"Playfair Display", serif', fontStyle: 'italic', fontWeight: 500 }}
            >
              בוקר טוב, סטודיו Malki Style ✨
            </h2>
-           <p className="mt-2.5 text-sm md:text-base font-semibold" style={{ color: 'var(--ms-muted)' }}>
-             יש לך {activeOrdersCount} עבודות פעילות ו-{urgentOrders} דחופות להיום.
+           <p className="mt-3 text-[1rem] md:text-[1.2rem] leading-relaxed font-semibold" style={{ color: '#7A5F70' }}>
+             יש לך <span className="font-black" style={{ color: 'var(--ms-primary)' }}>{activeOrdersCount}</span> עבודות פעילות
+             <span className="mx-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle" style={{ backgroundColor: 'var(--ms-accent)' }} />
+             ו־<span className="font-black" style={{ color: 'var(--ms-primary)' }}>{urgentOrders}</span> דחופות להיום.
            </p>
         </div>
         <div className="flex gap-4 z-10">
           <button
             onClick={() => onNavigate('folders')}
-            className="px-6 py-3 rounded-full font-black text-sm transition-all duration-200 border bg-white shadow-[0_8px_24px_rgba(229,72,134,0.16)] hover:bg-[var(--ms-primary)] hover:text-white hover:shadow-[0_10px_24px_rgba(229,72,134,0.2)] active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488633]"
-            style={{ borderColor: '#e5488640', color: 'var(--ms-primary)' }}
+            className="px-7 py-3.5 rounded-full font-black text-base transition-all duration-200 border bg-white shadow-[0_8px_22px_rgba(229,72,134,0.14)] hover:bg-[var(--ms-primary)] hover:text-white hover:shadow-[0_10px_24px_rgba(229,72,134,0.2)] active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488633] inline-flex items-center gap-2.5"
+            style={{ borderColor: '#e5488633', color: '#8b3664' }}
           >
+            <Scissors size={17} strokeWidth={1.9} />
             ניהול תיקים
           </button>
         </div>
@@ -149,18 +158,12 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <div
-          className="lg:col-span-3 rounded-[1.75rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95"
-          style={{
-            borderColor: '#e548861f',
-            boxShadow: '0 10px 24px rgba(229,72,134,0.08)'
-          }}
-        >
+        <div className="lg:col-span-3 rounded-[1.85rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95" style={{ borderColor: '#e548861c', boxShadow: '0 8px 20px rgba(229,72,134,0.075)' }}>
           <div className="flex justify-between items-center mb-8">
             <button
               onClick={() => onNavigate('orders')}
-              className="text-xs font-black px-5 py-2.5 rounded-full border transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630]"
-              style={{ color: 'var(--ms-primary)', backgroundColor: '#fff7fb', borderColor: '#e5488626' }}
+              className="text-xs font-black px-5 py-2.5 rounded-full border transition-all duration-200 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e5488630] hover:bg-[#E54886] hover:text-white"
+              style={{ color: '#8b3664', backgroundColor: '#fff8fb', borderColor: '#e5488622' }}
             >
               הצג את כל ההזמנות
             </button>
@@ -177,11 +180,11 @@ const Dashboard: React.FC<DashboardProps> = ({
                  <div
                    key={order.id}
                    onClick={() => onNavigate('orders')}
-                   className="p-5 md:p-6 rounded-[1.35rem] md:rounded-[1.5rem] border flex justify-between items-center cursor-pointer group transition-all duration-200"
+                   className="p-5 md:p-6 rounded-[1.45rem] md:rounded-[1.55rem] border flex justify-between items-center cursor-pointer group transition-all duration-200 hover:-translate-y-0.5"
                    style={{
-                     backgroundColor: '#fff9fc',
-                     borderColor: '#e5488615',
-                     boxShadow: '0 4px 14px rgba(229,72,134,0.05)'
+                     backgroundColor: '#fffbfd',
+                     borderColor: '#e5488617',
+                     boxShadow: '0 5px 13px rgba(229,72,134,0.045)'
                    }}
                  >
                     <div className="flex items-center gap-4">
@@ -206,13 +209,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* Full Navigation Grid for Mobile */}
-      <div
-        className="rounded-[1.75rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95"
-        style={{
-          borderColor: '#e548861f',
-          boxShadow: '0 10px 24px rgba(229,72,134,0.08)'
-        }}
-      >
+      <div className="rounded-[1.85rem] md:rounded-[2rem] p-6 md:p-8 text-right border bg-white/95" style={{ borderColor: '#e548861c', boxShadow: '0 8px 20px rgba(229,72,134,0.075)' }}>
          <h3 className="text-xl font-black mb-6" style={{ color: 'var(--ms-text)' }}>כל הכלים והניהול</h3>
          <div className="grid grid-cols-3 gap-4">
             <NavGridButton label="משימות" icon={<ListTodo />} onClick={() => onNavigate('tasks')} />
@@ -235,12 +232,12 @@ const NavGridButton: React.FC<{label: string, icon: any, onClick: () => void}> =
     className="flex flex-col items-center gap-2 group active:scale-95 transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e548862b] rounded-2xl"
   >
     <div
-      className="w-full aspect-square rounded-[1.35rem] flex items-center justify-center border transition-all duration-200 group-hover:-translate-y-0.5"
+      className="w-full aspect-square rounded-[1.4rem] flex items-center justify-center border transition-all duration-200 group-hover:-translate-y-0.5"
       style={{
-        backgroundColor: '#fff8fc',
-        borderColor: '#e5488620',
+        backgroundColor: '#fff9fc',
+        borderColor: '#e548861e',
         color: '#E54886',
-        boxShadow: '0 6px 16px rgba(229,72,134,0.09)'
+        boxShadow: '0 5px 14px rgba(229,72,134,0.08)'
       }}
     >
        {React.cloneElement(icon, { size: 27, strokeWidth: 1.8 })}
@@ -259,12 +256,13 @@ const StatCard: React.FC<{
 }> = ({ title, value, icon, actionIcon, actionLabel, onActionClick }) => {
   return (
     <div
-      className="bg-white rounded-[1.45rem] md:rounded-[1.6rem] p-5 md:p-6 border flex flex-col justify-between h-40 md:h-36 text-right transition-all duration-200 hover:-translate-y-0.5 group overflow-hidden relative"
+      className="bg-white rounded-[1.5rem] md:rounded-[1.7rem] p-5 md:p-6 border flex flex-col justify-between h-40 md:h-36 text-right transition-all duration-200 hover:-translate-y-0.5 group overflow-hidden relative"
       style={{
-        borderColor: '#e5488622',
-        boxShadow: '0 8px 20px rgba(229,72,134,0.08)'
+        borderColor: '#e5488620',
+        boxShadow: '0 7px 18px rgba(229,72,134,0.07)'
       }}
     >
+      <div className="absolute -bottom-7 -left-7 w-20 h-20 rounded-full bg-[#f7dce8]/55" />
       <div className="z-10 flex items-start justify-between">
         {actionIcon ? (
           onActionClick ? (
@@ -275,13 +273,13 @@ const StatCard: React.FC<{
                 onActionClick();
               }}
               aria-label={actionLabel || title}
-              className="w-8 h-8 rounded-xl border transition-colors duration-200 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e548862b]"
-              style={{ backgroundColor: '#fff9fc', borderColor: '#e5488622', color: '#7A7A7A' }}
+              className="w-8 h-8 rounded-xl border transition-colors duration-200 flex items-center justify-center focus:outline-none focus-visible:ring-4 focus-visible:ring-[#e548862b] hover:text-[#E54886]"
+              style={{ backgroundColor: '#fff9fc', borderColor: '#e5488620', color: '#7A7A7A' }}
             >
               {actionIcon}
             </button>
           ) : (
-            <span className="w-8 h-8 rounded-xl border flex items-center justify-center" style={{ backgroundColor: '#fff9fc', borderColor: '#e5488622', color: '#9ca3af' }}>
+            <span className="w-8 h-8 rounded-xl border flex items-center justify-center" style={{ backgroundColor: '#fff9fc', borderColor: '#e5488620', color: '#9ca3af' }}>
               {actionIcon}
             </span>
           )
@@ -291,9 +289,10 @@ const StatCard: React.FC<{
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center group-hover:scale-105 transition-transform duration-200"
           style={{
-            backgroundColor: '#fce9f2',
+            backgroundColor: '#fbe7f0',
             color: '#E54886',
-            border: '1px solid rgba(229,72,134,0.2)'
+            border: '1px solid rgba(229,72,134,0.16)',
+            boxShadow: '0 5px 12px rgba(229,72,134,0.09)'
           }}
         >
           {icon}
