@@ -228,7 +228,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
           if (!navigator.canShare || navigator.canShare({ files: [file] })) {
             await navigator.share({
               files: [file],
-              title: `Receipt - ${receiptData.receiptNumber || 'StitchFlow'}`,
+              title: `Receipt - ${receiptData.receiptNumber || 'Malki Style'}`,
               text: `Receipt for ${receiptData.billTo || ''}`.trim(),
             });
             wasShared = true;
@@ -924,7 +924,12 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                       <div className="bg-slate-900 text-white p-8 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-full h-full opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-rose-500 via-slate-900 to-slate-900"></div>
                         <div className="relative z-10 flex justify-center items-center">
-                           <div className="text-center">
+                           <div className="text-center space-y-4">
+                              <img
+                                src="/brand/malki-style-logo.jpeg"
+                                alt="Malki Style"
+                                className="w-56 h-auto mx-auto rounded-2xl border border-white/15 shadow-xl"
+                              />
                               <h1 className="text-5xl font-black text-white/90 tracking-tighter">INVOICE</h1>
                            </div>
                         </div>
@@ -981,7 +986,7 @@ const ClientFolders: React.FC<ClientFoldersProps> = ({
                             "{receiptData.footerMessage}"
                          </p>
                          <div className="mt-6 pt-6 border-t border-dashed border-gray-100 flex justify-center gap-4 text-[10px] text-gray-300 font-bold uppercase tracking-widest">
-                            <span>stitchflow.studio</span>
+                            <span>Malki Style</span>
                             <span>•</span>
                             <span>Thank You</span>
                          </div>

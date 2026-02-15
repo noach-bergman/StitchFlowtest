@@ -68,7 +68,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       <div className="bg-gradient-to-l from-slate-900 to-slate-800 p-8 rounded-[2.5rem] text-white flex flex-col md:flex-row justify-between items-center gap-6 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-rose-500/10 rounded-full -ml-32 -mt-32 blur-[100px]"></div>
         <div className="text-center md:text-right z-10">
-           <h2 className="text-3xl font-black font-heebo">בוקר טוב, סטודיו StitchFlow ✨</h2>
+           <h2 className="text-3xl font-black font-heebo">בוקר טוב, סטודיו Malki Style ✨</h2>
            <p className="text-slate-400 mt-2 font-bold">יש לך {activeOrdersCount} עבודות פעילות ו-{urgentOrders} דחופות להיום.</p>
         </div>
         <div className="flex gap-4 z-10">

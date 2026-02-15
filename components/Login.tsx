@@ -38,10 +38,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="bg-white w-full h-full md:h-auto md:max-w-md md:rounded-[2.5rem] shadow-2xl shadow-rose-100/50 border border-rose-50 overflow-y-auto flex flex-col">
         <div className="bg-rose-600 p-12 md:p-10 text-center text-white relative shrink-0">
           <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-24 -mt-24 blur-3xl"></div>
-          <div className="w-24 h-24 md:w-20 md:h-20 bg-white/20 rounded-[2rem] flex items-center justify-center mx-auto mb-8 md:mb-6 backdrop-blur-md">
-            <LogIn size={48} className="text-white md:w-10 md:h-10" />
+          <div className="mx-auto mb-8 md:mb-6 w-fit bg-white/15 rounded-[2rem] p-3 backdrop-blur-md border border-white/20 shadow-xl">
+            <img
+              src="/brand/malki-style-logo.jpeg"
+              alt="Malki Style"
+              className="w-56 md:w-48 h-auto rounded-2xl object-cover"
+            />
           </div>
-          <h1 className="text-4xl md:text-3xl font-black font-heebo tracking-tighter">StitchFlow</h1>
           <p className="text-rose-100 mt-3 md:mt-2 text-lg md:text-sm font-bold opacity-80">מערכת ניהול סטודיו חכמה</p>
         </div>
 

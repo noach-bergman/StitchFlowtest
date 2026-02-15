@@ -625,11 +625,12 @@ const App: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex w-64 bg-white border-l border-gray-200 flex-col shadow-lg z-30">
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-rose-600 font-heebo flex items-center gap-2">
-            <div className="w-8 h-8 bg-rose-600 rounded-full flex items-center justify-center shadow-md">
-              <span className="text-white text-xs">🧵</span>
-            </div>
-            StitchFlow
+          <h1 className="flex items-center">
+            <img
+              src="/brand/malki-style-logo.jpeg"
+              alt="Malki Style"
+              className="h-12 w-auto rounded-xl border border-rose-100 shadow-sm object-cover"
+            />
           </h1>
         </div>
 
@@ -687,7 +688,9 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-8 z-20 shadow-sm shrink-0">
           <div className="flex items-center gap-2">
-             <div className="md:hidden w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center text-white text-xs font-bold shadow-md">SF</div>
+             <div className="md:hidden w-9 h-9 rounded-lg overflow-hidden border border-rose-100 shadow-sm bg-white shrink-0">
+              <img src="/icons/malki-style-logo-192.png" alt="Malki Style" className="w-full h-full object-cover" />
+             </div>
              <h2 className="text-base md:text-lg font-bold text-gray-800 truncate">
               {NAV_ITEMS.find(n => n.id === activeTab)?.label}
             </h2>
