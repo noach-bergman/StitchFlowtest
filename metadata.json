@@ -1,0 +1,7 @@
+{
+  "name": "Malki Style",
+  "description": "אפליקציה מתקדמת לניהול סטודיו תפירה של Malki Style, הכוללת ניהול לקוחות, מדידות, מעקב הזמנות וייעוץ עיצובי מבוסס AI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

@@ -1,0 +1,25 @@
+
+{
+  "short_name": "Malki Style",
+  "name": "Malki Style - ניהול סטודיו תפירה",
+  "description": "אפליקציה לניהול לקוחות, הזמנות ומלאי למעצבות אופנה",
+  "icons": [
+    {
+      "src": "/icons/malki-style-logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icons/malki-style-logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#e11d48",
+  "background_color": "#ffffff",
+  "dir": "rtl",
+  "lang": "he"
+}

@@ -1,0 +1,140 @@
+
+export type OrderStatus = 'חדש' | 'מדידות' | 'בתפירה' | 'מדידה_שנייה' | 'מוכן';
+export type TaskStatus = 'חדש' | 'בטיפול' | 'בהמתנה' | 'הושלם';
+export type TaskPriority = 'נמוכה' | 'רגילה' | 'גבוהה' | 'דחופה';
+export type TaskKind = 'general' | 'order' | 'folder';
+export type UserRole = 'super_admin' | 'admin' | 'staff' | 'viewer';
+export type PaymentStatus = 'לא שולם' | 'שולם חלקית' | 'שולם';
+export type PagePermissionId =
+  | 'dashboard'
+  | 'tasks'
+  | 'clients'
+  | 'folders'
+  | 'orders'
+  | 'payments'
+  | 'inventory'
+  | 'income'
+  | 'data-mgmt'
+  | 'users';
+export type ActionPermissionId =
+  | 'clients.write'
+  | 'clients.delete'
+  | 'clients.merge'
+  | 'folders.write'
+  | 'folders.delete'
+  | 'folders.archive'
+  | 'orders.write'
+  | 'orders.delete'
+  | 'payments.write'
+  | 'tasks.write'
+  | 'tasks.delete'
+  | 'inventory.write'
+  | 'users.write'
+  | 'permissions.write';
+export type PermissionKey = `page:${PagePermissionId}` | `action:${ActionPermissionId}`;
+
+export interface User {
+  id: string;
+  username: string;
+  password?: string; // Stored as plain text for this simplified implementation
+  role: UserRole;
+  permissions: PermissionKey[];
+  createdAt?: number;
+}
+
+export interface Measurements {
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  shoulderToShoulder?: number;
+  sleeveLength?: number;
+  totalLength?: number;
+  neck?: number;
+  inseam?: number;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  measurements: Measurements;
+  notes: string;
+  createdAt: number;
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  clientId: string;
+  clientName: string;
+  createdAt: number;
+  deadline: string;
+  status: 'פעיל' | 'סגור';
+  paidAmount: number;
+  isPaid?: boolean; // Legacy compatibility for older records
+  isDelivered: boolean;
+  isArchived: boolean;
+}
+
+export interface Order {
+  id: string;
+  displayId: string;
+  folderId: string;
+  clientId: string;
+  clientName: string;
+  itemType: string;
+  description: string;
+  status: OrderStatus;
+  deadline: string;
+  price: number;
+  deposit: number;
+  fabricNotes: string;
+  createdAt: number;
+  updatedAt: number; // The timestamp of the last modification
+  readyAt?: number; // The timestamp when the order was marked as "מוכן"
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  kind?: TaskKind;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueAt: number | null;
+  assigneeUserId: string | null;
+  createdByUserId: string;
+  clientId?: string;
+  folderId?: string;
+  orderId?: string;
+  orderSnapshot?: {
+    orderId: string;
+    displayId: string;
+    itemType: string;
+    description: string;
+    clientName: string;
+    folderName?: string;
+  };
+  folderChecklist?: Array<{
+    orderId: string;
+    displayId: string;
+    itemType: string;
+    description: string;
+    done: boolean;
+    doneAt?: number;
+  }>;
+  createdAt: number;
+  updatedAt: number;
+  completedAt?: number;
+}
+
+export interface Fabric {
+  id: string;
+  name: string;
+  color: string;
+  type: string;
+  quantity: number;
+  unitPrice: number;
+  image?: string;
+}

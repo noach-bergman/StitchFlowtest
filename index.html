@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#e11d48" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/icons/malki-style-favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/malki-style-favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/malki-style-favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/malki-style-apple-touch-icon.png" />
+    <title>Malki Style - ניהול סטודיו תפירה</title>
+    <!-- Polyfill for process.env to prevent ReferenceError in browser environments -->
+    <script>
+      window.process = window.process || { env: {} };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600;700&family=Heebo:wght@300;500;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --ms-primary: #E54886;
+        --ms-secondary: #F26AA3;
+        --ms-soft: #F8C8DC;
+        --ms-bg: #FFF4F8;
+        --ms-surface: #FFFFFF;
+        --ms-text: #2B2B2B;
+        --ms-muted: #7A7A7A;
+        --ms-accent: #C9A227;
+        --ms-border: rgba(229, 72, 134, 0.26);
+        --ms-border-strong: rgba(229, 72, 134, 0.38);
+        --ms-shadow-soft: 0 8px 20px rgba(229, 72, 134, 0.12);
+        --ms-shadow-md: 0 12px 28px rgba(229, 72, 134, 0.17);
+      }
+
+      html {
+        background: linear-gradient(180deg, #fff4f8 0%, #ffe7f2 52%, #ffdceb 100%);
+      }
+
+      body {
+        font-family: 'Assistant', sans-serif;
+        color: var(--ms-text);
+        background:
+          radial-gradient(circle at 84% 22%, rgba(242, 106, 163, 0.36), transparent 44%),
+          radial-gradient(circle at 15% 78%, rgba(248, 200, 220, 0.5), transparent 46%),
+          linear-gradient(180deg, #fff4f8 0%, #ffe7f2 52%, #ffdceb 100%);
+        -webkit-tap-highlight-color: transparent;
+        height: 100%;
+      }
+
+      ::selection {
+        background: rgba(229, 72, 134, 0.22);
+      }
+
+      .font-playfair {
+        font-family: 'Playfair Display', serif;
+      }
+      .font-heebo { font-family: 'Heebo', sans-serif; }
+
+      .malki-theme .bg-white {
+        background-color: #fffdfd;
+      }
+
+      .malki-theme .bg-gray-50,
+      .malki-theme .bg-slate-50 {
+        background-color: #fff3f9;
+      }
+
+      .malki-theme .bg-slate-100,
+      .malki-theme .bg-gray-100 {
+        background-color: #fee9f3;
+      }
+
+      .malki-theme .border-gray-100,
+      .malki-theme .border-slate-100 {
+        border-color: var(--ms-border);
+      }
+
+      .malki-theme .border-gray-200,
+      .malki-theme .border-slate-200 {
+        border-color: var(--ms-border-strong);
+      }
+
+      .malki-theme .text-gray-800,
+      .malki-theme .text-slate-800,
+      .malki-theme .text-slate-900 {
+        color: var(--ms-text);
+      }
+
+      .malki-theme .text-gray-500,
+      .malki-theme .text-gray-400,
+      .malki-theme .text-slate-400,
+      .malki-theme .text-slate-500,
+      .malki-theme .text-slate-600 {
+        color: var(--ms-muted);
+      }
+
+      .malki-theme .shadow-sm {
+        box-shadow: var(--ms-shadow-soft);
+      }
+
+      .malki-theme .shadow-lg,
+      .malki-theme .shadow-xl,
+      .malki-theme .shadow-2xl {
+        box-shadow: var(--ms-shadow-md);
+      }
+
+      .malki-theme .bg-slate-900 {
+        background: linear-gradient(145deg, #823159 0%, #672548 100%);
+      }
+
+      .malki-theme button:focus-visible,
+      .malki-theme input:focus-visible,
+      .malki-theme textarea:focus-visible,
+      .malki-theme select:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 4px rgba(229, 72, 134, 0.24);
+      }
+      
+      @media (min-width: 768px) {
+        html, body { overflow: hidden; }
+      }
+      
+      /* אנימציית לייזר לסורק */
+      @keyframes laser-move {
+        0% { transform: translateY(0); opacity: 0.2; }
+        50% { transform: translateY(240px); opacity: 1; }
+        100% { transform: translateY(0); opacity: 0.2; }
+      }
+      .scanner-laser {
+        position: absolute;
+        left: 5%;
+        width: 90%;
+        height: 3px;
+        background: #e11d48;
+        box-shadow: 0 0 12px 3px rgba(225, 29, 72, 0.8);
+        z-index: 20;
+        animation: laser-move 2s infinite ease-in-out;
+        border-radius: 100%;
+        pointer-events: none;
+      }
+      
+      .scanner-overlay {
+        background: rgba(0, 0, 0, 0.5);
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+      }
+      .scanner-cutoff {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 250px;
+        height: 250px;
+        background: transparent;
+        box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.6);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        z-index: 11;
+        overflow: hidden;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "lucide-react": "https://esm.sh/lucide-react@^0.563.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "openai": "https://esm.sh/openai",
+    "react-dom": "https://esm.sh/react-dom@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "html5-qrcode": "https://esm.sh/html5-qrcode@^2.3.8",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.91.1",
+    "qrcode": "https://esm.sh/qrcode@^1.5.4"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      // Keep one inline module script so stale html-proxy index requests do not 500.
+    </script>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
